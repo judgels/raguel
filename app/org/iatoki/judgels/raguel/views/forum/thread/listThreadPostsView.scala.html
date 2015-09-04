@@ -1,0 +1,53 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.views.html.table.searchView
+@import org.iatoki.judgels.play.views.html.table.paginationView
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.raguel.services.impls.AvatarCacheServiceImpl
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.raguel.ForumThread
+@import org.iatoki.judgels.raguel.ThreadPost
+
+@(forumThread: ForumThread, pageOfThreadPosts: Page[ThreadPost], orderBy: String, orderDir: String, filterString: String)
+
+<h3>@Messages.get("forum.thread.posts")</h3>
+<div class="clearfix">
+    @Messages.get("forum.thread.posts.view"): <span>@Messages.get("forum.thread.posts.flat")</span> | <a href="@routes.ThreadPostController.viewTreeThreadPosts(forumThread.getId)">@Messages.get("forum.thread.posts.tree")</a>
+</div>
+@listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ThreadPostController.listThreadPosts(forumThread.getId, newPageIndex, newOrderBy, newOrderDir, newFilterString)}
+
+@searchView(pageOfThreadPosts.getPageIndex, orderBy, orderDir, filterString, listFunc)
+
+<div class="clearfix"></div>
+
+@for((threadPost, index) <- pageOfThreadPosts.getData.zipWithIndex) {
+    <div class="panel panel-default post">
+        <div class="panel-heading clearfix">
+            <div class="pull-left">
+                <span class="panel-title">@threadPost.getLatestContent.getSubject</span>
+                @if(threadPost.getReplyTo != null) {
+                    (@Messages.get("forum.thread.post.responseTo") <a href="@routes.ThreadPostController.viewTreeThreadPosts(threadPost.getThread.getId)#post-@threadPost.getReplyTo.getId">@Messages.get("post")</a> @Messages.get("forum.thread.post.by") @JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getReplyTo.getUserJid))
+                }
+                |
+                <a href="@routes.ThreadPostController.replyThreadPost(threadPost.getId)">@Messages.get("forum.thread.post.reply")</a>
+            </div>
+            <div class="pull-right">
+                <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(threadPost.getTimeCreate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(threadPost.getTimeCreate.getTime)</time>
+            </div>
+        </div>
+        <div class="panel-body post-body">
+            <div class="clearfix">
+                <div class="user col-md-2">
+                    <img class="avatar-picture" src="@AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid)" alt="avatar" />
+                    @JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid)
+                </div>
+                <div class="col-md-10 post-content">
+                    @Html(threadPost.getLatestContent.getContent)
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@paginationView(pageOfThreadPosts, orderBy, orderDir, filterString, listFunc)

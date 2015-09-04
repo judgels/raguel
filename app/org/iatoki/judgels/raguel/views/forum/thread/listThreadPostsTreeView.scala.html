@@ -1,0 +1,45 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.raguel.services.impls.AvatarCacheServiceImpl
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.raguel.ForumThread
+@import org.iatoki.judgels.raguel.ThreadPostWithLevel
+
+@(forumThread: ForumThread, threadPostsWithLevel: List[ThreadPostWithLevel])
+
+<h3>@Messages.get("forum.thread.posts")</h3>
+<div class="clearfix">
+    @Messages.get("forum.thread.posts.view"): <a href="@routes.ThreadPostController.viewThreadPosts(forumThread.getId)">@Messages.get("forum.thread.posts.flat")</a> | <span>@Messages.get("forum.thread.posts.tree")</span>
+</div>
+<br />
+
+@for((threadPost, index) <- threadPostsWithLevel.zipWithIndex) {
+    <div class="clearfix">
+        <div class="post-wrapper-@threadPost.getLevel">
+            <div id="post-@threadPost.getThreadPost.getId" class="panel panel-default post">
+                <div class="panel-heading clearfix">
+                    <div class="pull-left">
+                        <span class="panel-title">@threadPost.getThreadPost.getLatestContent.getSubject</span>
+                        |
+                        <a href="@routes.ThreadPostController.replyThreadPost(threadPost.getThreadPost.getId)">@Messages.get("forum.thread.post.reply")</a>
+                    </div>
+                    <div class="pull-right">
+                        <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(threadPost.getThreadPost.getTimeCreate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(threadPost.getThreadPost.getTimeCreate.getTime)</time>
+                    </div>
+                </div>
+                <div class="panel-body post-body">
+                    <div class="clearfix">
+                        <div class="user col-md-2">
+                            <img class="avatar-picture" src="@AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getThreadPost.getUserJid)" alt="avatar" />
+                            @JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getThreadPost.getUserJid)
+                        </div>
+                        <div class="col-md-10 post-content">
+                            @Html(threadPost.getThreadPost.getLatestContent.getContent)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,82 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.views.html.table.searchView
+@import org.iatoki.judgels.play.views.html.table.paginationView
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.raguel.Forum
+@import org.iatoki.judgels.raguel.ForumThreadWithStatistics
+
+@(currentForum: Forum, pageOfThreads: Page[ForumThreadWithStatistics], orderBy: String, orderDir: String, filterString: String)
+
+<div class="well">
+    @currentForum.getDescription
+</div>
+
+<h3>@Messages.get("forum.threads")</h3>
+
+@listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ForumController.listForumsThreads(currentForum.getId, newPageIndex, newOrderBy, newOrderDir, newFilterString)}
+
+@searchView(pageOfThreads.getPageIndex, orderBy, orderDir, filterString, listFunc)
+
+<div class="clearfix"></div>
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="clearfix row">
+            <div class="col-md-4">
+                @Messages.get("forum.thread")
+            </div>
+            <div class="col-md-2">
+                @Messages.get("forum.thread.author")
+            </div>
+            <div class="col-md-1">
+                @Messages.get("forum.thread.viewCount")
+            </div>
+            <div class="col-md-1">
+                @Messages.get("forum.thread.replyCount")
+            </div>
+            <div class="col-md-2">
+                @Messages.get("forum.thread.lastPost")
+            </div>
+            <div class="col-md-2">
+                @Messages.get("forum.thread.lastUserUpdate")
+            </div>
+        </div>
+        <div class="row">
+            <hr />
+        </div>
+        <div class="clearfix row">
+            @for((thread, index) <- pageOfThreads.getData.zipWithIndex) {
+                <div class="clearfix">
+                    <div class="col-md-4">
+                        <h4><a href="@routes.ThreadPostController.viewThreadPosts(thread.getForumThread.getId)">@thread.getForumThread.getName</a></h4>
+                    </div>
+                    <div class="col-md-2">
+                        @JidCacheServiceImpl.getInstance().getDisplayName(thread.getForumThread.getAuthorJid)
+                    </div>
+                    <div class="col-md-1">
+                        @thread.getViewCount
+                    </div>
+                    <div class="col-md-1">
+                        @thread.getReplyCount
+                    </div>
+                    <div class="col-md-2">
+                        <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(thread.getForumThread.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(thread.getForumThread.getLastUpdate.getTime)</time>
+                    </div>
+                    <div class="col-md-2">
+                        @JidCacheServiceImpl.getInstance().getDisplayName(thread.getForumThread.getLastUpdateUserJid)
+                    </div>
+                </div>
+                @if(index != (pageOfThreads.getData.size - 1)) {
+                    <div class="row">
+                        <hr />
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+@paginationView(pageOfThreads, orderBy, orderDir, filterString, listFunc)

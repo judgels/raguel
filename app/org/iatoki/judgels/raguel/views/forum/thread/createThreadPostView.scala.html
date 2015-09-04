@@ -1,0 +1,50 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.views.html.formErrorView
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.raguel.services.impls.AvatarCacheServiceImpl
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.raguel.ThreadPost
+@import org.iatoki.judgels.raguel.forms.ThreadPostCreateForm
+
+@(threadPost: ThreadPost, threadPostCreateForm: Form[ThreadPostCreateForm])
+
+@implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
+
+@formErrorView(threadPostCreateForm)
+
+<script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/ckeditor.js")"></script>
+
+@b3.form(routes.ThreadPostController.postReplyThreadPost(threadPost.getId)) {
+
+    @helper.CSRF.formField
+
+    @b3.text(threadPostCreateForm("subject"), '_label -> Messages.get("forum.thread.post.subject"))
+    @b3.textarea(threadPostCreateForm("content"), '_label -> Messages.get("forum.thread.post.content"), 'class -> "ckeditor")
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("forum.thread.post.reply") }
+}
+
+<h4>@Messages.get("forum.thread.post.repliedPost")</h4>
+
+<div class="panel panel-default post">
+    <div class="panel-heading clearfix">
+        <div class="pull-left">
+            <span class="panel-title">@threadPost.getLatestContent.getSubject</span>
+        </div>
+        <div class="pull-right">
+            @JudgelsPlayUtils.formatFriendlyDateTime(threadPost.getTimeCreate.getTime)
+        </div>
+    </div>
+    <div class="panel-body post-body">
+        <div class="clearfix">
+            <div class="user col-md-2">
+                <img class="avatar-picture" src="@AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid)" alt="avatar" />
+                @JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid)
+            </div>
+            <div class="col-md-10 post-content">
+                @Html(threadPost.getLatestContent.getContent)
+            </div>
+        </div>
+    </div>
+</div>

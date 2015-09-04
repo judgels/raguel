@@ -1,0 +1,84 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.raguel.Forum
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+
+@(currentForum: Forum, childForums: List[Forum])
+
+@if(currentForum != null) {
+    <div class="well">
+        @currentForum.getDescription
+    </div>
+    <h3>@Messages.get("forum.subforums")</h3>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="clearfix row">
+                <div class="col-md-7">
+                    @Messages.get("forum.subforum")
+                </div>
+                <div class="col-md-2">
+                    @Messages.get("forum.lastPost")
+                </div>
+                <div class="col-md-3">
+                    @Messages.get("forum.lastUserUpdate")
+                </div>
+            </div>
+            <div class="row">
+                <hr />
+            </div>
+            @for((forum, index) <- childForums.zipWithIndex) {
+                <div class="clearfix row">
+                    <div class="col-md-7">
+                        <h4><a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a> <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a></h4>
+                        <p>@forum.getDescription</p>
+                    </div>
+                    <div class="col-md-2">
+                        <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forum.getLastUpdate.getTime)</time>
+                    </div>
+                    <div class="col-md-3">
+                        @JidCacheServiceImpl.getInstance().getDisplayName(forum.getLastUpdateUserJid)
+                    </div>
+                </div>
+                @if(index != (childForums.size - 1)) {
+                    <div class="row">
+                        <hr />
+                    </div>
+                }
+        }
+        </div>
+    </div>
+} else {
+    @for(forum <- childForums) {
+        <div class="panel panel-default">
+            <div class="panel-heading clearfix">
+                <div class="pull-left">
+                    <h3 class="panel-title"><a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a></h3>
+                </div>
+                <div class="pull-right">
+                    <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
+                </div>
+            </div>
+            @if(!forum.getSubforums.isEmpty) {
+                <div class="panel-body">
+                    @for((subforum, index) <- forum.getSubforums.zipWithIndex) {
+                        <div class="clearfix">
+                            <div class="pull-left">
+                                <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>
+                                <p>@subforum.getDescription</p>
+                            </div>
+                            <div class="pull-right">
+                                <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>
+                            </div>
+                        </div>
+                        @if(index != (forum.getSubforums.size - 1)) {
+                            <div class="row">
+                                <hr />
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </div>
+    }
+}

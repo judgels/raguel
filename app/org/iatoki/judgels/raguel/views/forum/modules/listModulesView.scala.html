@@ -1,0 +1,26 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.raguel.modules.ForumModules
+@import org.iatoki.judgels.raguel.Forum
+
+@(forum: Forum)
+
+<h3>Enabled Modules</h3>
+
+@for(module <- forum.getModulesSet) {
+    <div class="well clearfix">
+        @module.name()
+    <div class="pull-right"><a href="@routes.ForumController.disableModule(forum.getId(), module.name())" class="btn btn-primary">@Messages.get("forum.module.disable")</a></div>
+    </div>
+}
+
+<h3>Disabled Modules</h3>
+
+@for(module <- ForumModules.values()) {
+    @if(!forum.containsModule(module)) {
+        <div class="well clearfix">
+            @module.name()
+            <div class="pull-right"><a href="@routes.ForumController.enableModule(forum.getId(), module.name())" class="btn btn-primary">@Messages.get("forum.module.enable")</a></div>
+        </div>
+    }
+}

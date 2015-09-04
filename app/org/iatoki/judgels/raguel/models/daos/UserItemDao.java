@@ -1,0 +1,22 @@
+package org.iatoki.judgels.raguel.models.daos;
+
+
+import org.iatoki.judgels.play.models.daos.Dao;
+import org.iatoki.judgels.raguel.models.entities.UserItemModel;
+
+import java.util.List;
+
+public interface UserItemDao extends Dao<Long, UserItemModel> {
+
+    boolean existsByUserJidAndItemJid(String userJid, String itemJid);
+
+    boolean existsByUserJidItemJidAndStatus(String userJid, String itemJid, String status);
+
+    UserItemModel findByUserJidAndItemJid(String userJid, String itemJid);
+
+    List<UserItemModel> getByUserJid(String userJid);
+
+    List<UserItemModel> getByItemJid(String itemJid);
+
+    List<UserItemModel> getByUserJidAndStatus(String userJid, String status);
+}

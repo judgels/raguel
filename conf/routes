@@ -1,0 +1,39 @@
+->          /                                                                                            playcommons.Routes
+->          /                                                                                            jophielcommons.Routes
+
+GET         /                                                                                            @org.iatoki.judgels.raguel.controllers.ApplicationController.index()
+GET         /auth                                                                                        @org.iatoki.judgels.raguel.controllers.ApplicationController.auth(returnUri: String ?= "")
+GET         /authRole                                                                                    @org.iatoki.judgels.raguel.controllers.ApplicationController.authRole(returnUri: String ?= "")
+GET         /afterLogin                                                                                  @org.iatoki.judgels.raguel.controllers.ApplicationController.afterLogin(returnUri: String ?= "")
+POST        /viewAs                                                                                      @org.iatoki.judgels.raguel.controllers.ApplicationController.postViewAs()
+GET         /resetViewAs                                                                                 @org.iatoki.judgels.raguel.controllers.ApplicationController.resetViewAs()
+
+GET         /forums/                                                                                     @org.iatoki.judgels.raguel.controllers.ForumController.index()
+GET         /forums/$fId<[0-9]{1,18}>                                                                    @org.iatoki.judgels.raguel.controllers.ForumController.viewForums(fId: Long)
+GET         /forums/$fId<[0-9]{1,18}>/                                                                   @org.iatoki.judgels.raguel.controllers.ForumController.listForumsThreads(fId: Long, pageIndex: Long ?= 0, orderBy ?= "timeUpdate", orderDir ?= "desc", filterString ?= "")
+GET         /forums/create                                                                               @org.iatoki.judgels.raguel.controllers.ForumController.createForum()
+POST        /forums/create                                                                               @org.iatoki.judgels.raguel.controllers.ForumController.postCreateForum()
+GET         /forums/$fId<[0-9]{1,18}>/update/general                                                     @org.iatoki.judgels.raguel.controllers.ForumController.updateForumGeneralConfig(fId: Long)
+POST        /forums/$fId<[0-9]{1,18}>/update/general                                                     @org.iatoki.judgels.raguel.controllers.ForumController.postUpdateForumGeneralConfig(fId: Long)
+GET         /forums/$fId<[0-9]{1,18}>/update/module                                                      @org.iatoki.judgels.raguel.controllers.ForumController.updateForumModuleConfig(fId: Long)
+GET         /forums/$fId<[0-9]{1,18}>/update/module/:moduleName/enable                                   @org.iatoki.judgels.raguel.controllers.ForumController.enableModule(fId: Long, moduleName: String)
+GET         /forums/$fId<[0-9]{1,18}>/update/module/:moduleName/disable                                  @org.iatoki.judgels.raguel.controllers.ForumController.disableModule(fId: Long, moduleName: String)
+
+GET         /forums/$fId<[0-9]{1,18}>/createThread                                                       @org.iatoki.judgels.raguel.controllers.ForumThreadController.createForumThread(fId: Long)
+POST        /forums/$fId<[0-9]{1,18}>/createThread                                                       @org.iatoki.judgels.raguel.controllers.ForumThreadController.postCreateForumThread(fId: Long)
+
+GET         /threads/$tId<[0-9]{1,18}>                                                                   @org.iatoki.judgels.raguel.controllers.ThreadPostController.viewThreadPosts(tId: Long)
+GET         /threads/$tId<[0-9]{1,18}>/                                                                  @org.iatoki.judgels.raguel.controllers.ThreadPostController.listThreadPosts(tId: Long, pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+GET         /threads/$tId<[0-9]{1,18}>/tree                                                              @org.iatoki.judgels.raguel.controllers.ThreadPostController.viewTreeThreadPosts(tId: Long)
+
+GET         /posts/$pId<[0-9]{1,18}>/reply                                                               @org.iatoki.judgels.raguel.controllers.ThreadPostController.replyThreadPost(pId: Long)
+POST        /posts/$pId<[0-9]{1,18}>/reply                                                               @org.iatoki.judgels.raguel.controllers.ThreadPostController.postReplyThreadPost(pId: Long)
+
+GET         /users                                                                                       @org.iatoki.judgels.raguel.controllers.UserController.index()
+GET         /users/                                                                                      @org.iatoki.judgels.raguel.controllers.UserController.listUsers(pageIndex: Long ?= 0, orderBy ?= "id", orderDir ?= "asc", filterString ?= "")
+GET         /users/create                                                                                @org.iatoki.judgels.raguel.controllers.UserController.createUser()
+POST        /users/create                                                                                @org.iatoki.judgels.raguel.controllers.UserController.postCreateUser()
+GET         /users/$cId<[0-9]{1,18}>                                                                     @org.iatoki.judgels.raguel.controllers.UserController.viewUser(cId: Long)
+GET         /users/$uId<[0-9]{1,18}>/update                                                              @org.iatoki.judgels.raguel.controllers.UserController.updateUser(uId: Long)
+POST        /users/$uId<[0-9]{1,18}>/update                                                              @org.iatoki.judgels.raguel.controllers.UserController.postUpdateUser(uId: Long)
+GET         /users/$uId<[0-9]{1,18}>/delete                                                              @org.iatoki.judgels.raguel.controllers.UserController.deleteUser(uId: Long)

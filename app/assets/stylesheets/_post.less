@@ -1,0 +1,20 @@
+.post .post-body {
+  padding: 0;
+}
+
+.post .post-body .user {
+  background-color: #EEEEEE;
+  padding: 15px;
+}
+
+.post .post-content {
+  padding: 15px;
+}
+
+.loopingClass (@index) when (@index > 0) {
+  .post-wrapper-@{index} {
+    padding-left: (@index) * 15px;
+  }
+  .loopingClass(@index - 1);
+}
+.loopingClass (30);
