@@ -33,7 +33,7 @@
             <span class="panel-title">@threadPost.getLatestContent.getSubject</span>
         </div>
         <div class="pull-right">
-            @JudgelsPlayUtils.formatFriendlyDateTime(threadPost.getTimeCreate.getTime)
+            <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(threadPost.getTimeCreate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(threadPost.getTimeCreate.getTime)</time>
         </div>
     </div>
     <div class="panel-body post-body">
