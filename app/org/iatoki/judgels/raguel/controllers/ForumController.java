@@ -12,7 +12,6 @@ import org.iatoki.judgels.play.views.html.layouts.headingWithActionsAndBackLayou
 import org.iatoki.judgels.play.views.html.layouts.headingWithBackLayout;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumNotFoundException;
-import org.iatoki.judgels.raguel.ForumThread;
 import org.iatoki.judgels.raguel.ForumThreadWithStatistics;
 import org.iatoki.judgels.raguel.RaguelUtils;
 import org.iatoki.judgels.raguel.controllers.securities.Authenticated;

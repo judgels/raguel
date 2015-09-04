@@ -1,12 +1,10 @@
 package org.iatoki.judgels.raguel.services.impls;
 
-import com.google.common.collect.ImmutableMap;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.raguel.UserItem;
 import org.iatoki.judgels.raguel.UserItemStatus;
 import org.iatoki.judgels.raguel.models.daos.UserItemDao;
 import org.iatoki.judgels.raguel.models.entities.UserItemModel;
-import org.iatoki.judgels.raguel.models.entities.UserItemModel_;
 import org.iatoki.judgels.raguel.services.UserItemService;
 
 import javax.inject.Inject;

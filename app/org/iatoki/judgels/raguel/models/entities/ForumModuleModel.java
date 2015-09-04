@@ -23,4 +23,5 @@ public final class ForumModuleModel extends AbstractModel {
     @Column(columnDefinition = "TEXT")
     public String config;
 
-    public boolean enabled;}
+    public boolean enabled;
+}

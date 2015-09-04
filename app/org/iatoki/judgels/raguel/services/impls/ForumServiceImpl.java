@@ -90,7 +90,7 @@ public final class ForumServiceImpl implements ForumService {
         return createForumWithParentAndSubforumsFromModel(intendedForumModel);
     }
 
-        @Override
+    @Override
     public void createForum(String parentJid, String name, String description) {
         ForumModel forumModel = new ForumModel();
         forumModel.parentJid = parentJid;
