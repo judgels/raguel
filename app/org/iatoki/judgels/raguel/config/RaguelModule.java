@@ -1,6 +1,9 @@
 package org.iatoki.judgels.raguel.config;
 
-import org.iatoki.judgels.jophiel.Jophiel;
+import org.iatoki.judgels.api.jophiel.JophielClientAPI;
+import org.iatoki.judgels.api.jophiel.JophielFactory;
+import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.jophiel.JophielAuthAPI;
 import org.iatoki.judgels.jophiel.services.BaseUserService;
 import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.raguel.RaguelProperties;
@@ -10,7 +13,9 @@ public final class RaguelModule extends AbstractJudgelsPlayModule {
 
     @Override
     protected void manualBinding() {
-        bind(Jophiel.class).toInstance(jophiel());
+        bind(JophielAuthAPI.class).toInstance(jophielAuthAPI());
+        bind(JophielClientAPI.class).toInstance(jophielClientAPI());
+        bind(JophielPublicAPI.class).toInstance(jophielPublicAPI());
         bind(BaseUserService.class).to(UserServiceImpl.class);
     }
 
@@ -28,7 +33,15 @@ public final class RaguelModule extends AbstractJudgelsPlayModule {
         return RaguelProperties.getInstance();
     }
 
-    private Jophiel jophiel() {
-        return new Jophiel(raguelProperties().getJophielBaseUrl(), raguelProperties().getJophielClientJid(), raguelProperties().getJophielClientSecret());
+    private JophielAuthAPI jophielAuthAPI() {
+        return new JophielAuthAPI(raguelProperties().getJophielBaseUrl(), raguelProperties().getJophielClientJid(), raguelProperties().getJophielClientSecret());
+    }
+
+    private JophielClientAPI jophielClientAPI() {
+        return JophielFactory.createJophiel(raguelProperties().getJophielBaseUrl()).connectToClientAPI(raguelProperties().getJophielClientJid(), raguelProperties().getJophielClientSecret());
+    }
+
+    private JophielPublicAPI jophielPublicAPI() {
+        return JophielFactory.createJophiel(raguelProperties().getJophielBaseUrl()).connectToPublicAPI();
     }
 }

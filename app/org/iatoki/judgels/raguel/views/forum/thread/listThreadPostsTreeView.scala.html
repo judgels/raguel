@@ -5,6 +5,7 @@
 @import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
 @import org.iatoki.judgels.raguel.ForumThread
 @import org.iatoki.judgels.raguel.ThreadPostWithLevel
+@import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils
 
 @(forumThread: ForumThread, threadPostsWithLevel: List[ThreadPostWithLevel])
 
@@ -31,7 +32,7 @@
                 <div class="panel-body post-body">
                     <div class="clearfix">
                         <div class="user col-md-2">
-                            <img class="avatar-picture" src="@AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getThreadPost.getUserJid)" alt="avatar" />
+                            <img class="avatar-picture" src="@AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getThreadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl)" alt="avatar" />
                             @JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getThreadPost.getUserJid)
                         </div>
                         <div class="col-md-10 post-content">

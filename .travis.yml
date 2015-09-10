@@ -8,6 +8,7 @@ install:
   - git clone https://github.com/judgels/commons.git ../commons
   - git clone https://github.com/judgels/play-commons.git ../play-commons
   - git clone https://github.com/judgels/jophiel-commons.git ../jophiel-commons
+  - git clone https://github.com/judgels/api.git ../api
 
 script:
   - ../judgels/scripts/download-activator.sh

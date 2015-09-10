@@ -1,9 +1,12 @@
 package org.iatoki.judgels.raguel.controllers;
 
+import org.iatoki.judgels.api.JudgelsAPIClientException;
+import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.api.jophiel.JophielUser;
+import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
-import org.iatoki.judgels.jophiel.Jophiel;
 import org.iatoki.judgels.jophiel.forms.ViewpointForm;
 import org.iatoki.judgels.raguel.RaguelUtils;
 import org.iatoki.judgels.raguel.User;
@@ -20,18 +23,17 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.io.IOException;
 
 @Singleton
 @Named
 public final class ApplicationController extends AbstractJudgelsController {
 
-    private final Jophiel jophiel;
+    private final JophielPublicAPI jophielPublicAPI;
     private final UserService userService;
 
     @Inject
-    public ApplicationController(Jophiel jophiel, UserService userService) {
-        this.jophiel = jophiel;
+    public ApplicationController(JophielPublicAPI jophielPublicAPI, UserService userService) {
+        this.jophielPublicAPI = jophielPublicAPI;
         this.userService = userService;
     }
 
@@ -56,15 +58,16 @@ public final class ApplicationController extends AbstractJudgelsController {
             return redirect(returnUri);
         }
 
-        String userRoleJid = IdentityUtils.getUserJid();
-        if (!userService.existsByUserJid(userRoleJid)) {
-            userService.createUser(userRoleJid, RaguelUtils.getDefaultRoles());
+        String userJid = IdentityUtils.getUserJid();
+        if (!userService.existsByUserJid(userJid)) {
+            userService.createUser(userJid, RaguelUtils.getDefaultRoles());
             RaguelUtils.saveRolesInSession(RaguelUtils.getDefaultRoles());
             return redirect(returnUri);
         }
 
-        User userRole = userService.findUserByJid(userRoleJid);
+        User userRole = userService.findUserByJid(userJid);
         RaguelUtils.saveRolesInSession(userRole.getRoles());
+
         return redirect(returnUri);
     }
 
@@ -76,13 +79,13 @@ public final class ApplicationController extends AbstractJudgelsController {
         }
 
         JudgelsPlayUtils.updateUserJidCache(JidCacheServiceImpl.getInstance());
-        Jophiel.updateUserAvatarCache(AvatarCacheServiceImpl.getInstance());
+        JophielClientControllerUtils.updateUserAvatarCache(AvatarCacheServiceImpl.getInstance());
 
         if (JudgelsPlayUtils.hasViewPoint()) {
             try {
                 RaguelUtils.backupSession();
-                RaguelUtils.setUserSession(jophiel.getPublicUserByJid(JudgelsPlayUtils.getViewPoint()), userService.findUserByJid(JudgelsPlayUtils.getViewPoint()));
-            } catch (IOException e) {
+                RaguelUtils.setUserSession(jophielPublicAPI.findUserByJid(JudgelsPlayUtils.getViewPoint()), userService.findUserByJid(JudgelsPlayUtils.getViewPoint()));
+            } catch (JudgelsAPIClientException e) {
                 JudgelsPlayUtils.removeViewPoint();
                 RaguelUtils.restoreSession();
             }
@@ -98,24 +101,18 @@ public final class ApplicationController extends AbstractJudgelsController {
         if (!formHasErrors(viewpointForm) && RaguelUtils.trullyHasRole("admin")) {
             ViewpointForm viewpointData = viewpointForm.get();
             try {
-                String userJid = jophiel.verifyUsername(viewpointData.username);
-                if (userJid != null) {
-                    try {
-                        userService.upsertUserFromJophielUserJid(userJid);
-                        if (!JudgelsPlayUtils.hasViewPoint()) {
-                            RaguelUtils.backupSession();
-                        }
-                        JudgelsPlayUtils.setViewPointInSession(userJid);
-                        RaguelUtils.setUserSession(jophiel.getPublicUserByJid(userJid), userService.findUserByJid(userJid));
-
-                        RaguelControllerUtils.getInstance().addActivityLog("View as user " + viewpointData.username + ".");
-
-                    } catch (IOException e) {
-                        JudgelsPlayUtils.removeViewPoint();
-                        RaguelUtils.restoreSession();
+                JophielUser jophielUser = jophielPublicAPI.findUserByUsername(viewpointData.username);
+                if (jophielUser != null) {
+                    userService.upsertUserFromJophielUser(jophielUser);
+                    if (!JudgelsPlayUtils.hasViewPoint()) {
+                        RaguelUtils.backupSession();
                     }
+                    JudgelsPlayUtils.setViewPointInSession(jophielUser.getJid());
+                    RaguelUtils.setUserSession(jophielUser, userService.findUserByJid(jophielUser.getJid()));
+
+                    RaguelControllerUtils.getInstance().addActivityLog("View as user " + viewpointData.username + ".");
                 }
-            } catch (IOException e) {
+            } catch (JudgelsAPIClientException e) {
                 // do nothing
                 e.printStackTrace();
             }
