@@ -9,7 +9,7 @@ import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.raguel.RaguelProperties;
 import org.iatoki.judgels.raguel.services.impls.UserServiceImpl;
 
-public final class RaguelModule extends AbstractJudgelsPlayModule {
+public class RaguelModule extends AbstractJudgelsPlayModule {
 
     @Override
     protected void manualBinding() {
@@ -21,7 +21,7 @@ public final class RaguelModule extends AbstractJudgelsPlayModule {
 
     @Override
     protected String getDaosImplPackage() {
-        return "org.iatoki.judgels.raguel.models.daos.impls";
+        return "org.iatoki.judgels.raguel.models.daos.hibernate";
     }
 
     @Override

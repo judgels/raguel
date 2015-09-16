@@ -1,11 +1,13 @@
-package org.iatoki.judgels.raguel.models.daos.impls;
+package org.iatoki.judgels.raguel.models.daos.jedishibernate;
 
-import org.iatoki.judgels.play.models.daos.impls.AbstractHibernateDao;
+import org.iatoki.judgels.play.models.daos.impls.AbstractJedisHibernateDao;
 import org.iatoki.judgels.raguel.models.daos.UserItemDao;
 import org.iatoki.judgels.raguel.models.entities.UserItemModel;
 import org.iatoki.judgels.raguel.models.entities.UserItemModel_;
 import play.db.jpa.JPA;
+import redis.clients.jedis.JedisPool;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -15,10 +17,11 @@ import java.util.List;
 
 @Singleton
 @Named("userItemDao")
-public final class UserItemHibernateDao extends AbstractHibernateDao<Long, UserItemModel> implements UserItemDao {
+public final class UserItemJedisHibernateDao extends AbstractJedisHibernateDao<Long, UserItemModel> implements UserItemDao {
 
-    public UserItemHibernateDao() {
-        super(UserItemModel.class);
+    @Inject
+    public UserItemJedisHibernateDao(JedisPool jedisPool) {
+        super(jedisPool, UserItemModel.class);
     }
 
     @Override

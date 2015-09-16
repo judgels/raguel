@@ -1,6 +1,6 @@
-package org.iatoki.judgels.raguel.models.daos.impls;
+package org.iatoki.judgels.raguel.models.daos.hibernate;
 
-import org.iatoki.judgels.jophiel.models.daos.impls.AbstractAvatarCacheHibernateDao;
+import org.iatoki.judgels.jophiel.models.daos.hibernate.AbstractAvatarCacheHibernateDao;
 import org.iatoki.judgels.raguel.models.daos.AvatarCacheDao;
 import org.iatoki.judgels.raguel.models.entities.AvatarCacheModel;
 

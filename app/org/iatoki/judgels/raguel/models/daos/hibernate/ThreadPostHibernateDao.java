@@ -1,4 +1,4 @@
-package org.iatoki.judgels.raguel.models.daos.impls;
+package org.iatoki.judgels.raguel.models.daos.hibernate;
 
 import org.iatoki.judgels.play.models.daos.impls.AbstractJudgelsHibernateDao;
 import org.iatoki.judgels.raguel.models.daos.ThreadPostDao;
