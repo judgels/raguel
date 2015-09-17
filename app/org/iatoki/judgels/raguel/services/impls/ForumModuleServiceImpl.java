@@ -4,8 +4,8 @@ import com.google.inject.Inject;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.raguel.models.daos.ForumModuleDao;
 import org.iatoki.judgels.raguel.models.entities.ForumModuleModel;
-import org.iatoki.judgels.raguel.modules.ForumModuleFactory;
-import org.iatoki.judgels.raguel.modules.ForumModules;
+import org.iatoki.judgels.raguel.modules.forum.ForumModuleFactory;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 import org.iatoki.judgels.raguel.services.ForumModuleService;
 
 import javax.inject.Named;

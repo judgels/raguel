@@ -1,7 +1,7 @@
-package org.iatoki.judgels.raguel.modules;
+package org.iatoki.judgels.raguel.modules.forum;
 
 import com.google.gson.Gson;
-import org.iatoki.judgels.raguel.modules.thread.ForumThreadModule;
+import org.iatoki.judgels.raguel.modules.forum.thread.ForumThreadModule;
 
 public final class ForumModuleFactory {
 

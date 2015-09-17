@@ -19,7 +19,7 @@ import org.iatoki.judgels.raguel.models.entities.ForumThreadModel;
 import org.iatoki.judgels.raguel.models.entities.ForumThreadModel_;
 import org.iatoki.judgels.raguel.models.entities.ThreadPostModel_;
 import org.iatoki.judgels.raguel.models.entities.UserItemModel_;
-import org.iatoki.judgels.raguel.modules.ForumModuleFactory;
+import org.iatoki.judgels.raguel.modules.forum.ForumModuleFactory;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 
 import javax.inject.Inject;

@@ -9,7 +9,7 @@ import org.iatoki.judgels.raguel.models.daos.ForumDao;
 import org.iatoki.judgels.raguel.models.daos.ForumModuleDao;
 import org.iatoki.judgels.raguel.models.entities.ForumModel;
 import org.iatoki.judgels.raguel.models.entities.ForumModel_;
-import org.iatoki.judgels.raguel.modules.ForumModuleFactory;
+import org.iatoki.judgels.raguel.modules.forum.ForumModuleFactory;
 import org.iatoki.judgels.raguel.services.ForumService;
 
 import javax.inject.Inject;

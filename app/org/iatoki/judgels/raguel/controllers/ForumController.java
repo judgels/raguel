@@ -20,7 +20,7 @@ import org.iatoki.judgels.raguel.controllers.securities.GuestView;
 import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
 import org.iatoki.judgels.raguel.forms.ForumUpsertForm;
-import org.iatoki.judgels.raguel.modules.ForumModules;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 import org.iatoki.judgels.raguel.services.ForumModuleService;
 import org.iatoki.judgels.raguel.services.ForumService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;

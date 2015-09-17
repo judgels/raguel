@@ -1,6 +1,6 @@
 package org.iatoki.judgels.raguel.services;
 
-import org.iatoki.judgels.raguel.modules.ForumModules;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 
 public interface ForumModuleService {
 

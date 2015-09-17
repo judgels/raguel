@@ -12,7 +12,7 @@ import org.iatoki.judgels.raguel.controllers.securities.Authenticated;
 import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
 import org.iatoki.judgels.raguel.forms.ForumThreadCreateForm;
-import org.iatoki.judgels.raguel.modules.ForumModules;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 import org.iatoki.judgels.raguel.services.ForumService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 import org.iatoki.judgels.raguel.services.ThreadPostService;

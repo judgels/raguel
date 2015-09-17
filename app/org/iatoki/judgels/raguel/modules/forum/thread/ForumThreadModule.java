@@ -1,8 +1,8 @@
-package org.iatoki.judgels.raguel.modules.thread;
+package org.iatoki.judgels.raguel.modules.forum.thread;
 
 import com.google.gson.Gson;
-import org.iatoki.judgels.raguel.modules.ForumModules;
-import org.iatoki.judgels.raguel.modules.ForumModule;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
+import org.iatoki.judgels.raguel.modules.forum.ForumModule;
 import org.iatoki.judgels.raguel.views.html.forum.modules.emptyFormView;
 import play.data.Form;
 import play.mvc.Http;

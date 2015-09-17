@@ -8,9 +8,9 @@ import org.iatoki.judgels.raguel.models.daos.ForumModuleDao;
 import org.iatoki.judgels.raguel.models.entities.ForumModel;
 import org.iatoki.judgels.raguel.models.entities.ForumModel_;
 import org.iatoki.judgels.raguel.models.entities.ForumModuleModel;
-import org.iatoki.judgels.raguel.modules.ForumModule;
-import org.iatoki.judgels.raguel.modules.ForumModuleFactory;
-import org.iatoki.judgels.raguel.modules.ForumModules;
+import org.iatoki.judgels.raguel.modules.forum.ForumModule;
+import org.iatoki.judgels.raguel.modules.forum.ForumModuleFactory;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 
 import java.util.Date;
 import java.util.List;

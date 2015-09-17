@@ -21,7 +21,7 @@ import org.iatoki.judgels.raguel.models.entities.PostContentModel;
 import org.iatoki.judgels.raguel.models.entities.PostContentModel_;
 import org.iatoki.judgels.raguel.models.entities.ThreadPostModel;
 import org.iatoki.judgels.raguel.models.entities.ThreadPostModel_;
-import org.iatoki.judgels.raguel.modules.ForumModuleFactory;
+import org.iatoki.judgels.raguel.modules.forum.ForumModuleFactory;
 import org.iatoki.judgels.raguel.services.ThreadPostService;
 
 import javax.inject.Inject;

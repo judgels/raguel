@@ -2,8 +2,8 @@ package org.iatoki.judgels.raguel;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.iatoki.judgels.raguel.modules.ForumModule;
-import org.iatoki.judgels.raguel.modules.ForumModules;
+import org.iatoki.judgels.raguel.modules.forum.ForumModule;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 
 import java.util.Date;
 import java.util.List;

@@ -1,4 +1,4 @@
-package org.iatoki.judgels.raguel.modules;
+package org.iatoki.judgels.raguel.modules.forum;
 
 import play.data.Form;
 import play.mvc.Http;
