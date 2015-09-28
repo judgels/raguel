@@ -9,10 +9,10 @@ POST        /viewAs                                                             
 GET         /resetViewAs                                                                                 @org.iatoki.judgels.raguel.controllers.ApplicationController.resetViewAs()
 
 GET         /forums/                                                                                     @org.iatoki.judgels.raguel.controllers.ForumController.index()
-GET         /forums/:fId                                                                                 @org.iatoki.judgels.raguel.controllers.ForumController.viewForums(fId: Long)
-GET         /forums/:fId/                                                                                @org.iatoki.judgels.raguel.controllers.ForumController.listForumsThreads(fId: Long, pageIndex: Long ?= 0, orderBy ?= "timeUpdate", orderDir ?= "desc", filterString ?= "")
 GET         /forums/create                                                                               @org.iatoki.judgels.raguel.controllers.ForumController.createForum()
 POST        /forums/create                                                                               @org.iatoki.judgels.raguel.controllers.ForumController.postCreateForum()
+GET         /forums/:fId                                                                                 @org.iatoki.judgels.raguel.controllers.ForumController.viewForums(fId: Long)
+GET         /forums/:fId/                                                                                @org.iatoki.judgels.raguel.controllers.ForumController.listForumsThreads(fId: Long, pageIndex: Long ?= 0, orderBy ?= "timeUpdate", orderDir ?= "desc", filterString ?= "")
 GET         /forums/:fId/update/general                                                                  @org.iatoki.judgels.raguel.controllers.ForumController.updateForumGeneralConfig(fId: Long)
 POST        /forums/:fId/update/general                                                                  @org.iatoki.judgels.raguel.controllers.ForumController.postUpdateForumGeneralConfig(fId: Long)
 GET         /forums/:fId/update/module                                                                   @org.iatoki.judgels.raguel.controllers.ForumController.updateForumModuleConfig(fId: Long)
