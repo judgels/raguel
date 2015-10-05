@@ -31,7 +31,7 @@
                 <div class="clearfix row">
                     <div class="col-md-7">
                         <h4><a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a> <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a></h4>
-                        <p>@forum.getDescription</p>
+                        <p>@Html(forum.getDescription)</p>
                     </div>
                     <div class="col-md-2">
                         <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forum.getLastUpdate.getTime)</time>
@@ -65,7 +65,7 @@
                         <div class="clearfix">
                             <div class="pull-left">
                                 <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>
-                                <p>@subforum.getDescription</p>
+                                <p>@Html(subforum.getDescription)</p>
                             </div>
                             <div class="pull-right">
                                 <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>

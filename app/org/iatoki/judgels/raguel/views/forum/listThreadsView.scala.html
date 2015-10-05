@@ -11,7 +11,7 @@
 @(currentForum: Forum, pageOfThreads: Page[ForumThreadWithStatistics], orderBy: String, orderDir: String, filterString: String)
 
 <div class="well">
-    @currentForum.getDescription
+    @Html(currentForum.getDescription)
 </div>
 
 <h3>@Messages.get("forum.threads")</h3>
