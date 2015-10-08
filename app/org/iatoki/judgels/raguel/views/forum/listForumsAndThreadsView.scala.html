@@ -4,6 +4,12 @@
 
 @(currentForum: Forum, childForums: List[Forum], pageOfThreads: Page[ForumThreadWithStatistics], orderBy: String, orderDir: String, filterString: String)
 
+@if(currentForum != null) {
+    <div class="well">
+        @currentForum.getDescription
+    </div>
+}
+
 @if(!childForums.isEmpty) {
     @listForumsView(currentForum, childForums)
 }

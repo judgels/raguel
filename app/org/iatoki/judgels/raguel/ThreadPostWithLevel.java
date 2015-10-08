@@ -15,6 +15,6 @@ public final class ThreadPostWithLevel {
     }
 
     public int getLevel() {
-        return level;
+        return Math.min(level, 30);
     }
 }

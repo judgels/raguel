@@ -24,8 +24,8 @@ forum.lastUserUpdate=Last post by
 
 forum.thread=Thread
 forum.thread.author=Author
-forum.thread.replyCount=Total Replies
-forum.thread.viewCount=Total Views
+forum.thread.replyCount=Replies
+forum.thread.viewCount=Views
 forum.thread.lastPost=Last post
 forum.thread.lastUserUpdate=Last post by
 
