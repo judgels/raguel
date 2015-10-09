@@ -1,0 +1,59 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import scala.collection.JavaConversions
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.raguel.RaguelUtils
+@import org.iatoki.judgels.raguel.Forum
+@import org.iatoki.judgels.raguel.ForumWithStatus
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+
+@(currentForum: Forum, childForumsWithStatus: List[ForumWithStatus])
+
+<h3>@Messages.get("forum.subforums")</h3>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="clearfix row">
+            <div class="col-md-7">
+                @Messages.get("forum.subforum")
+            </div>
+            <div class="col-md-2">
+                @Messages.get("forum.lastPost")
+            </div>
+            <div class="col-md-3">
+                @Messages.get("forum.lastUserUpdate")
+            </div>
+        </div>
+    </div>
+    <div class="panel-body">
+        @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(childForumsWithStatus.map(f => f.getForum.getLastUpdateUserJid).toSeq))) { displayNamesMap =>
+            @for((forumWithStatus, index) <- childForumsWithStatus.zipWithIndex) {
+                <div class="clearfix row">
+                    <div class="col-md-7">
+                        @if(forumWithStatus.isHasNewPost) {
+                            <strong>
+                        }
+                            <a href="@routes.ForumController.viewForums(forumWithStatus.getForum.getId)">@forumWithStatus.getForum.getName</a>
+                        @if(forumWithStatus.isHasNewPost) {
+                            </strong>
+                        }
+                        @if(RaguelUtils.hasRole("admin")) {
+                            <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forumWithStatus.getForum.getId)">@Messages.get("commons.update")</a>
+                        }
+                        <p><small>@Html(forumWithStatus.getForum.getDescription)</small></p>
+                    </div>
+                    <div class="col-md-2">
+                        <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forumWithStatus.getForum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forumWithStatus.getForum.getLastUpdate.getTime)</time>
+                    </div>
+                    <div class="col-md-3">
+                        @displayNamesMap.get(forumWithStatus.getForum.getLastUpdateUserJid)
+                    </div>
+                </div>
+                @if(index != (childForumsWithStatus.size - 1)) {
+                    <div class="row">
+                        <hr />
+                    </div>
+                }
+            }
+        }
+    </div>
+</div>

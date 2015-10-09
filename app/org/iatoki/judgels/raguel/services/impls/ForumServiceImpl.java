@@ -5,17 +5,26 @@ import com.google.common.collect.ImmutableMap;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumNotFoundException;
+import org.iatoki.judgels.raguel.ForumWithStatus;
 import org.iatoki.judgels.raguel.models.daos.ForumDao;
 import org.iatoki.judgels.raguel.models.daos.ForumModuleDao;
+import org.iatoki.judgels.raguel.models.daos.ForumThreadDao;
+import org.iatoki.judgels.raguel.models.daos.UserItemDao;
 import org.iatoki.judgels.raguel.models.entities.ForumModel;
 import org.iatoki.judgels.raguel.models.entities.ForumModel_;
+import org.iatoki.judgels.raguel.models.entities.ForumThreadModel;
+import org.iatoki.judgels.raguel.models.entities.ForumThreadModel_;
+import org.iatoki.judgels.raguel.models.entities.UserItemModel;
+import org.iatoki.judgels.raguel.models.entities.UserItemModel_;
 import org.iatoki.judgels.raguel.modules.forum.ForumModuleFactory;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 import org.iatoki.judgels.raguel.services.ForumService;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -26,12 +35,16 @@ public final class ForumServiceImpl implements ForumService {
     private final ForumDao forumDao;
     private final ForumModuleDao forumModuleDao;
     private final ForumModuleFactory forumModuleFactory;
+    private final ForumThreadDao forumThreadDao;
+    private final UserItemDao userItemDao;
 
     @Inject
-    public ForumServiceImpl(ForumDao forumDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory) {
+    public ForumServiceImpl(ForumDao forumDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, UserItemDao userItemDao) {
         this.forumDao = forumDao;
         this.forumModuleDao = forumModuleDao;
         this.forumModuleFactory = forumModuleFactory;
+        this.forumThreadDao = forumThreadDao;
+        this.userItemDao = userItemDao;
     }
 
     @Override
@@ -77,6 +90,48 @@ public final class ForumServiceImpl implements ForumService {
         List<Forum> forums = forumModels.stream().map(m -> createForumWithParentAndSubforumsFromModel(m)).collect(Collectors.toList());
 
         return forums;
+    }
+
+    @Override
+    public List<ForumWithStatus> getChildForumsWithStatus(String parentJid, String userJid) {
+        List<Forum> forums = getChildForums(parentJid);
+
+        ImmutableList.Builder<ForumWithStatus> forumWithStatusesBuilder = ImmutableList.builder();
+        for (Forum forum : forums) {
+            Stack<Forum> forumStack = new Stack<>();
+            forumStack.push(forum);
+
+            boolean hasNewPost = false;
+            while (!hasNewPost && !forumStack.isEmpty()) {
+                Forum currentForum = forumStack.pop();
+
+                if (currentForum.containsModule(ForumModules.THREAD)) {
+                    List<ForumThreadModel> forumThreadModels = forumThreadDao.findSortedByFiltersEq("id", "asc", "", ImmutableMap.of(ForumThreadModel_.forumJid, currentForum.getJid()), 0, -1);
+                    List<String> forumThreadJids = forumThreadModels.stream().map(t -> t.jid).collect(Collectors.toList());
+                    List<UserItemModel> userItemModels = userItemDao.findSortedByFilters("id", "asc", "", ImmutableMap.of(UserItemModel_.userJid, userJid), ImmutableMap.of(UserItemModel_.itemJid, forumThreadJids), 0, -1);
+                    ImmutableMap.Builder<String, UserItemModel> mapItemJidToUserItemModelBuilder = ImmutableMap.builder();
+                    for (UserItemModel userItemModel : userItemModels) {
+                        mapItemJidToUserItemModelBuilder.put(userItemModel.itemJid, userItemModel);
+                    }
+                    Map<String, UserItemModel> mapItemJidToUserItemModel = mapItemJidToUserItemModelBuilder.build();
+
+                    for (int i = 0; !hasNewPost && (i < forumThreadModels.size()); ++i) {
+                        UserItemModel userItemModel = mapItemJidToUserItemModel.get(forumThreadModels.get(i).jid);
+                        hasNewPost = (userItemModel == null) || (userItemModel.timeUpdate < forumThreadModels.get(i).timeUpdate);
+                    }
+                }
+
+                if (!hasNewPost) {
+                    for (Forum childForum : currentForum.getSubforums()) {
+                        forumStack.push(childForum);
+                    }
+                }
+            }
+
+            forumWithStatusesBuilder.add(new ForumWithStatus(forum, hasNewPost));
+        }
+
+        return forumWithStatusesBuilder.build();
     }
 
     @Override

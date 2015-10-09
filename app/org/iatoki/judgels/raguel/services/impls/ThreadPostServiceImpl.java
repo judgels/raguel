@@ -124,6 +124,7 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
     public Page<ThreadPost> getPageOfThreadPosts(ForumThread forumThread, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalRowsCount = threadPostDao.countByFiltersEq(filterString, ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()));
         List<ThreadPostModel> threadPostModels = threadPostDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()), pageIndex, pageSize);
+        Map<String, ThreadPostModel> jidsToModelMap = threadPostModels.stream().collect(Collectors.toMap(m -> m.jid, m -> m));
 
         ImmutableList.Builder<ThreadPost> threadPostBuilder = ImmutableList.builder();
         for (ThreadPostModel threadPostModel : threadPostModels) {
@@ -132,7 +133,12 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
 
             ThreadPost repliedPost = null;
             if ((threadPostModel.replyJid != null) && !threadPostModel.replyJid.isEmpty()) {
-                ThreadPostModel repliedPostModel = threadPostDao.findByJid(threadPostModel.replyJid);
+                ThreadPostModel repliedPostModel;
+                if (jidsToModelMap.containsKey(threadPostModel.replyJid)) {
+                    repliedPostModel = jidsToModelMap.get(threadPostModel.replyJid);
+                } else {
+                    repliedPostModel = threadPostDao.findByJid(threadPostModel.replyJid);
+                }
                 repliedPost = ThreadPostServiceUtils.createThreadPostFromModel(repliedPostModel, forumThread, null, null);
             }
 

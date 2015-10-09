@@ -1,0 +1,20 @@
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.raguel.Forum
+@import org.iatoki.judgels.raguel.ForumWithStatus
+@import org.iatoki.judgels.raguel.ForumThreadWithStatisticsAndStatus
+
+@(currentForum: Forum, childForumsWithStatus: List[ForumWithStatus], pageOfThreads: Page[ForumThreadWithStatisticsAndStatus], orderBy: String, orderDir: String, filterString: String)
+
+@if(currentForum != null) {
+    <div class="well">
+        @currentForum.getDescription
+    </div>
+}
+
+@if(!childForumsWithStatus.isEmpty) {
+    @listForumsWithStatusView(currentForum, childForumsWithStatus)
+}
+
+@if(!pageOfThreads.getData.isEmpty) {
+    @listThreadsWithStatusView(currentForum, pageOfThreads, orderBy, orderDir, filterString)
+}

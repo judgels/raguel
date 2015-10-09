@@ -1,0 +1,46 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import scala.collection.JavaConversions
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.raguel.RaguelUtils
+@import org.iatoki.judgels.raguel.Forum
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+
+@(childForums: List[Forum])
+
+@for(forum <- childForums) {
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <div class="pull-left">
+                <h3 class="panel-title"><a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a></h3>
+            </div>
+            @if(RaguelUtils.hasRole("admin")) {
+                <div class="pull-right">
+                    <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
+                </div>
+            }
+        </div>
+        @if(!forum.getSubforums.isEmpty) {
+            <div class="panel-body">
+                @for((subforum, index) <- forum.getSubforums.zipWithIndex) {
+                    <div class="clearfix">
+                        <div class="pull-left">
+                            <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>
+                            <p>@Html(subforum.getDescription)</p>
+                        </div>
+                        @if(RaguelUtils.hasRole("admin")) {
+                            <div class="pull-right">
+                                <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>
+                            </div>
+                        }
+                    </div>
+                    @if(index != (forum.getSubforums.size - 1)) {
+                        <div class="row">
+                            <hr />
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+}

@@ -56,26 +56,24 @@ public final class ThreadPostController extends AbstractJudgelsController {
     }
 
     @Authenticated(value = GuestView.class)
-    @Transactional(readOnly = true)
+    @Transactional
     public Result viewThreadPosts(long forumThreadId) throws ForumThreadNotFoundException {
         return showListThreadPosts(forumThreadId, 0, "id", "asc", "");
     }
 
     @Authenticated(value = GuestView.class)
-    @Transactional(readOnly = true)
+    @Transactional
     public Result listThreadPosts(long forumThreadId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumThreadNotFoundException {
         return showListThreadPosts(forumThreadId, pageIndex, orderBy, orderDir, filterString);
     }
 
     @Authenticated(value = GuestView.class)
-    @Transactional(readOnly = true)
+    @Transactional
     public Result viewTreeThreadPosts(long forumThreadId) throws ForumThreadNotFoundException {
         ForumThread forumThread = forumThreadService.findForumThreadById(forumThreadId);
         List<ThreadPostWithLevel> threadPostsWithLevel = threadPostService.getAllThreadPostsWithLevel(forumThread);
 
-        if (!userItemService.userItemExistsByUserJidAndItemJid(IdentityUtils.getUserJid(), forumThread.getJid())) {
-            userItemService.upsertUserItem(IdentityUtils.getUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
-        }
+        userItemService.upsertUserItem(IdentityUtils.getUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
 
         LazyHtml content = new LazyHtml(listThreadPostsTreeView.render(forumThread, threadPostsWithLevel));
         content.appendLayout(c -> headingWithBackLayout.render(forumThread.getName(), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + forumThread.getParentForum().getName(), routes.ForumController.viewForums(forumThread.getParentForum().getId())), c));
@@ -135,9 +133,7 @@ public final class ThreadPostController extends AbstractJudgelsController {
         ForumThread forumThread = forumThreadService.findForumThreadById(forumThreadId);
         Page<ThreadPost> pageOfThreadPosts = threadPostService.getPageOfThreadPosts(forumThread, pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
-        if (!userItemService.userItemExistsByUserJidAndItemJid(IdentityUtils.getUserJid(), forumThread.getJid())) {
-            userItemService.upsertUserItem(IdentityUtils.getUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
-        }
+        userItemService.upsertUserItem(IdentityUtils.getUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
 
         LazyHtml content = new LazyHtml(listThreadPostsView.render(forumThread, pageOfThreadPosts, orderBy, orderDir, filterString));
         content.appendLayout(c -> headingWithBackLayout.render(forumThread.getName(), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + forumThread.getParentForum().getName(), routes.ForumController.viewForums(forumThread.getParentForum().getId())), c));

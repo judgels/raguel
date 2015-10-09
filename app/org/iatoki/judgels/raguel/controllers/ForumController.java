@@ -1,6 +1,8 @@
 package org.iatoki.judgels.raguel.controllers;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
@@ -13,6 +15,8 @@ import org.iatoki.judgels.play.views.html.layouts.headingWithBackLayout;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumNotFoundException;
 import org.iatoki.judgels.raguel.ForumThreadWithStatistics;
+import org.iatoki.judgels.raguel.ForumThreadWithStatisticsAndStatus;
+import org.iatoki.judgels.raguel.ForumWithStatus;
 import org.iatoki.judgels.raguel.RaguelUtils;
 import org.iatoki.judgels.raguel.controllers.securities.Authenticated;
 import org.iatoki.judgels.raguel.controllers.securities.Authorized;
@@ -25,8 +29,12 @@ import org.iatoki.judgels.raguel.services.ForumModuleService;
 import org.iatoki.judgels.raguel.services.ForumService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 import org.iatoki.judgels.raguel.views.html.forum.createForumView;
+import org.iatoki.judgels.raguel.views.html.forum.listBaseForumsView;
+import org.iatoki.judgels.raguel.views.html.forum.listBaseForumsWithStatusView;
 import org.iatoki.judgels.raguel.views.html.forum.listForumsAndThreadsView;
+import org.iatoki.judgels.raguel.views.html.forum.listForumsAndThreadsWithStatusView;
 import org.iatoki.judgels.raguel.views.html.forum.listForumsView;
+import org.iatoki.judgels.raguel.views.html.forum.listForumsWithStatusView;
 import org.iatoki.judgels.raguel.views.html.forum.modules.listModulesView;
 import org.iatoki.judgels.raguel.views.html.forum.updateForumGeneralView;
 import play.data.Form;
@@ -185,24 +193,45 @@ public final class ForumController extends AbstractJudgelsController {
     private Result showListForumsThreads(long forumId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumNotFoundException {
         Forum currentForum;
         Forum parentForum;
-        List<Forum> childForums;
+        LazyHtml content;
+
         if (forumId == 0) {
             currentForum = null;
             parentForum = null;
-            childForums = forumService.getChildForums("");
+            if (RaguelUtils.isGuest()) {
+                List<Forum> childForums = forumService.getChildForums("");
+                content = new LazyHtml(listBaseForumsView.render(childForums));
+            } else {
+                List<Forum> childForums = forumService.getChildForums("");
+                ImmutableMap.Builder<String, List<ForumWithStatus>> mapForumJidToForumsWithStatusBuilder = ImmutableMap.builder();
+                for (Forum childForum : childForums) {
+                    mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getChildForumsWithStatus(childForum.getJid(), IdentityUtils.getUserJid()));
+                }
+
+                content = new LazyHtml(listBaseForumsWithStatusView.render(childForums, mapForumJidToForumsWithStatusBuilder.build()));
+            }
         } else {
             currentForum = forumService.findForumById(forumId);
             parentForum = currentForum.getParentForum();
-            childForums = forumService.getChildForums(currentForum.getJid());
-        }
+            if (RaguelUtils.isGuest()) {
+                List<Forum> childForums = forumService.getChildForums(currentForum.getJid());
+                if (currentForum.containsModule(ForumModules.THREAD)) {
+                    Page<ForumThreadWithStatistics> pageOfForumThreads = forumThreadService.getPageOfForumThreadsWithStatistic(currentForum, pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
-        LazyHtml content;
-        if ((currentForum != null) && currentForum.containsModule(ForumModules.THREAD)) {
-            Page<ForumThreadWithStatistics> pageOfForumThreads = forumThreadService.getPageOfForumThreadsWithStatistic(currentForum, pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
+                    content = new LazyHtml(listForumsAndThreadsView.render(currentForum, childForums, pageOfForumThreads, orderBy, orderDir, filterString));
+                } else {
+                    content = new LazyHtml(listForumsView.render(currentForum, childForums));
+                }
+            } else {
+                List<ForumWithStatus> childForumsWithStatus = forumService.getChildForumsWithStatus(currentForum.getJid(), IdentityUtils.getUserJid());
+                if (currentForum.containsModule(ForumModules.THREAD)) {
+                    Page<ForumThreadWithStatisticsAndStatus> pageOfForumThreads = forumThreadService.getPageOfForumThreadsWithStatisticAndStatus(currentForum, IdentityUtils.getUserJid(), pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
-            content = new LazyHtml(listForumsAndThreadsView.render(currentForum, childForums, pageOfForumThreads, orderBy, orderDir, filterString));
-        } else {
-            content = new LazyHtml(listForumsView.render(currentForum, childForums));
+                    content = new LazyHtml(listForumsAndThreadsWithStatusView.render(currentForum, childForumsWithStatus, pageOfForumThreads, orderBy, orderDir, filterString));
+                } else {
+                    content = new LazyHtml(listForumsWithStatusView.render(currentForum, childForumsWithStatus));
+                }
+            }
         }
 
         if (currentForum != null) {

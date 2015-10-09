@@ -40,8 +40,8 @@
     <div class="panel-body post-body">
         <div class="clearfix">
             <div class="user col-md-2">
-                <img class="avatar-picture" src="@AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl)" alt="avatar" />
-                @JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid)
+                <img class="avatar-picture center-block" src="@AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl)" alt="avatar" />
+                <div class="text-center">@JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid)</div>
             </div>
             <div class="col-md-10 post-content">
                 @Html(threadPost.getLatestContent.getContent)

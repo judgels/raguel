@@ -1,0 +1,53 @@
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import scala.collection.JavaConversions
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.raguel.RaguelUtils
+@import org.iatoki.judgels.raguel.Forum
+@import org.iatoki.judgels.raguel.ForumWithStatus
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+
+@(childForums: List[Forum], mapForumJidToForumsWithStatus: Map[String, List[ForumWithStatus]])
+
+@for(forum <- childForums) {
+    <div class="panel panel-default">
+        <div class="panel-heading clearfix">
+            <div class="pull-left">
+                <h3 class="panel-title"><a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a></h3>
+            </div>
+            @if(RaguelUtils.hasRole("admin")) {
+                <div class="pull-right">
+                    <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
+                </div>
+            }
+        </div>
+        @if(!mapForumJidToForumsWithStatus.get(forum.getJid).isEmpty) {
+            <div class="panel-body">
+                @for((subforumWithStatus, index) <- mapForumJidToForumsWithStatus.get(forum.getJid).zipWithIndex) {
+                    <div class="clearfix">
+                        <div class="pull-left">
+                            @if(subforumWithStatus.isHasNewPost) {
+                                <strong>
+                            }
+                            <a href="@routes.ForumController.viewForums(subforumWithStatus.getForum.getId)">@subforumWithStatus.getForum.getName</a>
+                            @if(subforumWithStatus.isHasNewPost) {
+                                </strong>
+                            }
+                            <p><small>@Html(subforumWithStatus.getForum.getDescription)</small></p>
+                        </div>
+                        @if(RaguelUtils.hasRole("admin")) {
+                            <div class="pull-right">
+                                <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(subforumWithStatus.getForum.getId)">@Messages.get("commons.update")</a>
+                            </div>
+                        }
+                    </div>
+                    @if(index != (forum.getSubforums.size - 1)) {
+                        <div class="row">
+                            <hr />
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+}

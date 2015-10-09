@@ -8,84 +8,45 @@
 
 @(currentForum: Forum, childForums: List[Forum])
 
-@if(currentForum != null) {
-    <h3>@Messages.get("forum.subforums")</h3>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <div class="clearfix row">
-                <div class="col-md-7">
-                    @Messages.get("forum.subforum")
-                </div>
-                <div class="col-md-2">
-                    @Messages.get("forum.lastPost")
-                </div>
-                <div class="col-md-3">
-                    @Messages.get("forum.lastUserUpdate")
-                </div>
+<h3>@Messages.get("forum.subforums")</h3>
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <div class="clearfix row">
+            <div class="col-md-7">
+                @Messages.get("forum.subforum")
             </div>
-        </div>
-        <div class="panel-body">
-            @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(childForums.map(f => f.getLastUpdateUserJid).toSeq))) { displayNamesMap =>
-                @for((forum, index) <- childForums.zipWithIndex) {
-                    <div class="clearfix row">
-                        <div class="col-md-7">
-                            <a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a>
-                            @if(RaguelUtils.hasRole("admin")) {
-                                <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
-                            }
-                            <p><small>@Html(forum.getDescription)</small></p>
-                        </div>
-                        <div class="col-md-2">
-                            <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forum.getLastUpdate.getTime)</time>
-                        </div>
-                        <div class="col-md-3">
-                            @displayNamesMap.get(forum.getLastUpdateUserJid)
-                        </div>
-                    </div>
-                    @if(index != (childForums.size - 1)) {
-                        <div class="row">
-                            <hr />
-                        </div>
-                    }
-                }
-            }
+            <div class="col-md-2">
+                @Messages.get("forum.lastPost")
+            </div>
+            <div class="col-md-3">
+                @Messages.get("forum.lastUserUpdate")
+            </div>
         </div>
     </div>
-} else {
-    @for(forum <- childForums) {
-        <div class="panel panel-default">
-            <div class="panel-heading clearfix">
-                <div class="pull-left">
-                    <h3 class="panel-title"><a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a></h3>
+    <div class="panel-body">
+        @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(childForums.map(f => f.getLastUpdateUserJid).toSeq))) { displayNamesMap =>
+            @for((forum, index) <- childForums.zipWithIndex) {
+                <div class="clearfix row">
+                    <div class="col-md-7">
+                        <a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a>
+                        @if(RaguelUtils.hasRole("admin")) {
+                            <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
+                        }
+                        <p><small>@Html(forum.getDescription)</small></p>
+                    </div>
+                    <div class="col-md-2">
+                        <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forum.getLastUpdate.getTime)</time>
+                    </div>
+                    <div class="col-md-3">
+                        @displayNamesMap.get(forum.getLastUpdateUserJid)
+                    </div>
                 </div>
-                @if(RaguelUtils.hasRole("admin")) {
-                    <div class="pull-right">
-                        <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
+                @if(index != (childForums.size - 1)) {
+                    <div class="row">
+                        <hr />
                     </div>
                 }
-            </div>
-            @if(!forum.getSubforums.isEmpty) {
-                <div class="panel-body">
-                    @for((subforum, index) <- forum.getSubforums.zipWithIndex) {
-                        <div class="clearfix">
-                            <div class="pull-left">
-                                <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>
-                                <p>@Html(subforum.getDescription)</p>
-                            </div>
-                            @if(RaguelUtils.hasRole("admin")) {
-                                <div class="pull-right">
-                                    <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>
-                                </div>
-                            }
-                        </div>
-                        @if(index != (forum.getSubforums.size - 1)) {
-                            <div class="row">
-                                <hr />
-                            </div>
-                        }
-                    }
-                </div>
             }
-        </div>
-    }
-}
+        }
+    </div>
+</div>
