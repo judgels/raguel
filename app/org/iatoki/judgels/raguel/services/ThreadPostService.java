@@ -15,7 +15,9 @@ public interface ThreadPostService {
 
     Page<ThreadPost> getPageOfThreadPosts(ForumThread forumThread, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);
 
-    void createPost(String threadJid, String userJid, String subject, String body);
+    void createPost(ForumThread forumThread, String userJid, String subject, String body, String userIpAddress);
 
-    void replyPost(String threadJid, String postJid, String userJid, String subject, String body);
+    void editPost(ThreadPost threadPost, String userJid, String subject, String body, String userIpAddress);
+
+    void replyPost(ThreadPost threadPost, String userJid, String subject, String body, String userIpAddress);
 }

@@ -1,0 +1,41 @@
+@import java.net.URL
+@import play.i18n.Messages
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.play.IdentityUtils
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.raguel.ThreadPost
+
+@(threadPost: ThreadPost, avatarUrl: URL, username: String)
+
+<div class="clearfix"></div>
+
+<div class="panel-heading clearfix">
+    <div class="pull-left">
+        <span class="panel-title">@threadPost.getLatestContent.getSubject</span>
+        @if(threadPost.getReplyTo != null) {
+            (@Messages.get("forum.thread.post.responseTo") <a href="@routes.ThreadPostController.viewTreeThreadPosts(threadPost.getThread.getId)#post-@threadPost.getReplyTo.getId">@Messages.get("post")</a> @Messages.get("forum.thread.post.by") @JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getReplyTo.getUserJid))
+        }
+        |
+        <a href="@routes.ThreadPostController.replyThreadPost(threadPost.getId)">@Messages.get("forum.thread.post.reply")</a>
+        @if(IdentityUtils.getUserJid.equals(threadPost.getUserJid)) {
+            |
+            <a href="@routes.ThreadPostController.editThreadPost(threadPost.getId)">@Messages.get("forum.thread.post.edit")</a>
+        }
+    </div>
+    <div class="pull-right">
+        @if(threadPost.getContents.size > 1) {
+            <a href="@routes.ThreadPostController.viewPostVersions(threadPost.getId)">@{threadPost.getContents.size - 1} @Messages.get("forum.thread.post.edit")</a>
+            |
+        }
+        <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(threadPost.getTimeCreate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(threadPost.getTimeCreate.getTime)</time>
+    </div>
+</div>
+<div class="panel-body post-body">
+    <div class="clearfix">
+        @avatarPostView(avatarUrl, username)
+        <div class="col-md-10 post-content">
+            @Html(threadPost.getLatestContent.getContent)
+        </div>
+    </div>
+</div>

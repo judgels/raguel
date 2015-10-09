@@ -18,7 +18,9 @@ public interface ForumService {
 
     Forum findForumById(long forumId) throws ForumNotFoundException;
 
-    void createForum(String parentJid, String name, String description);
+    Forum findForumByJid(String forumJid);
 
-    void updateForum(String forumJid, String parentJid, String name, String description);
+    void createForum(Forum parentForum, String name, String description, String userJid, String userIpAddress);
+
+    void updateForum(Forum forum, Forum parentForum, String name, String description, String userJid, String userIpAddress);
 }

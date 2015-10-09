@@ -35,6 +35,10 @@ public final class ThreadPost {
         return thread;
     }
 
+    public List<PostContent> getContents() {
+        return contents;
+    }
+
     public PostContent getLatestContent() {
         return contents.get(contents.size() - 1);
     }

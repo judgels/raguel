@@ -18,8 +18,8 @@ public final class ForumControllerUtils {
 
     static void appendUpdateLayout(LazyHtml content, Forum forum) {
         content.appendLayout(c -> tabLayout.render(ImmutableList.of(
-                    new InternalLink(Messages.get("forum.config.general"), routes.ForumController.updateForumGeneralConfig(forum.getId())),
-                    new InternalLink(Messages.get("forum.config.modules"), routes.ForumController.updateForumModuleConfig(forum.getId()))
+                    new InternalLink(Messages.get("forum.config.general"), routes.ForumController.editForumGeneralConfig(forum.getId())),
+                    new InternalLink(Messages.get("forum.config.modules"), routes.ForumController.editForumModuleConfig(forum.getId()))
                 ), c)
         );
         content.appendLayout(c -> headingWithActionLayout.render(Messages.get("forum.forum") + "#" + forum.getId() + ": " + forum.getName(), new InternalLink(Messages.get("forum.enter"), routes.ForumController.viewForums(forum.getId())), c));

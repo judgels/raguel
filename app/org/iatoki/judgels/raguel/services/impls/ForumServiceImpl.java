@@ -2,7 +2,6 @@ package org.iatoki.judgels.raguel.services.impls;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumNotFoundException;
 import org.iatoki.judgels.raguel.ForumWithStatus;
@@ -146,23 +145,43 @@ public final class ForumServiceImpl implements ForumService {
     }
 
     @Override
-    public void createForum(String parentJid, String name, String description) {
-        ForumModel forumModel = new ForumModel();
-        forumModel.parentJid = parentJid;
-        forumModel.name = name;
-        forumModel.description = description;
+    public Forum findForumByJid(String forumJid) {
+        ForumModel intendedForumModel = forumDao.findByJid(forumJid);
 
-        forumDao.persist(forumModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        return createForumWithParentAndSubforumsFromModel(intendedForumModel);
     }
 
     @Override
-    public void updateForum(String forumJid, String parentJid, String name, String description) {
-        ForumModel forumModel = forumDao.findByJid(forumJid);
-        forumModel.parentJid = parentJid;
+    public void createForum(Forum parentForum, String name, String description, String userJid, String userIpAddress) {
+        ForumModel forumModel = new ForumModel();
+        if (parentForum == null) {
+            forumModel.parentJid = "";
+        } else {
+            forumModel.parentJid = parentForum.getJid();
+        }
         forumModel.name = name;
         forumModel.description = description;
 
-        forumDao.persist(forumModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        forumDao.persist(forumModel, userJid, userIpAddress);
+
+        ForumServiceUtils.updateForumAndParents(forumDao, parentForum, userJid, userIpAddress);
+    }
+
+    @Override
+    public void updateForum(Forum forum, Forum parentForum, String name, String description, String userJid, String userIpAddress) {
+        ForumModel forumModel = forumDao.findByJid(forum.getJid());
+        if (parentForum == null) {
+            forumModel.parentJid = "";
+        } else {
+            forumModel.parentJid = parentForum.getJid();
+        }
+        forumModel.name = name;
+        forumModel.description = description;
+
+        forumDao.edit(forumModel, userJid, userIpAddress);
+
+        ForumServiceUtils.updateForumAndParents(forumDao, forum.getParentForum(), userJid, userIpAddress);
+        ForumServiceUtils.updateForumAndParents(forumDao, parentForum, userJid, userIpAddress);
     }
 
     private Forum createForumWithParentAndSubforumsFromModel(ForumModel intendedForumModel) {

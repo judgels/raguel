@@ -5,14 +5,14 @@
 @import org.iatoki.judgels.raguel.services.impls.AvatarCacheServiceImpl
 @import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
 @import org.iatoki.judgels.raguel.ThreadPost
-@import org.iatoki.judgels.raguel.forms.ThreadPostCreateForm
+@import org.iatoki.judgels.raguel.forms.ThreadPostUpsertForm
 @import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils
 
-@(threadPost: ThreadPost, threadPostCreateForm: Form[ThreadPostCreateForm])
+@(threadPost: ThreadPost, threadPostUpsertForm: Form[ThreadPostUpsertForm])
 
 @implicitFieldConstructor = @{ b3.vertical.fieldConstructor }
 
-@formErrorView(threadPostCreateForm)
+@formErrorView(threadPostUpsertForm)
 
 <script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/ckeditor.js")"></script>
 
@@ -20,8 +20,8 @@
 
     @helper.CSRF.formField
 
-    @b3.text(threadPostCreateForm("subject"), '_label -> Messages.get("forum.thread.post.subject"))
-    @b3.textarea(threadPostCreateForm("content"), '_label -> Messages.get("forum.thread.post.content"), 'class -> "ckeditor")
+    @b3.text(threadPostUpsertForm("subject"), '_label -> Messages.get("forum.thread.post.subject"))
+    @b3.textarea(threadPostUpsertForm("content"), '_label -> Messages.get("forum.thread.post.content"), 'class -> "ckeditor")
 
     @b3.submit('class -> "btn btn-primary") { @Messages.get("forum.thread.post.reply") }
 }
@@ -39,10 +39,7 @@
     </div>
     <div class="panel-body post-body">
         <div class="clearfix">
-            <div class="user col-md-2">
-                <img class="avatar-picture center-block" src="@AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl)" alt="avatar" />
-                <div class="text-center">@JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid)</div>
-            </div>
+            @avatarPostView(AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl), JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid))
             <div class="col-md-10 post-content">
                 @Html(threadPost.getLatestContent.getContent)
             </div>

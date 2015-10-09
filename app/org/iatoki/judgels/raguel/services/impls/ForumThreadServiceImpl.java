@@ -2,7 +2,6 @@ package org.iatoki.judgels.raguel.services.impls;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumThread;
@@ -121,21 +120,15 @@ public final class ForumThreadServiceImpl implements ForumThreadService {
     }
 
     @Override
-    public String createForumThread(String forumJid, String name) {
+    public ForumThread createForumThread(Forum forum, String name, String userJid, String userIpAddress) {
         ForumThreadModel forumThreadModel = new ForumThreadModel();
-        forumThreadModel.forumJid = forumJid;
+        forumThreadModel.forumJid = forum.getJid();
         forumThreadModel.name = name;
 
-        forumThreadDao.persist(forumThreadModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        forumThreadDao.persist(forumThreadModel, userJid, userIpAddress);
 
-        String parentForumJid = forumThreadModel.forumJid;
-        while ((parentForumJid != null) && !parentForumJid.isEmpty()) {
-            ForumModel forumModel = forumDao.findByJid(parentForumJid);
-            forumDao.edit(forumModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        ForumServiceUtils.updateForumAndParents(forumDao, forum, userJid, userIpAddress);
 
-            parentForumJid = forumModel.parentJid;
-        }
-
-        return forumThreadModel.jid;
+        return ForumThreadServiceUtils.createForumThreadFromModelAndForum(forumThreadModel, forum);
     }
 }

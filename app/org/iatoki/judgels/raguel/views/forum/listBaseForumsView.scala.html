@@ -16,7 +16,7 @@
             </div>
             @if(RaguelUtils.hasRole("admin")) {
                 <div class="pull-right">
-                    <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
+                    <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
                 </div>
             }
         </div>
@@ -30,7 +30,7 @@
                         </div>
                         @if(RaguelUtils.hasRole("admin")) {
                             <div class="pull-right">
-                                <a class="btn btn-primary" href="@routes.ForumController.updateForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>
+                                <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>
                             </div>
                         }
                     </div>

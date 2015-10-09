@@ -1,9 +1,8 @@
 package org.iatoki.judgels.raguel.services.impls;
 
-import com.beust.jcommander.internal.Maps;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.iatoki.judgels.play.IdentityUtils;
+import com.google.common.collect.Maps;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumThread;
@@ -148,45 +147,61 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
     }
 
     @Override
-    public void createPost(String threadJid, String userJid, String subject, String body) {
+    public void createPost(ForumThread forumThread, String userJid, String subject, String body, String userIpAddress) {
         ThreadPostModel threadPostModel = new ThreadPostModel();
-        threadPostModel.threadJid = threadJid;
+        threadPostModel.threadJid = forumThread.getJid();
 
-        threadPostDao.persist(threadPostModel, userJid, IdentityUtils.getIpAddress());
+        threadPostDao.persist(threadPostModel, userJid, userIpAddress);
 
         PostContentModel postContentModel = new PostContentModel();
         postContentModel.postJid = threadPostModel.jid;
         postContentModel.subject = subject;
         postContentModel.content = body;
 
-        postContentDao.persist(postContentModel, userJid, IdentityUtils.getIpAddress());
+        postContentDao.persist(postContentModel, userJid, userIpAddress);
+
+        updateThreadAndParents(forumThread, userJid, userIpAddress);
     }
 
     @Override
-    public void replyPost(String threadJid, String postJid, String userJid, String subject, String body) {
-        ThreadPostModel threadPostModel = new ThreadPostModel();
-        threadPostModel.threadJid = threadJid;
-        threadPostModel.replyJid = postJid;
-
-        threadPostDao.persist(threadPostModel, userJid, IdentityUtils.getIpAddress());
+    public void editPost(ThreadPost threadPost, String userJid, String subject, String body, String userIpAddress) {
+        ThreadPostModel threadPostModel = threadPostDao.findByJid(threadPost.getJid());
 
         PostContentModel postContentModel = new PostContentModel();
         postContentModel.postJid = threadPostModel.jid;
         postContentModel.subject = subject;
         postContentModel.content = body;
 
-        postContentDao.persist(postContentModel, userJid, IdentityUtils.getIpAddress());
+        postContentDao.persist(postContentModel, userJid, userIpAddress);
 
-        ForumThreadModel forumThreadModel = forumThreadDao.findByJid(threadJid);
-        forumThreadDao.edit(forumThreadModel, userJid, IdentityUtils.getIpAddress());
+        threadPostDao.edit(threadPostModel, userJid, userIpAddress);
 
-        String forumJid = forumThreadModel.forumJid;
-        while ((forumJid != null) && !forumJid.isEmpty()) {
-            ForumModel forumModel = forumDao.findByJid(forumJid);
-            forumDao.edit(forumModel, userJid, IdentityUtils.getIpAddress());
+        updateThreadAndParents(threadPost.getThread(), userJid, userIpAddress);
+    }
 
-            forumJid = forumModel.parentJid;
-        }
+    @Override
+    public void replyPost(ThreadPost threadPost, String userJid, String subject, String body, String userIpAddress) {
+        ThreadPostModel threadPostModel = new ThreadPostModel();
+        threadPostModel.threadJid = threadPost.getThread().getJid();
+        threadPostModel.replyJid = threadPost.getJid();
+
+        threadPostDao.persist(threadPostModel, userJid, userIpAddress);
+
+        PostContentModel postContentModel = new PostContentModel();
+        postContentModel.postJid = threadPostModel.jid;
+        postContentModel.subject = subject;
+        postContentModel.content = body;
+
+        postContentDao.persist(postContentModel, userJid, userIpAddress);
+
+        updateThreadAndParents(threadPost.getThread(), userJid, userIpAddress);
+    }
+
+    private void updateThreadAndParents(ForumThread forumThread, String userJid, String userIpAddress) {
+        ForumThreadModel forumThreadModel = forumThreadDao.findByJid(forumThread.getJid());
+        forumThreadDao.edit(forumThreadModel, userJid, userIpAddress);
+
+        ForumServiceUtils.updateForumAndParents(forumDao, forumThread.getParentForum(), userJid, userIpAddress);
     }
 
     private class ThreadPostModelWithLevel {

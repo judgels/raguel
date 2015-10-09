@@ -18,13 +18,15 @@ import org.iatoki.judgels.raguel.controllers.securities.Authenticated;
 import org.iatoki.judgels.raguel.controllers.securities.GuestView;
 import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
-import org.iatoki.judgels.raguel.forms.ThreadPostCreateForm;
+import org.iatoki.judgels.raguel.forms.ThreadPostUpsertForm;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 import org.iatoki.judgels.raguel.services.ThreadPostService;
 import org.iatoki.judgels.raguel.services.UserItemService;
-import org.iatoki.judgels.raguel.views.html.forum.thread.createThreadPostView;
+import org.iatoki.judgels.raguel.views.html.forum.thread.editThreadPostView;
+import org.iatoki.judgels.raguel.views.html.forum.thread.listPostContentsView;
 import org.iatoki.judgels.raguel.views.html.forum.thread.listThreadPostsTreeView;
 import org.iatoki.judgels.raguel.views.html.forum.thread.listThreadPostsView;
+import org.iatoki.judgels.raguel.views.html.forum.thread.replyThreadPostView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -97,18 +99,86 @@ public final class ThreadPostController extends AbstractJudgelsController {
         return RaguelControllerUtils.getInstance().lazyOk(content);
     }
 
+    @Authenticated(value = GuestView.class)
+    @Transactional
+    public Result viewPostVersions(long threadPostId) throws ThreadPostNotFoundException {
+        ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
+
+        LazyHtml content = new LazyHtml(listPostContentsView.render(threadPost));
+        content.appendLayout(c -> headingWithBackLayout.render(Messages.get("forum.thread.post.versions"), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId())), c));
+        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
+
+        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
+        Stack<InternalLink> internalLinkStack = new Stack<>();
+        Forum currentParent = threadPost.getThread().getParentForum();
+        while (currentParent != null) {
+            internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
+            currentParent = currentParent.getParentForum();
+        }
+
+        while (!internalLinkStack.isEmpty()) {
+            internalLinkBuilder.add(internalLinkStack.pop());
+        }
+        internalLinkBuilder.add(new InternalLink(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId())));
+        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
+        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Post Version");
+
+        return RaguelControllerUtils.getInstance().lazyOk(content);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Transactional(readOnly = true)
+    @AddCSRFToken
+    public Result editThreadPost(long threadPostId) throws ThreadPostNotFoundException {
+        ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
+
+        if (!IdentityUtils.getUserJid().equals(threadPost.getUserJid())) {
+            return notFound();
+        }
+
+        ThreadPostUpsertForm threadPostUpsertData = new ThreadPostUpsertForm();
+        threadPostUpsertData.subject = threadPost.getLatestContent().getSubject();
+        threadPostUpsertData.content = threadPost.getLatestContent().getContent();
+
+        Form<ThreadPostUpsertForm> threadPostUpsertForm = Form.form(ThreadPostUpsertForm.class).fill(threadPostUpsertData);
+
+        return showEditThreadPost(threadPost, threadPostUpsertForm);
+    }
+
+    @Authenticated(value = {LoggedIn.class, HasRole.class})
+    @Transactional
+    @RequireCSRFCheck
+    public Result postEditThreadPost(long threadPostId) throws ThreadPostNotFoundException {
+        ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
+
+        if (!IdentityUtils.getUserJid().equals(threadPost.getUserJid())) {
+            return notFound();
+        }
+
+        Form<ThreadPostUpsertForm> threadPostUpsertForm = Form.form(ThreadPostUpsertForm.class).bindFromRequest();
+
+        if (formHasErrors(threadPostUpsertForm)) {
+            return showEditThreadPost(threadPost, threadPostUpsertForm);
+        }
+
+        ThreadPostUpsertForm threadPostUpsertData = threadPostUpsertForm.get();
+        threadPostService.editPost(threadPost, IdentityUtils.getUserJid(), threadPostUpsertData.subject, threadPostUpsertData.content, IdentityUtils.getIpAddress());
+
+        return redirect(routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
+    }
+
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Transactional(readOnly = true)
     @AddCSRFToken
     public Result replyThreadPost(long threadPostId) throws ThreadPostNotFoundException {
         ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
 
-        ThreadPostCreateForm threadPostCreateData = new ThreadPostCreateForm();
-        threadPostCreateData.subject = "Re: " + threadPost.getLatestContent().getSubject();
+        ThreadPostUpsertForm threadPostUpsertData = new ThreadPostUpsertForm();
+        threadPostUpsertData.subject = "Re: " + threadPost.getLatestContent().getSubject();
 
-        Form<ThreadPostCreateForm> threadPostCreateForm = Form.form(ThreadPostCreateForm.class).fill(threadPostCreateData);
+        Form<ThreadPostUpsertForm> threadPostUpsertForm = Form.form(ThreadPostUpsertForm.class).fill(threadPostUpsertData);
 
-        return showReplyThreadPost(threadPost, threadPostCreateForm);
+        return showReplyThreadPost(threadPost, threadPostUpsertForm);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -117,14 +187,14 @@ public final class ThreadPostController extends AbstractJudgelsController {
     public Result postReplyThreadPost(long threadPostId) throws ThreadPostNotFoundException {
         ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
 
-        Form<ThreadPostCreateForm> threadPostCreateForm = Form.form(ThreadPostCreateForm.class).bindFromRequest();
+        Form<ThreadPostUpsertForm> threadPostUpsertForm = Form.form(ThreadPostUpsertForm.class).bindFromRequest();
 
-        if (formHasErrors(threadPostCreateForm)) {
-            return showReplyThreadPost(threadPost, threadPostCreateForm);
+        if (formHasErrors(threadPostUpsertForm)) {
+            return showReplyThreadPost(threadPost, threadPostUpsertForm);
         }
 
-        ThreadPostCreateForm threadPostCreateData = threadPostCreateForm.get();
-        threadPostService.replyPost(threadPost.getThread().getJid(), threadPost.getJid(), IdentityUtils.getUserJid(), threadPostCreateData.subject, threadPostCreateData.content);
+        ThreadPostUpsertForm threadPostUpsertData = threadPostUpsertForm.get();
+        threadPostService.replyPost(threadPost, IdentityUtils.getUserJid(), threadPostUpsertData.subject, threadPostUpsertData.content, IdentityUtils.getIpAddress());
 
         return redirect(routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
     }
@@ -157,8 +227,30 @@ public final class ThreadPostController extends AbstractJudgelsController {
         return RaguelControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showReplyThreadPost(ThreadPost threadPost, Form<ThreadPostCreateForm> threadPostCreateForm) {
-        LazyHtml content = new LazyHtml(createThreadPostView.render(threadPost, threadPostCreateForm));
+    private Result showEditThreadPost(ThreadPost threadPost, Form<ThreadPostUpsertForm> threadPostUpsertForm) {
+        LazyHtml content = new LazyHtml(editThreadPostView.render(threadPost, threadPostUpsertForm));
+        content.appendLayout(c -> headingWithBackLayout.render(Messages.get("forum.thread.post.edit"), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + threadPost.getThread().getParentForum().getName(), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId())), c));
+        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
+        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
+        Stack<InternalLink> internalLinkStack = new Stack<>();
+        Forum currentParent = threadPost.getThread().getParentForum();
+        while (currentParent != null) {
+            internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
+            currentParent = currentParent.getParentForum();
+        }
+
+        while (!internalLinkStack.isEmpty()) {
+            internalLinkBuilder.add(internalLinkStack.pop());
+        }
+        internalLinkBuilder.add(new InternalLink(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId())));
+        internalLinkBuilder.add(new InternalLink(Messages.get("forum.thread.post.edit"), routes.ThreadPostController.editThreadPost(threadPost.getId())));
+        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
+        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Post - Edit");
+        return RaguelControllerUtils.getInstance().lazyOk(content);
+    }
+
+    private Result showReplyThreadPost(ThreadPost threadPost, Form<ThreadPostUpsertForm> threadPostUpsertForm) {
+        LazyHtml content = new LazyHtml(replyThreadPostView.render(threadPost, threadPostUpsertForm));
         content.appendLayout(c -> headingWithBackLayout.render(Messages.get("forum.thread.post.reply"), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + threadPost.getThread().getParentForum().getName(), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId())), c));
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();

@@ -1,6 +1,7 @@
 @import play.i18n.Messages
 @import scala.collection.JavaConversions
 @import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.play.IdentityUtils
 @import org.iatoki.judgels.play.JudgelsPlayUtils
 @import org.iatoki.judgels.raguel.services.impls.AvatarCacheServiceImpl
 @import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
@@ -22,27 +23,7 @@
             <div class="clearfix">
                 <div class="post-wrapper-@threadPost.getLevel">
                     <div id="post-@threadPost.getThreadPost.getId" class="panel panel-default post">
-                        <div class="panel-heading clearfix">
-                            <div class="pull-left">
-                                <span class="panel-title">@threadPost.getThreadPost.getLatestContent.getSubject</span>
-                                |
-                                <a href="@routes.ThreadPostController.replyThreadPost(threadPost.getThreadPost.getId)">@Messages.get("forum.thread.post.reply")</a>
-                            </div>
-                            <div class="pull-right">
-                                <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(threadPost.getThreadPost.getTimeCreate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(threadPost.getThreadPost.getTimeCreate.getTime)</time>
-                            </div>
-                        </div>
-                        <div class="panel-body post-body">
-                            <div class="clearfix">
-                                <div class="user col-md-2">
-                                    <img class="avatar-picture center-block" src="@avatarUrlsMap.get(threadPost.getThreadPost.getUserJid)" alt="avatar" />
-                                    <div class="text-center">@displayNamesMap.get(threadPost.getThreadPost.getUserJid)</div>
-                                </div>
-                                <div class="col-md-10 post-content">
-                                    @Html(threadPost.getThreadPost.getLatestContent.getContent)
-                                </div>
-                            </div>
-                        </div>
+                        @postContentView(threadPost.getThreadPost, avatarUrlsMap.get(threadPost.getThreadPost.getUserJid), displayNamesMap.get(threadPost.getThreadPost.getUserJid))
                     </div>
                 </div>
             </div>

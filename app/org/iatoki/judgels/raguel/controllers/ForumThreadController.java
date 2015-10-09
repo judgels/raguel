@@ -8,6 +8,7 @@ import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumNotFoundException;
+import org.iatoki.judgels.raguel.ForumThread;
 import org.iatoki.judgels.raguel.controllers.securities.Authenticated;
 import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
@@ -72,8 +73,8 @@ public final class ForumThreadController extends AbstractJudgelsController {
         }
 
         ForumThreadCreateForm forumThreadCreateData = forumThreadCreateForm.get();
-        String threadJid = forumThreadService.createForumThread(forum.getJid(), forumThreadCreateData.name);
-        threadPostService.createPost(threadJid, IdentityUtils.getUserJid(), forumThreadCreateData.name, forumThreadCreateData.content);
+        ForumThread forumThread = forumThreadService.createForumThread(forum, forumThreadCreateData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        threadPostService.createPost(forumThread, IdentityUtils.getUserJid(), forumThreadCreateData.name, forumThreadCreateData.content, IdentityUtils.getIpAddress());
 
         return redirect(routes.ForumController.viewForums(forum.getId()));
     }

@@ -15,5 +15,5 @@ public interface ForumThreadService {
 
     ForumThread findForumThreadById(long forumThreadId) throws ForumThreadNotFoundException;
 
-    String createForumThread(String forumJid, String name);
+    ForumThread createForumThread(Forum forum, String name, String userJid, String userIpAddress);
 }

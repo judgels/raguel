@@ -1,0 +1,8 @@
+@import java.net.URL
+
+@(avatarUrl: URL, username: String)
+
+<div class="user col-md-2">
+    <img class="avatar-picture center-block" src="@avatarUrl" alt="avatar" />
+    <div class="text-center">@username</div>
+</div>

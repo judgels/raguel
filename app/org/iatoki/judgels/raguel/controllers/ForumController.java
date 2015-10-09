@@ -29,6 +29,7 @@ import org.iatoki.judgels.raguel.services.ForumModuleService;
 import org.iatoki.judgels.raguel.services.ForumService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 import org.iatoki.judgels.raguel.views.html.forum.createForumView;
+import org.iatoki.judgels.raguel.views.html.forum.editForumGeneralView;
 import org.iatoki.judgels.raguel.views.html.forum.listBaseForumsView;
 import org.iatoki.judgels.raguel.views.html.forum.listBaseForumsWithStatusView;
 import org.iatoki.judgels.raguel.views.html.forum.listForumsAndThreadsView;
@@ -36,7 +37,6 @@ import org.iatoki.judgels.raguel.views.html.forum.listForumsAndThreadsWithStatus
 import org.iatoki.judgels.raguel.views.html.forum.listForumsView;
 import org.iatoki.judgels.raguel.views.html.forum.listForumsWithStatusView;
 import org.iatoki.judgels.raguel.views.html.forum.modules.listModulesView;
-import org.iatoki.judgels.raguel.views.html.forum.updateForumGeneralView;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -90,10 +90,15 @@ public final class ForumController extends AbstractJudgelsController {
     @Authorized(value = "admin")
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result createForum() {
-        Form<ForumUpsertForm> forumUpsertForm = Form.form(ForumUpsertForm.class);
+    public Result createForum(long parentId) throws ForumNotFoundException {
+        ForumUpsertForm forumUpsertData = new ForumUpsertForm();
+        if (parentId != 0) {
+            Forum forum = forumService.findForumById(parentId);
+            forumUpsertData.parentJid = forum.getJid();
+        }
+        Form<ForumUpsertForm> forumUpsertForm = Form.form(ForumUpsertForm.class).fill(forumUpsertData);
 
-        return showCreateForum(forumUpsertForm);
+        return showCreateForum(parentId, forumUpsertForm);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -104,11 +109,16 @@ public final class ForumController extends AbstractJudgelsController {
         Form<ForumUpsertForm> forumUpsertForm = Form.form(ForumUpsertForm.class).bindFromRequest();
 
         if (formHasErrors(forumUpsertForm)) {
-            return showCreateForum(forumUpsertForm);
+            return showCreateForum(0, forumUpsertForm);
         }
 
         ForumUpsertForm forumUpsertData = forumUpsertForm.get();
-        forumService.createForum(forumUpsertData.parentJid, forumUpsertData.name, forumUpsertData.description);
+        Forum forum = null;
+        if (forumService.forumExistsByJid(forumUpsertData.parentJid)) {
+            forum = forumService.findForumByJid(forumUpsertData.parentJid);
+        }
+
+        forumService.createForum(forum, forumUpsertData.name, forumUpsertData.description, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         return redirect(routes.ForumController.index());
     }
@@ -117,7 +127,7 @@ public final class ForumController extends AbstractJudgelsController {
     @Authorized(value = "admin")
     @Transactional(readOnly = true)
     @AddCSRFToken
-    public Result updateForumGeneralConfig(long forumId) throws ForumNotFoundException {
+    public Result editForumGeneralConfig(long forumId) throws ForumNotFoundException {
         Forum forum = forumService.findForumById(forumId);
         ForumUpsertForm forumUpsertData = new ForumUpsertForm();
         if (forum.getParentForum() != null) {
@@ -128,23 +138,28 @@ public final class ForumController extends AbstractJudgelsController {
 
         Form<ForumUpsertForm> forumUpsertForm = Form.form(ForumUpsertForm.class).fill(forumUpsertData);
 
-        return showUpdateForumGeneral(forumUpsertForm, forum);
+        return showEditForumGeneral(forumUpsertForm, forum);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized(value = "admin")
     @Transactional
     @RequireCSRFCheck
-    public Result postUpdateForumGeneralConfig(long forumId) throws ForumNotFoundException {
+    public Result postEditForumGeneralConfig(long forumId) throws ForumNotFoundException {
         Forum forum = forumService.findForumById(forumId);
         Form<ForumUpsertForm> forumUpsertForm = Form.form(ForumUpsertForm.class).bindFromRequest();
 
         if (formHasErrors(forumUpsertForm)) {
-            return showUpdateForumGeneral(forumUpsertForm, forum);
+            return showEditForumGeneral(forumUpsertForm, forum);
         }
 
         ForumUpsertForm forumUpsertData = forumUpsertForm.get();
-        forumService.updateForum(forum.getJid(), forumUpsertData.parentJid, forumUpsertData.name, forumUpsertData.description);
+        Forum parentForum = null;
+        if (forumService.forumExistsByJid(forumUpsertData.parentJid)) {
+            parentForum = forumService.findForumByJid(forumUpsertData.parentJid);
+        }
+
+        forumService.updateForum(forum, parentForum, forumUpsertData.name, forumUpsertData.description, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
         return redirect(routes.ForumController.index());
     }
@@ -152,15 +167,15 @@ public final class ForumController extends AbstractJudgelsController {
     @Authenticated(value = {LoggedIn.class, HasRole.class})
     @Authorized(value = "admin")
     @Transactional(readOnly = true)
-    public Result updateForumModuleConfig(long forumId) throws ForumNotFoundException {
+    public Result editForumModuleConfig(long forumId) throws ForumNotFoundException {
         Forum forum = forumService.findForumById(forumId);
 
         LazyHtml content = new LazyHtml(listModulesView.render(forum));
         ForumControllerUtils.appendUpdateLayout(content, forum);
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
         ForumControllerUtils.appendBreadcrumbsLayout(content,
-                new InternalLink(Messages.get("forum.update"), routes.ForumController.updateForumGeneralConfig(forum.getId())),
-                new InternalLink(Messages.get("forum.config.modules"), routes.ForumController.updateForumModuleConfig(forum.getId()))
+                new InternalLink(Messages.get("forum.update"), routes.ForumController.editForumGeneralConfig(forum.getId())),
+                new InternalLink(Messages.get("forum.config.modules"), routes.ForumController.editForumModuleConfig(forum.getId()))
         );
 
         RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Update Module");
@@ -176,7 +191,7 @@ public final class ForumController extends AbstractJudgelsController {
 
         forumModuleService.enableModule(forum.getJid(), ForumModules.valueOf(forumModule));
 
-        return redirect(routes.ForumController.updateForumModuleConfig(forum.getId()));
+        return redirect(routes.ForumController.editForumModuleConfig(forum.getId()));
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -187,7 +202,7 @@ public final class ForumController extends AbstractJudgelsController {
 
         forumModuleService.disableModule(forum.getJid(), ForumModules.valueOf(forumModule));
 
-        return redirect(routes.ForumController.updateForumModuleConfig(forum.getId()));
+        return redirect(routes.ForumController.editForumModuleConfig(forum.getId()));
     }
 
     private Result showListForumsThreads(long forumId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumNotFoundException {
@@ -247,8 +262,8 @@ public final class ForumController extends AbstractJudgelsController {
 
             if (RaguelUtils.hasRole("admin")) {
                 ImmutableList.Builder<InternalLink> actionsBuilder = ImmutableList.builder();
-                actionsBuilder.add(new InternalLink(Messages.get("commons.update"), routes.ForumController.updateForumGeneralConfig(forumId)));
-                actionsBuilder.add(new InternalLink(Messages.get("forum.create"), routes.ForumController.createForum()));
+                actionsBuilder.add(new InternalLink(Messages.get("commons.update"), routes.ForumController.editForumGeneralConfig(forumId)));
+                actionsBuilder.add(new InternalLink(Messages.get("forum.create"), routes.ForumController.createForum(currentForum.getId())));
                 if (currentForum.containsModule(ForumModules.THREAD)) {
                     actionsBuilder.add(new InternalLink(Messages.get("forum.thread.create"), routes.ForumThreadController.createForumThread(currentForum.getId())));
                 }
@@ -263,7 +278,7 @@ public final class ForumController extends AbstractJudgelsController {
             }
         } else {
             if (RaguelUtils.hasRole("admin")) {
-                content.appendLayout(c -> headingWithActionLayout.render(Messages.get("forum.forums"), new InternalLink(Messages.get("commons.create"), routes.ForumController.createForum()), c));
+                content.appendLayout(c -> headingWithActionLayout.render(Messages.get("forum.forums"), new InternalLink(Messages.get("commons.create"), routes.ForumController.createForum(0)), c));
             } else {
                 content.appendLayout(c -> headingLayout.render(Messages.get("forum.forums"), c));
             }
@@ -290,26 +305,26 @@ public final class ForumController extends AbstractJudgelsController {
         return RaguelControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showCreateForum(Form<ForumUpsertForm> forumUpsertForm) {
+    private Result showCreateForum(long parentId, Form<ForumUpsertForm> forumUpsertForm) {
         LazyHtml content = new LazyHtml(createForumView.render(forumUpsertForm, forumService.getAllForums()));
         content.appendLayout(c -> headingLayout.render(Messages.get("forum.create"), c));
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
         ForumControllerUtils.appendBreadcrumbsLayout(content,
-                new InternalLink(Messages.get("forum.create"), routes.ForumController.createForum())
+                new InternalLink(Messages.get("forum.create"), routes.ForumController.createForum(parentId))
         );
         RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Create");
         return RaguelControllerUtils.getInstance().lazyOk(content);
     }
 
-    private Result showUpdateForumGeneral(Form<ForumUpsertForm> forumUpsertForm, Forum forum) {
-        LazyHtml content = new LazyHtml(updateForumGeneralView.render(forumUpsertForm, forum.getId(), forumService.getAllForums().stream().filter(f -> !f.containsJidInHierarchy(forum.getJid())).collect(Collectors.toList())));
+    private Result showEditForumGeneral(Form<ForumUpsertForm> forumUpsertForm, Forum forum) {
+        LazyHtml content = new LazyHtml(editForumGeneralView.render(forumUpsertForm, forum.getId(), forumService.getAllForums().stream().filter(f -> !f.containsJidInHierarchy(forum.getJid())).collect(Collectors.toList())));
         ForumControllerUtils.appendUpdateLayout(content, forum);
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
         ForumControllerUtils.appendBreadcrumbsLayout(content,
-                new InternalLink(Messages.get("forum.update"), routes.ForumController.updateForumGeneralConfig(forum.getId())),
-                new InternalLink(Messages.get("forum.config.general"), routes.ForumController.updateForumGeneralConfig(forum.getId()))
+                new InternalLink(Messages.get("forum.edit"), routes.ForumController.editForumGeneralConfig(forum.getId())),
+                new InternalLink(Messages.get("forum.config.general"), routes.ForumController.editForumGeneralConfig(forum.getId()))
         );
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Update");
+        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Edit");
         return RaguelControllerUtils.getInstance().lazyOk(content);
     }
 }
