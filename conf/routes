@@ -1,14 +1,13 @@
 ->          /                                                                                            playcommons.Routes
 ->          /                                                                                            jophielcommons.Routes
 
-GET         /                                                                                            @org.iatoki.judgels.raguel.controllers.ApplicationController.index()
 GET         /auth                                                                                        @org.iatoki.judgels.raguel.controllers.ApplicationController.auth(returnUri: String ?= "")
 GET         /authRole                                                                                    @org.iatoki.judgels.raguel.controllers.ApplicationController.authRole(returnUri: String ?= "")
 GET         /afterLogin                                                                                  @org.iatoki.judgels.raguel.controllers.ApplicationController.afterLogin(returnUri: String ?= "")
 POST        /viewAs                                                                                      @org.iatoki.judgels.raguel.controllers.ApplicationController.postViewAs()
 GET         /resetViewAs                                                                                 @org.iatoki.judgels.raguel.controllers.ApplicationController.resetViewAs()
 
-GET         /forums/                                                                                     @org.iatoki.judgels.raguel.controllers.ForumController.index()
+GET         /                                                                                            @org.iatoki.judgels.raguel.controllers.ForumController.index()
 GET         /forums/create                                                                               @org.iatoki.judgels.raguel.controllers.ForumController.createForum(parentId: Long)
 POST        /forums/create                                                                               @org.iatoki.judgels.raguel.controllers.ForumController.postCreateForum()
 GET         /forums/:fId                                                                                 @org.iatoki.judgels.raguel.controllers.ForumController.viewForums(fId: Long)
