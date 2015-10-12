@@ -30,6 +30,7 @@ forum.thread.lastPost=Last post
 forum.thread.lastUserUpdate=Last post by
 
 forum.thread.create=New Thread
+forum.thread.post=Post Thread
 forum.thread.name=Name
 forum.thread.content=Content
 

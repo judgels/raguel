@@ -19,5 +19,5 @@
     @b3.text(forumThreadCreateForm("name"), '_label -> Messages.get("forum.thread.name"))
     @b3.textarea(forumThreadCreateForm("content"), '_label -> Messages.get("forum.thread.content"), 'class -> "ckeditor")
 
-    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.create") }
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("forum.thread.post") }
 }
