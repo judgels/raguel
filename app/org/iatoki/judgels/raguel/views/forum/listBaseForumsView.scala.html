@@ -35,7 +35,7 @@
                         </div>
                         <div>
                             <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>
-                            <p>@Html(subforum.getDescription)</p>
+                            <p><small>@Html(subforum.getDescription)</small></p>
                         </div>
                     </div>
                     @if(index != (forum.getSubforums.size - 1)) {
