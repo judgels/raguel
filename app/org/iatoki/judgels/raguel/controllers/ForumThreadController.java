@@ -76,7 +76,7 @@ public final class ForumThreadController extends AbstractJudgelsController {
         ForumThread forumThread = forumThreadService.createForumThread(forum, forumThreadCreateData.name, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
         threadPostService.createPost(forumThread, IdentityUtils.getUserJid(), forumThreadCreateData.name, forumThreadCreateData.content, IdentityUtils.getIpAddress());
 
-        return redirect(routes.ForumController.viewForums(forum.getId()));
+        return redirect(routes.ThreadPostController.viewThreadPosts(forumThread.getId()));
     }
 
     private Result showCreateForumThread(Forum forum, Form<ForumThreadCreateForm> forumThreadCreateForm) {
