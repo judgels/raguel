@@ -22,10 +22,19 @@
             }
         </div>
         @if(!mapForumJidToForumsWithStatus.get(forum.getJid).isEmpty) {
-            <div class="panel-body">
+            @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(mapForumJidToForumsWithStatus.get(forum.getJid).map(f => f.getForum.getLastUpdateUserJid).toSeq))) { lastUpdateDisplayNamesMap =>
+                <div class="panel-body">
                 @for((subforumWithStatus, index) <- mapForumJidToForumsWithStatus.get(forum.getJid).zipWithIndex) {
                     <div class="clearfix">
-                        <div class="pull-left">
+                        @if(RaguelUtils.hasRole("admin")) {
+                            <div class="pull-right">
+                                <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(subforumWithStatus.getForum.getId)">@Messages.get("commons.update")</a>
+                            </div>
+                        }
+                        <div class="pull-right">
+                            <small>@Messages.get("forum.lastPost"): @lastUpdateDisplayNamesMap.get(subforumWithStatus.getForum.getLastUpdateUserJid) @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforumWithStatus.getForum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforumWithStatus.getForum.getLastUpdate.getTime)</time></small>
+                        </div>
+                        <div>
                             @if(subforumWithStatus.isHasNewPost) {
                                 <strong>
                             }
@@ -35,11 +44,6 @@
                             }
                             <p><small>@Html(subforumWithStatus.getForum.getDescription)</small></p>
                         </div>
-                        @if(RaguelUtils.hasRole("admin")) {
-                            <div class="pull-right">
-                                <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(subforumWithStatus.getForum.getId)">@Messages.get("commons.update")</a>
-                            </div>
-                        }
                     </div>
                     @if(index != (forum.getSubforums.size - 1)) {
                         <div class="row">
@@ -47,7 +51,8 @@
                         </div>
                     }
                 }
-            </div>
+                </div>
+            }
         }
     </div>
 }

@@ -21,18 +21,22 @@
             }
         </div>
         @if(!forum.getSubforums.isEmpty) {
-            <div class="panel-body">
+            @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(forum.getSubforums.map(f => f.getLastUpdateUserJid).toSeq))) { lastUpdateDisplayNamesMap =>
+                <div class="panel-body">
                 @for((subforum, index) <- forum.getSubforums.zipWithIndex) {
                     <div class="clearfix">
-                        <div class="pull-left">
-                            <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>
-                            <p>@Html(subforum.getDescription)</p>
-                        </div>
                         @if(RaguelUtils.hasRole("admin")) {
                             <div class="pull-right">
                                 <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>
                             </div>
                         }
+                        <div class="pull-right">
+                            <small>@Messages.get("forum.lastPost"): @lastUpdateDisplayNamesMap.get(subforum.getLastUpdateUserJid) @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforum.getLastUpdate.getTime)</time></small>
+                        </div>
+                        <div>
+                            <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>
+                            <p>@Html(subforum.getDescription)</p>
+                        </div>
                     </div>
                     @if(index != (forum.getSubforums.size - 1)) {
                         <div class="row">
@@ -40,7 +44,8 @@
                         </div>
                     }
                 }
-            </div>
+                </div>
+            }
         }
     </div>
 }
