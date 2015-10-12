@@ -37,6 +37,7 @@ import org.iatoki.judgels.raguel.views.html.forum.listForumsAndThreadsWithStatus
 import org.iatoki.judgels.raguel.views.html.forum.listForumsView;
 import org.iatoki.judgels.raguel.views.html.forum.listForumsWithStatusView;
 import org.iatoki.judgels.raguel.views.html.forum.modules.listModulesView;
+import play.api.mvc.Call;
 import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
@@ -251,13 +252,13 @@ public final class ForumController extends AbstractJudgelsController {
 
         if (currentForum != null) {
             final String parentForumName;
-            final long parentForumId;
+            final Call backCall;
             if (parentForum == null) {
                 parentForumName = Messages.get("forum.home");
-                parentForumId = 0;
+                backCall = routes.ForumController.index();
             } else {
                 parentForumName = parentForum.getName();
-                parentForumId = parentForum.getId();
+                backCall = routes.ForumController.viewForums(parentForum.getId());
             }
 
             if (RaguelUtils.hasRole("admin")) {
@@ -268,12 +269,12 @@ public final class ForumController extends AbstractJudgelsController {
                     actionsBuilder.add(new InternalLink(Messages.get("forum.thread.create"), routes.ForumThreadController.createForumThread(currentForum.getId())));
                 }
 
-                content.appendLayout(c -> headingWithActionsAndBackLayout.render(currentForum.getName(), actionsBuilder.build(), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
+                content.appendLayout(c -> headingWithActionsAndBackLayout.render(currentForum.getName(), actionsBuilder.build(), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, backCall), c));
             } else {
                 if (currentForum.containsModule(ForumModules.THREAD)) {
-                    content.appendLayout(c -> headingWithActionAndBackLayout.render(currentForum.getName(), new InternalLink(Messages.get("forum.thread.create"), routes.ForumThreadController.createForumThread(currentForum.getId())), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
+                    content.appendLayout(c -> headingWithActionAndBackLayout.render(currentForum.getName(), new InternalLink(Messages.get("forum.thread.create"), routes.ForumThreadController.createForumThread(currentForum.getId())), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, backCall), c));
                 } else {
-                    content.appendLayout(c -> headingWithBackLayout.render(currentForum.getName(), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
+                    content.appendLayout(c -> headingWithBackLayout.render(currentForum.getName(), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, backCall), c));
                 }
             }
         } else {
