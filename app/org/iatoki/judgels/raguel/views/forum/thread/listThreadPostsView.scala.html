@@ -11,7 +11,7 @@
 @import org.iatoki.judgels.raguel.ThreadPost
 @import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils
 
-@(forumThread: ForumThread, pageOfThreadPosts: Page[ThreadPost], orderBy: String, orderDir: String, filterString: String)
+@(forumThread: ForumThread, pageOfThreadPosts: Page[ThreadPost], replyJidToIdMap: Map[String, Long], replyJidToUserJidMap: Map[String, String], orderBy: String, orderDir: String, filterString: String)
 
 <h3>@Messages.get("forum.thread.posts")</h3>
 <div class="clearfix">
@@ -25,10 +25,12 @@
 
 @defining(AvatarCacheServiceImpl.getInstance().getAvatarUrls(JavaConversions.seqAsJavaList(pageOfThreadPosts.getData.map(p => p.getUserJid).toSeq), JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl)) { avatarUrlsMap =>
     @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfThreadPosts.getData.map(p => p.getUserJid).toSeq))) { displayNamesMap =>
-        @for((threadPost, index) <- pageOfThreadPosts.getData.zipWithIndex) {
-            <div class="panel panel-default post">
-                @postContentView(threadPost, avatarUrlsMap.get(threadPost.getUserJid), displayNamesMap.get(threadPost.getUserJid))
-            </div>
+        @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(replyJidToUserJidMap.values.toSeq))) { replyDisplayNamesMap =>
+            @for((threadPost, index) <- pageOfThreadPosts.getData.zipWithIndex) {
+                <div class="panel panel-default post">
+                @postContentView(threadPost, avatarUrlsMap.get(threadPost.getUserJid), displayNamesMap.get(threadPost.getUserJid), replyJidToIdMap.get(threadPost.getReplyJid), replyDisplayNamesMap.get(replyJidToUserJidMap.get(threadPost.getReplyJid)))
+                </div>
+            }
         }
     }
 }

@@ -9,7 +9,7 @@
 @import org.iatoki.judgels.raguel.ThreadPostWithLevel
 @import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils
 
-@(forumThread: ForumThread, threadPostsWithLevel: List[ThreadPostWithLevel])
+@(forumThread: ForumThread, threadPostsWithLevel: List[ThreadPostWithLevel], replyJidToIdMap: Map[String, Long], replyJidToUserJidMap: Map[String, String])
 
 <h3>@Messages.get("forum.thread.posts")</h3>
 <div class="clearfix">
@@ -19,14 +19,16 @@
 
 @defining(AvatarCacheServiceImpl.getInstance().getAvatarUrls(JavaConversions.seqAsJavaList(threadPostsWithLevel.map(p => p.getThreadPost.getUserJid).toSeq), JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl)) { avatarUrlsMap =>
     @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(threadPostsWithLevel.map(p => p.getThreadPost.getUserJid).toSeq))) { displayNamesMap =>
-        @for((threadPost, index) <- threadPostsWithLevel.zipWithIndex) {
-            <div class="clearfix">
-                <div class="post-wrapper-@threadPost.getLevel">
-                    <div id="post-@threadPost.getThreadPost.getId" class="panel panel-default post">
-                        @postContentView(threadPost.getThreadPost, avatarUrlsMap.get(threadPost.getThreadPost.getUserJid), displayNamesMap.get(threadPost.getThreadPost.getUserJid))
+        @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(replyJidToUserJidMap.values.toSeq))) { replyDisplayNamesMap =>
+            @for((threadPost, index) <- threadPostsWithLevel.zipWithIndex) {
+                <div class="clearfix">
+                    <div class="post-wrapper-@threadPost.getLevel">
+                        <div id="post-@threadPost.getThreadPost.getId" class="panel panel-default post">
+                        @postContentView(threadPost.getThreadPost, avatarUrlsMap.get(threadPost.getThreadPost.getUserJid), displayNamesMap.get(threadPost.getThreadPost.getUserJid), replyJidToIdMap.get(threadPost.getThreadPost.getReplyJid), replyJidToUserJidMap.get(replyJidToUserJidMap.get(threadPost.getThreadPost.getReplyJid)))
+                        </div>
                     </div>
                 </div>
-            </div>
+            }
         }
     }
 }

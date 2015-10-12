@@ -38,7 +38,9 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 @Singleton
 @Named
@@ -74,10 +76,13 @@ public final class ThreadPostController extends AbstractJudgelsController {
     public Result viewTreeThreadPosts(long forumThreadId) throws ForumThreadNotFoundException {
         ForumThread forumThread = forumThreadService.findForumThreadById(forumThreadId);
         List<ThreadPostWithLevel> threadPostsWithLevel = threadPostService.getAllThreadPostsWithLevel(forumThread);
+        List<String> replyJids = threadPostsWithLevel.stream().map(e -> e.getThreadPost().getReplyJid()).collect(Collectors.toList());
+        Map<String, Long> replyJidToIdMap = threadPostService.getThreadPostsJidToIdMap(replyJids);
+        Map<String, String> replyJidToUserJidMap = threadPostService.getThreadPostsJidToUserJidMap(replyJids);
 
         userItemService.upsertUserItem(IdentityUtils.getUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
 
-        LazyHtml content = new LazyHtml(listThreadPostsTreeView.render(forumThread, threadPostsWithLevel));
+        LazyHtml content = new LazyHtml(listThreadPostsTreeView.render(forumThread, threadPostsWithLevel, replyJidToIdMap, replyJidToUserJidMap));
         content.appendLayout(c -> headingWithBackLayout.render(forumThread.getName(), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + forumThread.getParentForum().getName(), routes.ForumController.viewForums(forumThread.getParentForum().getId())), c));
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
 
@@ -202,10 +207,13 @@ public final class ThreadPostController extends AbstractJudgelsController {
     private Result showListThreadPosts(long forumThreadId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumThreadNotFoundException {
         ForumThread forumThread = forumThreadService.findForumThreadById(forumThreadId);
         Page<ThreadPost> pageOfThreadPosts = threadPostService.getPageOfThreadPosts(forumThread, pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
+        List<String> replyJids = pageOfThreadPosts.getData().stream().map(e -> e.getReplyJid()).collect(Collectors.toList());
+        Map<String, Long> replyJidToIdMap = threadPostService.getThreadPostsJidToIdMap(replyJids);
+        Map<String, String> replyJidToUserJidMap = threadPostService.getThreadPostsJidToUserJidMap(replyJids);
 
         userItemService.upsertUserItem(IdentityUtils.getUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
 
-        LazyHtml content = new LazyHtml(listThreadPostsView.render(forumThread, pageOfThreadPosts, orderBy, orderDir, filterString));
+        LazyHtml content = new LazyHtml(listThreadPostsView.render(forumThread, pageOfThreadPosts, replyJidToIdMap, replyJidToUserJidMap, orderBy, orderDir, filterString));
         content.appendLayout(c -> headingWithBackLayout.render(forumThread.getName(), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + forumThread.getParentForum().getName(), routes.ForumController.viewForums(forumThread.getParentForum().getId())), c));
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
 

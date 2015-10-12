@@ -10,16 +10,16 @@ public final class ThreadPost {
     private final ForumThread thread;
     private final List<PostContent> contents;
     private final String userJid;
-    private final ThreadPost replyTo;
+    private final String replyJid;
     private final Date timeCreate;
 
-    public ThreadPost(long id, String jid, ForumThread thread, List<PostContent> contents, String userJid, ThreadPost replyTo, Date timeCreate) {
+    public ThreadPost(long id, String jid, ForumThread thread, List<PostContent> contents, String userJid, String replyJid, Date timeCreate) {
         this.id = id;
         this.jid = jid;
         this.thread = thread;
         this.contents = contents;
         this.userJid = userJid;
-        this.replyTo = replyTo;
+        this.replyJid = replyJid;
         this.timeCreate = timeCreate;
     }
 
@@ -47,8 +47,8 @@ public final class ThreadPost {
         return userJid;
     }
 
-    public ThreadPost getReplyTo() {
-        return replyTo;
+    public String getReplyJid() {
+        return replyJid;
     }
 
     public Date getTimeCreate() {

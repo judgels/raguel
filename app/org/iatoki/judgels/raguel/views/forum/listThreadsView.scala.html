@@ -45,29 +45,31 @@
     <div class="panel-body">
         <div class="clearfix row">
             @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfThreads.getData.map(t => t.getForumThread.getAuthorJid).toSeq))) { displayNamesMap =>
-                @for((thread, index) <- pageOfThreads.getData.zipWithIndex) {
-                    <div class="clearfix">
-                        <div class="col-md-4">
-                            <small><a href="@routes.ThreadPostController.viewThreadPosts(thread.getForumThread.getId)">@thread.getForumThread.getName</a></small>
+                @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfThreads.getData.map(t => t.getForumThread.getLastUpdateUserJid).toSeq))) { lastUpdateDisplayNamesMap =>
+                    @for((thread, index) <- pageOfThreads.getData.zipWithIndex) {
+                        <div class="clearfix">
+                            <div class="col-md-4">
+                                <small><a href="@routes.ThreadPostController.viewThreadPosts(thread.getForumThread.getId)">@thread.getForumThread.getName</a></small>
+                            </div>
+                            <div class="col-md-2">
+                                <small>@displayNamesMap.get(thread.getForumThread.getAuthorJid)</small>
+                            </div>
+                            <div class="col-md-1 text-center">
+                                <small>@thread.getViewCount</small>
+                            </div>
+                            <div class="col-md-1 text-center">
+                                <small>@thread.getReplyCount</small>
+                            </div>
+                            <div class="col-md-2">
+                                <small><time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(thread.getForumThread.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(thread.getForumThread.getLastUpdate.getTime)</time></small>
+                            </div>
+                            <div class="col-md-2">
+                                <small>@lastUpdateDisplayNamesMap.get(thread.getForumThread.getLastUpdateUserJid)</small>
+                            </div>
                         </div>
-                        <div class="col-md-2">
-                            <small>@displayNamesMap.get(thread.getForumThread.getAuthorJid)</small>
-                        </div>
-                        <div class="col-md-1 text-center">
-                            <small>@thread.getViewCount</small>
-                        </div>
-                        <div class="col-md-1 text-center">
-                            <small>@thread.getReplyCount</small>
-                        </div>
-                        <div class="col-md-2">
-                            <small><time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(thread.getForumThread.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(thread.getForumThread.getLastUpdate.getTime)</time></small>
-                        </div>
-                        <div class="col-md-2">
-                            <small>@JidCacheServiceImpl.getInstance().getDisplayName(thread.getForumThread.getLastUpdateUserJid)</small>
-                        </div>
-                    </div>
-                    @if(index != (pageOfThreads.getData.size - 1)) {
-                        <hr />
+                        @if(index != (pageOfThreads.getData.size - 1)) {
+                            <hr />
+                        }
                     }
                 }
             }

@@ -6,10 +6,15 @@ import org.iatoki.judgels.raguel.ThreadPost;
 import org.iatoki.judgels.raguel.ThreadPostWithLevel;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ThreadPostService {
 
     ThreadPost findThreadPostById(long threadPostId);
+
+    Map<String, Long> getThreadPostsJidToIdMap(List<String> threadPostJids);
+
+    Map<String, String> getThreadPostsJidToUserJidMap(List<String> threadPostJids);
 
     List<ThreadPostWithLevel> getAllThreadPostsWithLevel(ForumThread forumThread);
 

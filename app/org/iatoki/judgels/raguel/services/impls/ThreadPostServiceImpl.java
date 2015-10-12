@@ -64,7 +64,19 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         List<PostContentModel> postContentModels = postContentDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(PostContentModel_.postJid, threadPostModel.jid), 0, -1);
         List<PostContent> postContents = postContentModels.stream().map(m -> new PostContent(m.id, m.postJid, m.subject, m.content, new Date(m.timeCreate))).collect(Collectors.toList());
 
-        return ThreadPostServiceUtils.createThreadPostFromModel(threadPostModel, forumThread, postContents, null);
+        return ThreadPostServiceUtils.createThreadPostFromModel(threadPostModel, forumThread, postContents);
+    }
+
+    @Override
+    public Map<String, Long> getThreadPostsJidToIdMap(List<String> threadPostJids) {
+        List<ThreadPostModel> threadPostModels = threadPostDao.getByJids(threadPostJids);
+        return threadPostModels.stream().collect(Collectors.toMap(m -> m.jid, m -> m.id));
+    }
+
+    @Override
+    public Map<String, String> getThreadPostsJidToUserJidMap(List<String> threadPostJids) {
+        List<ThreadPostModel> threadPostModels = threadPostDao.getByJids(threadPostJids);
+        return threadPostModels.stream().collect(Collectors.toMap(m -> m.jid, m -> m.userCreate));
     }
 
     @Override
@@ -103,14 +115,10 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
                 }
             }
 
-            ThreadPost repliedThreadPost = null;
-            if ((threadPostModelWithLevel.threadPostModel.replyJid != null) && !threadPostModelWithLevel.threadPostModel.replyJid.isEmpty()) {
-                repliedThreadPost = threadPostsMap.get(threadPostModelWithLevel.threadPostModel.replyJid);
-            }
             List<PostContentModel> postContentModels = postContentDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(PostContentModel_.postJid, threadPostModelWithLevel.threadPostModel.jid), 0, -1);
             List<PostContent> postContents = postContentModels.stream().map(m -> new PostContent(m.id, m.postJid, m.subject, m.content, new Date(m.timeCreate))).collect(Collectors.toList());
 
-            ThreadPost threadPost = ThreadPostServiceUtils.createThreadPostFromModel(threadPostModelWithLevel.threadPostModel, forumThread, postContents, repliedThreadPost);
+            ThreadPost threadPost = ThreadPostServiceUtils.createThreadPostFromModel(threadPostModelWithLevel.threadPostModel, forumThread, postContents);
             threadPostsWithLevelBuilder.add(new ThreadPostWithLevel(threadPost, threadPostModelWithLevel.level));
 
             threadPostsMap.put(threadPost.getJid(), threadPost);
@@ -123,25 +131,13 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
     public Page<ThreadPost> getPageOfThreadPosts(ForumThread forumThread, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalRowsCount = threadPostDao.countByFiltersEq(filterString, ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()));
         List<ThreadPostModel> threadPostModels = threadPostDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()), pageIndex, pageSize);
-        Map<String, ThreadPostModel> jidsToModelMap = threadPostModels.stream().collect(Collectors.toMap(m -> m.jid, m -> m));
 
         ImmutableList.Builder<ThreadPost> threadPostBuilder = ImmutableList.builder();
         for (ThreadPostModel threadPostModel : threadPostModels) {
             List<PostContentModel> postContentModels = postContentDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(PostContentModel_.postJid, threadPostModel.jid), 0, -1);
             List<PostContent> postContents = postContentModels.stream().map(m -> new PostContent(m.id, m.postJid, m.subject, m.content, new Date(m.timeCreate))).collect(Collectors.toList());
 
-            ThreadPost repliedPost = null;
-            if ((threadPostModel.replyJid != null) && !threadPostModel.replyJid.isEmpty()) {
-                ThreadPostModel repliedPostModel;
-                if (jidsToModelMap.containsKey(threadPostModel.replyJid)) {
-                    repliedPostModel = jidsToModelMap.get(threadPostModel.replyJid);
-                } else {
-                    repliedPostModel = threadPostDao.findByJid(threadPostModel.replyJid);
-                }
-                repliedPost = ThreadPostServiceUtils.createThreadPostFromModel(repliedPostModel, forumThread, null, null);
-            }
-
-            threadPostBuilder.add(ThreadPostServiceUtils.createThreadPostFromModel(threadPostModel, forumThread, postContents, repliedPost));
+            threadPostBuilder.add(ThreadPostServiceUtils.createThreadPostFromModel(threadPostModel, forumThread, postContents));
         }
         return new Page<>(threadPostBuilder.build(), totalRowsCount, pageIndex, pageSize);
     }
