@@ -84,18 +84,18 @@ public final class ForumThreadController extends AbstractJudgelsController {
         content.appendLayout(c -> headingLayout.render(Messages.get("forum.thread.create"), c));
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
         ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        if (forum != null) {
-            Stack<InternalLink> internalLinkStack = new Stack<>();
-            Forum currentParent = forum;
-            while (currentParent != null) {
-                internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
-                currentParent = currentParent.getParentForum();
-            }
 
-            while (!internalLinkStack.isEmpty()) {
-                internalLinkBuilder.add(internalLinkStack.pop());
-            }
+        Stack<InternalLink> internalLinkStack = new Stack<>();
+        Forum currentParent = forum;
+        while (currentParent != null) {
+            internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
+            currentParent = currentParent.getParentForum();
         }
+
+        while (!internalLinkStack.isEmpty()) {
+            internalLinkBuilder.add(internalLinkStack.pop());
+        }
+
         internalLinkBuilder.add(new InternalLink(Messages.get("forum.thread.create"), routes.ForumThreadController.createForumThread(forum.getId())));
         ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
         RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Create");
