@@ -4,7 +4,7 @@ forum.forums=Forums
 forum.subforums=Subforums
 forum.home=Home
 forum.threads=Threads
-forum.create=Create Forum
+forum.create=New Forum
 forum.edit=Edit Forum
 forum.config.general=General
 forum.config.modules=Modules
@@ -29,7 +29,7 @@ forum.thread.viewCount=Views
 forum.thread.lastPost=Last post
 forum.thread.lastUserUpdate=Last post by
 
-forum.thread.create=Create Thread
+forum.thread.create=New Thread
 forum.thread.name=Name
 forum.thread.content=Content
 
