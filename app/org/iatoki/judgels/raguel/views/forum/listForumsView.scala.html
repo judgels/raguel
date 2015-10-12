@@ -8,22 +8,23 @@
 
 @(currentForum: Forum, childForums: List[Forum])
 
-<h3>@Messages.get("forum.subforums")</h3>
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <div class="clearfix row">
-            <div class="col-md-7">
+@if(childForums.nonEmpty) {
+    <h3>@Messages.get("forum.subforums")</h3>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="clearfix row">
+                <div class="col-md-7">
                 @Messages.get("forum.subforum")
-            </div>
-            <div class="col-md-2">
+                </div>
+                <div class="col-md-2">
                 @Messages.get("forum.lastPost")
-            </div>
-            <div class="col-md-3">
+                </div>
+                <div class="col-md-3">
                 @Messages.get("forum.lastUserUpdate")
+                </div>
             </div>
         </div>
-    </div>
-    <div class="panel-body">
+        <div class="panel-body">
         @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(childForums.map(f => f.getLastUpdateUserJid).toSeq))) { displayNamesMap =>
             @for((forum, index) <- childForums.zipWithIndex) {
                 <div class="clearfix row">
@@ -38,15 +39,16 @@
                         <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forum.getLastUpdate.getTime)</time>
                     </div>
                     <div class="col-md-3">
-                        @displayNamesMap.get(forum.getLastUpdateUserJid)
+                    @displayNamesMap.get(forum.getLastUpdateUserJid)
                     </div>
                 </div>
                 @if(index != (childForums.size - 1)) {
                     <div class="row">
-                        <hr />
+                        <hr class="forum-divider"/>
                     </div>
                 }
             }
         }
+        </div>
     </div>
-</div>
+}
