@@ -31,7 +31,7 @@
                             </div>
                         }
                         <div class="pull-right">
-                            <small>@Messages.get("forum.lastPost"): @lastUpdateDisplayNamesMap.get(subforum.getLastUpdateUserJid) @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforum.getLastUpdate.getTime)</time></small>
+                            <small>@Messages.get("forum.lastUpdate"): @lastUpdateDisplayNamesMap.get(subforum.getLastUpdateUserJid) @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforum.getLastUpdate.getTime)</time></small>
                         </div>
                         <div>
                             <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>

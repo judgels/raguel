@@ -21,6 +21,7 @@ forum.module.disable=Disable
 forum.subforum=Subforum
 forum.lastPost=Last post
 forum.lastUserUpdate=Last post by
+forum.lastUpdate=Last update
 
 forum.thread=Thread
 forum.thread.author=Author

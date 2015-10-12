@@ -32,7 +32,7 @@
                             </div>
                         }
                         <div class="pull-right">
-                            <small>@Messages.get("forum.lastPost"): @lastUpdateDisplayNamesMap.get(subforumWithStatus.getForum.getLastUpdateUserJid) @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforumWithStatus.getForum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforumWithStatus.getForum.getLastUpdate.getTime)</time></small>
+                            <small>@Messages.get("forum.lastUpdate"): @lastUpdateDisplayNamesMap.get(subforumWithStatus.getForum.getLastUpdateUserJid) @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforumWithStatus.getForum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforumWithStatus.getForum.getLastUpdate.getTime)</time></small>
                         </div>
                         <div>
                             @if(subforumWithStatus.isHasNewPost) {
