@@ -268,12 +268,12 @@ public final class ForumController extends AbstractJudgelsController {
                     actionsBuilder.add(new InternalLink(Messages.get("forum.thread.create"), routes.ForumThreadController.createForumThread(currentForum.getId())));
                 }
 
-                content.appendLayout(c -> headingWithActionsAndBackLayout.render(Messages.get("forum.forum") + " " + currentForum.getName(), actionsBuilder.build(), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
+                content.appendLayout(c -> headingWithActionsAndBackLayout.render(currentForum.getName(), actionsBuilder.build(), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
             } else {
                 if (currentForum.containsModule(ForumModules.THREAD)) {
-                    content.appendLayout(c -> headingWithActionAndBackLayout.render(Messages.get("forum.forum") + " " + currentForum.getName(), new InternalLink(Messages.get("forum.thread.create"), routes.ForumThreadController.createForumThread(currentForum.getId())), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
+                    content.appendLayout(c -> headingWithActionAndBackLayout.render(currentForum.getName(), new InternalLink(Messages.get("forum.thread.create"), routes.ForumThreadController.createForumThread(currentForum.getId())), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
                 } else {
-                    content.appendLayout(c -> headingWithBackLayout.render(Messages.get("forum.forum") + " " + currentForum.getName(), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
+                    content.appendLayout(c -> headingWithBackLayout.render(currentForum.getName(), new InternalLink(Messages.get("forum.backTo") + " " + parentForumName, routes.ForumController.viewForums(parentForumId)), c));
                 }
             }
         } else {
