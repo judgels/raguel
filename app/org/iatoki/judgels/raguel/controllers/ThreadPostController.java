@@ -179,7 +179,12 @@ public final class ThreadPostController extends AbstractJudgelsController {
         ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
 
         ThreadPostUpsertForm threadPostUpsertData = new ThreadPostUpsertForm();
-        threadPostUpsertData.subject = "Re: " + threadPost.getLatestContent().getSubject();
+
+        if (threadPost.getReplyJid() == null) {
+            threadPostUpsertData.subject = "Re: " + threadPost.getLatestContent().getSubject();
+        } else {
+            threadPostUpsertData.subject = threadPost.getLatestContent().getSubject();
+        }
 
         Form<ThreadPostUpsertForm> threadPostUpsertForm = Form.form(ThreadPostUpsertForm.class).fill(threadPostUpsertData);
 
