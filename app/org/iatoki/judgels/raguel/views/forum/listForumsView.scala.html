@@ -33,7 +33,9 @@
                         @if(RaguelUtils.hasRole("admin")) {
                             <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
                         }
-                        <p><small>@Html(forum.getDescription)</small></p>
+                        @if(forum.getDescription != null) {
+                            <p><small>@Html(forum.getDescription)</small></p>
+                        }
                     </div>
                     <div class="col-md-2">
                         <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forum.getLastUpdate.getTime)</time>
