@@ -60,7 +60,7 @@ public final class ApplicationController extends AbstractJudgelsController {
 
         String userJid = IdentityUtils.getUserJid();
         if (!userService.existsByUserJid(userJid)) {
-            userService.createUser(userJid, RaguelUtils.getDefaultRoles());
+            userService.createUser(userJid, RaguelUtils.getDefaultRoles(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
             RaguelUtils.saveRolesInSession(RaguelUtils.getDefaultRoles());
             return redirect(returnUri);
         }
@@ -103,7 +103,7 @@ public final class ApplicationController extends AbstractJudgelsController {
             try {
                 JophielUser jophielUser = jophielPublicAPI.findUserByUsername(viewpointData.username);
                 if (jophielUser != null) {
-                    userService.upsertUserFromJophielUser(jophielUser);
+                    userService.upsertUserFromJophielUser(jophielUser, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
                     if (!JudgelsPlayUtils.hasViewPoint()) {
                         RaguelUtils.backupSession();
                     }

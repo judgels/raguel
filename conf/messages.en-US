@@ -3,11 +3,11 @@ forum.forums=Forums
 
 forum.subforums=Subforums
 forum.home=Home
-forum.threads=Threads
 forum.create=New Forum
 forum.edit=Edit Forum
 forum.config.general=General
 forum.config.modules=Modules
+forum.config.specific=Specific
 forum.parent.none=None
 forum.parent=Parent
 forum.name=Name
@@ -15,8 +15,26 @@ forum.description=Description
 forum.enter=Enter Forum
 forum.backTo=Back to
 
+forum.modules.enabled=Enabled Modules
+forum.modules.disabled=Disabled Modules
+forum.modules.inherited=Inherited Modules
+
 forum.module.enable=Enable
+forum.module.enable.error.dependencies=Modules can''t be enabled because it requires {0}.
+forum.module.enable.error.contradiction=Modules can''t be enabled because it conflicts with {0}.
+forum.module.enabled.error.inherited=Modules is already enabled in parent.
 forum.module.disable=Disable
+forum.module.disable.error.dependencies=Modules can''t be disabled because it is required by {0}.
+
+forum.module.THREAD=Threads
+forum.module.THREAD.description=Enable threads in the forum.
+forum.module.MEMBER=Members
+forum.module.MEMBER.description=Enable members in the forum.
+forum.module.EXCLUSIVE=Exclusive
+forum.module.EXCLUSIVE.description=Limit only moderator and admin to create thread. Requires Threads modules.
+
+forum.canRegister=Can register?
+forum.password=Password
 
 forum.subforum=Subforum
 forum.lastPost=Last post
@@ -24,9 +42,11 @@ forum.lastUserUpdate=Last post by
 forum.lastUpdate=Last update
 
 forum.thread=Thread
+forum.threads=Threads
 forum.thread.author=Author
 forum.thread.replyCount=Replies
 forum.thread.viewCount=Views
+forum.thread.lastUpdate=Last Update Time
 forum.thread.lastPost=Last post
 forum.thread.lastUserUpdate=Last post by
 
@@ -34,6 +54,27 @@ forum.thread.create=New Thread
 forum.thread.post=Post Thread
 forum.thread.name=Name
 forum.thread.content=Content
+
+forum.member=Member
+forum.members=Members
+forum.member.edit=Edit Member
+forum.member.delete.confirmation=Are you sure you want to delete?
+
+forum.member.name=Name
+forum.member.status=Status
+forum.member.importTXT=Import via txt
+forum.member.manualCreate=Manual Create
+forum.member.delete.confirmation=Are you sure you want to delete?
+forum.member.username=Username
+forum.member.usernames=Usernames
+
+forum.member.upload.success=Upload Success
+forum.member.upload.result=Upload Result
+
+error.member.create.userIsAlreadyMember=User is already member.
+error.member.create.userNotExist=User not exist..
+error.member.isAlreadyMember=User is already member.
+error.member.userNotExist=User not exist.
 
 forum.thread.posts=Posts
 forum.thread.post.subject=Subject
@@ -49,6 +90,8 @@ forum.thread.post.backTo=Back to
 forum.thread.posts.view=View
 forum.thread.posts.flat=Flat
 forum.thread.posts.tree=Tree
+
+forum.members=Members
 
 user.users=Users
 user.user=User

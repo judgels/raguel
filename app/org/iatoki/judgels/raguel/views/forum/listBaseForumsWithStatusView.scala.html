@@ -15,7 +15,7 @@
             <div class="pull-left">
                 <h3 class="panel-title"><a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a></h3>
             </div>
-            @if(RaguelUtils.hasRole("admin")) {
+            @if(RaguelUtils.hasRole("moderator") || RaguelUtils.hasRole("admin")) {
                 <div class="pull-right">
                     <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
                 </div>
@@ -26,7 +26,7 @@
                 <div class="panel-body">
                 @for((subforumWithStatus, index) <- mapForumJidToForumsWithStatus.get(forum.getJid).zipWithIndex) {
                     <div class="clearfix">
-                        @if(RaguelUtils.hasRole("admin")) {
+                        @if(RaguelUtils.hasRole("moderator") || RaguelUtils.hasRole("admin")) {
                             <div class="pull-right">
                                 <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(subforumWithStatus.getForum.getId)">@Messages.get("commons.update")</a>
                             </div>

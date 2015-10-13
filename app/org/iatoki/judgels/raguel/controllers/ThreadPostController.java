@@ -19,6 +19,8 @@ import org.iatoki.judgels.raguel.controllers.securities.GuestView;
 import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
 import org.iatoki.judgels.raguel.forms.ThreadPostUpsertForm;
+import org.iatoki.judgels.raguel.modules.forum.ForumModules;
+import org.iatoki.judgels.raguel.services.ForumMemberService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 import org.iatoki.judgels.raguel.services.ThreadPostService;
 import org.iatoki.judgels.raguel.services.UserItemService;
@@ -48,12 +50,14 @@ public final class ThreadPostController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
 
+    private final ForumMemberService forumMemberService;
     private final ForumThreadService forumThreadService;
     private final ThreadPostService threadPostService;
     private final UserItemService userItemService;
 
     @Inject
-    public ThreadPostController(ForumThreadService forumThreadService, ThreadPostService threadPostService, UserItemService userItemService) {
+    public ThreadPostController(ForumMemberService forumMemberService, ForumThreadService forumThreadService, ThreadPostService threadPostService, UserItemService userItemService) {
+        this.forumMemberService = forumMemberService;
         this.forumThreadService = forumThreadService;
         this.threadPostService = threadPostService;
         this.userItemService = userItemService;
@@ -75,6 +79,16 @@ public final class ThreadPostController extends AbstractJudgelsController {
     @Transactional
     public Result viewTreeThreadPosts(long forumThreadId) throws ForumThreadNotFoundException {
         ForumThread forumThread = forumThreadService.findForumThreadById(forumThreadId);
+
+        Forum forum = forumThread.getParentForum();
+        if (!forum.containModule(ForumModules.THREAD)) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
+        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
         List<ThreadPostWithLevel> threadPostsWithLevel = threadPostService.getAllThreadPostsWithLevel(forumThread);
         List<String> replyJids = threadPostsWithLevel.stream().map(e -> e.getThreadPost().getReplyJid()).collect(Collectors.toList());
         Map<String, Long> replyJidToIdMap = threadPostService.getThreadPostsJidToIdMap(replyJids);
@@ -109,6 +123,15 @@ public final class ThreadPostController extends AbstractJudgelsController {
     public Result viewPostVersions(long threadPostId) throws ThreadPostNotFoundException {
         ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
 
+        Forum forum = threadPost.getThread().getParentForum();
+        if (!forum.containModule(ForumModules.THREAD)) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
+        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
         LazyHtml content = new LazyHtml(listPostContentsView.render(threadPost));
         content.appendLayout(c -> headingWithBackLayout.render(Messages.get("forum.thread.post.versions"), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId())), c));
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
@@ -137,6 +160,15 @@ public final class ThreadPostController extends AbstractJudgelsController {
     public Result editThreadPost(long threadPostId) throws ThreadPostNotFoundException {
         ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
 
+        Forum forum = threadPost.getThread().getParentForum();
+        if (!forum.containModule(ForumModules.THREAD)) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
+        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
         if (!IdentityUtils.getUserJid().equals(threadPost.getUserJid())) {
             return notFound();
         }
@@ -155,6 +187,15 @@ public final class ThreadPostController extends AbstractJudgelsController {
     @RequireCSRFCheck
     public Result postEditThreadPost(long threadPostId) throws ThreadPostNotFoundException {
         ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
+
+        Forum forum = threadPost.getThread().getParentForum();
+        if (!forum.containModule(ForumModules.THREAD)) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
+        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
 
         if (!IdentityUtils.getUserJid().equals(threadPost.getUserJid())) {
             return notFound();
@@ -178,6 +219,15 @@ public final class ThreadPostController extends AbstractJudgelsController {
     public Result replyThreadPost(long threadPostId) throws ThreadPostNotFoundException {
         ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
 
+        Forum forum = threadPost.getThread().getParentForum();
+        if (!forum.containModule(ForumModules.THREAD)) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
+        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
         ThreadPostUpsertForm threadPostUpsertData = new ThreadPostUpsertForm();
 
         if (threadPost.getReplyJid() == null) {
@@ -197,6 +247,15 @@ public final class ThreadPostController extends AbstractJudgelsController {
     public Result postReplyThreadPost(long threadPostId) throws ThreadPostNotFoundException {
         ThreadPost threadPost = threadPostService.findThreadPostById(threadPostId);
 
+        Forum forum = threadPost.getThread().getParentForum();
+        if (!forum.containModule(ForumModules.THREAD)) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
+        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
         Form<ThreadPostUpsertForm> threadPostUpsertForm = Form.form(ThreadPostUpsertForm.class).bindFromRequest();
 
         if (formHasErrors(threadPostUpsertForm)) {
@@ -211,6 +270,16 @@ public final class ThreadPostController extends AbstractJudgelsController {
 
     private Result showListThreadPosts(long forumThreadId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumThreadNotFoundException {
         ForumThread forumThread = forumThreadService.findForumThreadById(forumThreadId);
+
+        Forum forum = forumThread.getParentForum();
+        if (!forum.containModule(ForumModules.THREAD)) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
+        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+            return redirect(routes.ForumController.viewForums(forum.getId()));
+        }
+
         Page<ThreadPost> pageOfThreadPosts = threadPostService.getPageOfThreadPosts(forumThread, pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
         List<String> replyJids = pageOfThreadPosts.getData().stream().map(e -> e.getReplyJid()).collect(Collectors.toList());
         Map<String, Long> replyJidToIdMap = threadPostService.getThreadPostsJidToIdMap(replyJids);

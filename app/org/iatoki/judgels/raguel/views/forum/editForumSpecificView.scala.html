@@ -1,0 +1,22 @@
+@import java.util.Map
+
+@import org.iatoki.judgels.raguel.modules.forum.ForumModule
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.views.html.formErrorView
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.raguel.Forum
+
+@(forum: Forum, modulesForm: Map[ForumModule, Form[_]])
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
+
+@b3.form(routes.ForumController.postEditForumSpecificConfig(forum.getId)) {
+
+    @helper.CSRF.formField
+
+    @for((forumModule, _) <- modulesForm) {
+        @forumModule.generateConfigFormInput(modulesForm.get(forumModule))
+    }
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
+}

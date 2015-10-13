@@ -6,15 +6,18 @@ import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumNotFoundException;
 import org.iatoki.judgels.raguel.ForumWithStatus;
 import org.iatoki.judgels.raguel.models.daos.ForumDao;
+import org.iatoki.judgels.raguel.models.daos.ForumMemberDao;
 import org.iatoki.judgels.raguel.models.daos.ForumModuleDao;
 import org.iatoki.judgels.raguel.models.daos.ForumThreadDao;
 import org.iatoki.judgels.raguel.models.daos.UserItemDao;
 import org.iatoki.judgels.raguel.models.entities.ForumModel;
 import org.iatoki.judgels.raguel.models.entities.ForumModel_;
+import org.iatoki.judgels.raguel.models.entities.ForumModuleModel;
 import org.iatoki.judgels.raguel.models.entities.ForumThreadModel;
 import org.iatoki.judgels.raguel.models.entities.ForumThreadModel_;
 import org.iatoki.judgels.raguel.models.entities.UserItemModel;
 import org.iatoki.judgels.raguel.models.entities.UserItemModel_;
+import org.iatoki.judgels.raguel.modules.forum.ForumModule;
 import org.iatoki.judgels.raguel.modules.forum.ForumModuleFactory;
 import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 import org.iatoki.judgels.raguel.services.ForumService;
@@ -22,6 +25,7 @@ import org.iatoki.judgels.raguel.services.ForumService;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -32,14 +36,16 @@ import java.util.stream.Collectors;
 public final class ForumServiceImpl implements ForumService {
 
     private final ForumDao forumDao;
+    private final ForumMemberDao forumMemberDao;
     private final ForumModuleDao forumModuleDao;
     private final ForumModuleFactory forumModuleFactory;
     private final ForumThreadDao forumThreadDao;
     private final UserItemDao userItemDao;
 
     @Inject
-    public ForumServiceImpl(ForumDao forumDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, UserItemDao userItemDao) {
+    public ForumServiceImpl(ForumDao forumDao, ForumMemberDao forumMemberDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, UserItemDao userItemDao) {
         this.forumDao = forumDao;
+        this.forumMemberDao = forumMemberDao;
         this.forumModuleDao = forumModuleDao;
         this.forumModuleFactory = forumModuleFactory;
         this.forumThreadDao = forumThreadDao;
@@ -92,6 +98,20 @@ public final class ForumServiceImpl implements ForumService {
     }
 
     @Override
+    public List<Forum> getAllowedChildForums(String parentJid) {
+        List<Forum> forums = getChildForums(parentJid);
+
+        ImmutableList.Builder<Forum> allowedForums = ImmutableList.builder();
+        for (Forum forum : forums) {
+            if (!forum.containModule(ForumModules.MEMBER)) {
+                allowedForums.add(forum);
+            }
+        }
+
+        return allowedForums.build();
+    }
+
+    @Override
     public List<ForumWithStatus> getChildForumsWithStatus(String parentJid, String userJid) {
         List<Forum> forums = getChildForums(parentJid);
 
@@ -104,7 +124,7 @@ public final class ForumServiceImpl implements ForumService {
             while (!hasNewPost && !forumStack.isEmpty()) {
                 Forum currentForum = forumStack.pop();
 
-                if (currentForum.containsModule(ForumModules.THREAD)) {
+                if (currentForum.containModule(ForumModules.THREAD)) {
                     List<ForumThreadModel> forumThreadModels = forumThreadDao.findSortedByFiltersEq("id", "asc", "", ImmutableMap.of(ForumThreadModel_.forumJid, currentForum.getJid()), 0, -1);
                     List<String> forumThreadJids = forumThreadModels.stream().map(t -> t.jid).collect(Collectors.toList());
                     List<UserItemModel> userItemModels = userItemDao.findSortedByFilters("id", "asc", "", ImmutableMap.of(UserItemModel_.userJid, userJid), ImmutableMap.of(UserItemModel_.itemJid, forumThreadJids), 0, -1);
@@ -131,6 +151,26 @@ public final class ForumServiceImpl implements ForumService {
         }
 
         return forumWithStatusesBuilder.build();
+    }
+
+    @Override
+    public List<ForumWithStatus> getAllowedChildForumsWithStatus(String parentJid, String userJid) {
+        List<ForumWithStatus> forumsWithStatus = getChildForumsWithStatus(parentJid, userJid);
+        List<String> forumJidsWhereIsMember = forumMemberDao.getForumJidsByJid(userJid);
+
+        ImmutableList.Builder<ForumWithStatus> allowedForumsWithStatus = ImmutableList.builder();
+        for (ForumWithStatus forumWithStatus : forumsWithStatus) {
+            if (forumWithStatus.getForum().containOrInheritModule(ForumModules.MEMBER)) {
+                Forum forumWithMember = forumWithStatus.getForum().getForumOrParentWithModule(ForumModules.MEMBER);
+                if (forumJidsWhereIsMember.contains(forumWithMember.getJid())) {
+                    allowedForumsWithStatus.add(forumWithStatus);
+                }
+            } else {
+                allowedForumsWithStatus.add(forumWithStatus);
+            }
+        }
+
+        return allowedForumsWithStatus.build();
     }
 
     @Override
@@ -184,6 +224,20 @@ public final class ForumServiceImpl implements ForumService {
         ForumServiceUtils.updateForumAndParents(forumDao, parentForum, userJid, userIpAddress);
     }
 
+    @Override
+    public void updateForumModuleConfiguration(String forumJid, Collection<ForumModule> forumModules, String userJid, String userIpAddress) {
+        for (ForumModule forumModule : forumModules) {
+            ForumModuleModel forumModuleModel = forumModuleDao.findInForumByName(forumJid, forumModule.getType().name());
+            forumModuleModel.config = forumModule.toJSONString();
+
+            forumModuleDao.edit(forumModuleModel, userJid, userIpAddress);
+        }
+
+        ForumModel forumModel = forumDao.findByJid(forumJid);
+
+        forumDao.edit(forumModel, userJid, userIpAddress);
+    }
+
     private Forum createForumWithParentAndSubforumsFromModel(ForumModel intendedForumModel) {
         Stack<ForumModel> forumModelStack = new Stack<>();
         forumModelStack.push(intendedForumModel);
@@ -209,20 +263,10 @@ public final class ForumServiceImpl implements ForumService {
             }
         }
 
-        Stack<Forum> forumStack = new Stack<>();
-        forumStack.add(intendedForum);
-
-        while (!forumStack.isEmpty()) {
-            Forum currentForum = forumStack.pop();
-
-            List<ForumModel> forumModels = forumDao.findSortedByFiltersEq("id", "asc", "", ImmutableMap.of(ForumModel_.parentJid, currentForum.getJid()), 0, -1);
-            for (ForumModel forumModel : forumModels) {
-                Forum forum = ForumServiceUtils.createForumFromModel(forumModuleFactory, forumModel, currentForum, forumModuleDao.getEnabledInForum(forumModel.jid));
-                if (currentForum != null) {
-                    currentForum.getSubforums().add(forum);
-                }
-                forumStack.push(forum);
-            }
+        List<ForumModel> forumModels = forumDao.findSortedByFiltersEq("id", "asc", "", ImmutableMap.of(ForumModel_.parentJid, intendedForum.getJid()), 0, -1);
+        for (ForumModel forumModel : forumModels) {
+            Forum forum = ForumServiceUtils.createForumFromModel(forumModuleFactory, forumModel, intendedForum, forumModuleDao.getEnabledInForum(forumModel.jid));
+            intendedForum.getSubforums().add(forum);
         }
 
         return intendedForum;

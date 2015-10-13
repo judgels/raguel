@@ -1,4 +1,4 @@
-package org.iatoki.judgels.raguel.modules.forum.thread;
+package org.iatoki.judgels.raguel.modules.forum.member;
 
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.controllers.ForumControllerUtils;
@@ -8,16 +8,16 @@ import org.iatoki.judgels.raguel.modules.forum.TabbedForumModule;
 import play.api.mvc.Call;
 import play.i18n.Messages;
 
-public final class ForumThreadModule extends TabbedForumModule {
+public final class ForumMemberModule extends TabbedForumModule {
 
     @Override
     public ForumModules getType() {
-        return ForumModules.THREAD;
+        return ForumModules.MEMBER;
     }
 
     @Override
     public String getTabName() {
-        return Messages.get("forum.threads");
+        return Messages.get("forum.members");
     }
 
     @Override
@@ -27,6 +27,6 @@ public final class ForumThreadModule extends TabbedForumModule {
 
     @Override
     public Call getDefaultJumpTo(long forumId) {
-        return routes.ForumThreadController.viewThreads(forumId);
+        return routes.ForumMemberController.viewMembers(forumId);
     }
 }

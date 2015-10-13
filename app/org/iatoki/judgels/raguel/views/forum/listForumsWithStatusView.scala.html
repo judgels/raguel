@@ -37,7 +37,7 @@
                             @if(forumWithStatus.isHasNewPost) {
                                 </strong>
                             }
-                            @if(RaguelUtils.hasRole("admin")) {
+                            @if(RaguelUtils.hasRole("moderator") || RaguelUtils.hasRole("admin")) {
                                 <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forumWithStatus.getForum.getId)">@Messages.get("commons.update")</a>
                             }
                             @if(forumWithStatus.getForum.getDescription != null) {

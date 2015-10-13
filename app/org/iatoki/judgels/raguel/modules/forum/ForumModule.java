@@ -1,18 +1,28 @@
 package org.iatoki.judgels.raguel.modules.forum;
 
+import com.google.gson.Gson;
+import org.iatoki.judgels.raguel.views.html.forum.modules.emptyFormView;
 import play.data.Form;
 import play.mvc.Http;
 import play.twirl.api.Html;
 
-public interface ForumModule {
+public abstract class ForumModule {
 
-    ForumModules getType();
+    public abstract ForumModules getType();
 
-    String toJSONString();
+    public String toJSONString() {
+        return new Gson().toJson(this);
+    }
 
-    Html generateConfigFormInput(Form<?> form);
+    public Html generateConfigFormInput(Form<?> form) {
+        return emptyFormView.render();
+    }
 
-    Form<?> generateConfigForm();
+    public Form<?> generateConfigForm() {
+        return Form.form();
+    }
 
-    Form<?> updateModuleByFormFromRequest(Http.Request request);
+    public Form<?> updateModuleByFormFromRequest(Http.Request request) {
+        return Form.form().bindFromRequest(request);
+    }
 }

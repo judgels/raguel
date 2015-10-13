@@ -1,0 +1,77 @@
+@import scala.collection.JavaConversions
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.views.html.table.tableView
+@import org.iatoki.judgels.play.views.html.table.tableHeadersView
+@import org.iatoki.judgels.play.views.html.table.searchView
+@import org.iatoki.judgels.play.views.html.table.paginationView
+@import org.iatoki.judgels.play.views.html.formErrorView
+@import org.iatoki.judgels.raguel.controllers.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
+@import org.iatoki.judgels.raguel.ForumMember
+@import org.iatoki.judgels.raguel.forms.ForumMemberAddForm
+@import org.iatoki.judgels.raguel.forms.ForumMemberUploadForm
+
+@(forumId: Long, pageOfForumMembers: Page[ForumMember], pageIndex: Long, orderBy: String, orderDir: String, filterString: String, forumMemberAddForm: Form[ForumMemberAddForm], forumMemberUploadForm: Form[ForumMemberUploadForm], jophielAutoCompleteUrl: String)
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-3", "col-md-9") }
+
+@listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ForumMemberController.listAddMembers(forumId, newPageIndex, newOrderBy, newOrderDir, newFilterString)}
+
+<h4>@Messages.get("forum.member.importTXT")</h4>
+
+@formErrorView(forumMemberUploadForm)
+
+@b3.form(routes.ForumMemberController.postUploadMember(forumId), 'enctype->"multipart/form-data") {
+
+    @helper.CSRF.formField
+
+    @b3.file(forumMemberAddForm("usernames"), '_label -> Messages.get("forum.member.usernames"), 'class -> "form-control")
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.add") }
+}
+
+@formErrorView(forumMemberAddForm)
+
+<h4>@Messages.get("forum.member.manualCreate")</h4>
+
+@b3.form(routes.ForumMemberController.postAddMember(forumId, pageIndex, orderBy, orderDir, filterString)) {
+
+    @helper.CSRF.formField
+
+    @b3.text(forumMemberAddForm("username"), '_label -> Messages.get("forum.member.username"), 'class -> "form-control user_autocomplete")
+
+    <script type="text/javascript">
+        var jophielAutoCompleteUrl = "@jophielAutoCompleteUrl";
+    </script>
+    <script type="text/javascript" src="@controllers.routes.Assets.versioned("lib/jophielcommons/javascripts/userAutoComplete.js")"></script>
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.add") }
+}
+
+@searchView(pageOfForumMembers.getPageIndex, orderBy, orderDir, filterString, listFunc)
+
+<div class="clearfix"></div>
+
+@tableView() {
+    @tableHeadersView(pageOfForumMembers.getPageIndex, orderBy, orderDir, filterString, listFunc)(
+        "id" -> Messages.get("commons.id"),
+        "userJid" -> Messages.get("forum.member.name")
+    )
+    <tbody>
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfForumMembers.getData.map(s => s.getUserJid).toSeq))) { displayNamesMap =>
+        @for(forumMember <- pageOfForumMembers.getData) {
+            <tr>
+                <td>@forumMember.getId</td>
+                <td>@Html(JudgelsPlayUtils.prettifyUserDisplayName(displayNamesMap.get(forumMember.getUserJid)))</td>
+                <td class="text-center">
+                    <a href="@routes.ForumMemberController.removeMember(forumId, forumMember.getId)" onclick="return confirm('@Messages.get("forum.member.delete.confirmation")');"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></a>
+                </td>
+            </tr>
+        }
+    }
+    </tbody>
+}
+
+@paginationView(pageOfForumMembers, orderBy, orderDir, filterString, listFunc)

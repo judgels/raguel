@@ -52,35 +52,29 @@ public final class ForumThreadServiceImpl implements ForumThreadService {
     }
 
     @Override
+    public Page<ForumThread> getPageOfForumThreads(Forum forum, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
+        long totalRowsCount = forumThreadDao.countByFiltersEq(filterString, ImmutableMap.of(ForumThreadModel_.forumJid, forum.getJid()));
+        List<ForumThreadModel> forumThreadModels = forumThreadDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ForumThreadModel_.forumJid, forum.getJid()), pageIndex * pageSize, pageSize);
+
+        List<ForumThread> forumThreads = createForumThreadsFromModels(forum, forumThreadModels);
+
+        return new Page<>(forumThreads, totalRowsCount, pageIndex, pageSize);
+    }
+
+    @Override
     public Page<ForumThreadWithStatistics> getPageOfForumThreadsWithStatistic(Forum forum, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalRowsCount = forumThreadDao.countByFiltersEq(filterString, ImmutableMap.of(ForumThreadModel_.forumJid, forum.getJid()));
-        List<ForumThreadModel> forumThreadModels = forumThreadDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ForumThreadModel_.forumJid, forum.getJid()), pageIndex, pageSize);
+        List<ForumThreadModel> forumThreadModels = forumThreadDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ForumThreadModel_.forumJid, forum.getJid()), pageIndex * pageSize, pageSize);
 
         List<ForumThread> forumThreads = createForumThreadsFromModels(forum, forumThreadModels);
 
         return new Page<>(createForumThreadWithStatistics(forumThreads), totalRowsCount, pageIndex, pageSize);
     }
 
-    private List<ForumThread> createForumThreadsFromModels(Forum forum, List<ForumThreadModel> forumThreadModels) {
-        return forumThreadModels.stream().map(m -> ForumThreadServiceUtils.createForumThreadFromModelAndForum(m, forum)).collect(Collectors.toList());
-    }
-
-    private List<ForumThreadWithStatistics> createForumThreadWithStatistics(List<ForumThread> forumThreads) {
-        ImmutableList.Builder<ForumThreadWithStatistics> forumThreadsWithStatisticsBuilder = ImmutableList.builder();
-        for (ForumThread forumThread : forumThreads) {
-            long viewCount = userItemDao.countByFiltersEq("", ImmutableMap.of(UserItemModel_.itemJid, forumThread.getJid(), UserItemModel_.status, UserItemStatus.VIEWED.name()));
-            long replyCount = threadPostDao.countByFiltersEq("", ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid())) - 1;
-
-            forumThreadsWithStatisticsBuilder.add(new ForumThreadWithStatistics(forumThread, viewCount, replyCount));
-        }
-
-        return forumThreadsWithStatisticsBuilder.build();
-    }
-
     @Override
     public Page<ForumThreadWithStatisticsAndStatus> getPageOfForumThreadsWithStatisticAndStatus(Forum forum, String userJid, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalRowsCount = forumThreadDao.countByFiltersEq(filterString, ImmutableMap.of(ForumThreadModel_.forumJid, forum.getJid()));
-        List<ForumThreadModel> forumThreadModels = forumThreadDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ForumThreadModel_.forumJid, forum.getJid()), pageIndex, pageSize);
+        List<ForumThreadModel> forumThreadModels = forumThreadDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ForumThreadModel_.forumJid, forum.getJid()), pageIndex * pageSize, pageSize);
 
         List<ForumThread> forumThreads = createForumThreadsFromModels(forum, forumThreadModels);
 
@@ -130,5 +124,21 @@ public final class ForumThreadServiceImpl implements ForumThreadService {
         ForumServiceUtils.updateForumAndParents(forumDao, forum, userJid, userIpAddress);
 
         return ForumThreadServiceUtils.createForumThreadFromModelAndForum(forumThreadModel, forum);
+    }
+
+    private List<ForumThread> createForumThreadsFromModels(Forum forum, List<ForumThreadModel> forumThreadModels) {
+        return forumThreadModels.stream().map(m -> ForumThreadServiceUtils.createForumThreadFromModelAndForum(m, forum)).collect(Collectors.toList());
+    }
+
+    private List<ForumThreadWithStatistics> createForumThreadWithStatistics(List<ForumThread> forumThreads) {
+        ImmutableList.Builder<ForumThreadWithStatistics> forumThreadsWithStatisticsBuilder = ImmutableList.builder();
+        for (ForumThread forumThread : forumThreads) {
+            long viewCount = userItemDao.countByFiltersEq("", ImmutableMap.of(UserItemModel_.itemJid, forumThread.getJid(), UserItemModel_.status, UserItemStatus.VIEWED.name()));
+            long replyCount = threadPostDao.countByFiltersEq("", ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid())) - 1;
+
+            forumThreadsWithStatisticsBuilder.add(new ForumThreadWithStatistics(forumThread, viewCount, replyCount));
+        }
+
+        return forumThreadsWithStatisticsBuilder.build();
     }
 }

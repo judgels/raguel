@@ -78,20 +78,20 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createUser(String userJid, List<String> roles) {
+    public void createUser(String userJid, List<String> roles, String createUserJid, String createUserIpAddress) {
         UserModel userModel = new UserModel();
         userModel.userJid = userJid;
         userModel.roles = StringUtils.join(roles, ",");
 
-        userDao.persist(userModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userDao.persist(userModel, createUserJid, createUserIpAddress);
     }
 
     @Override
-    public void updateUser(long userId, List<String> roles) {
+    public void updateUser(long userId, List<String> roles, String userJid, String userIpAddress) {
         UserModel userModel = userDao.findById(userId);
         userModel.roles = StringUtils.join(roles, ",");
 
-        userDao.edit(userModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userDao.edit(userModel, userJid, userIpAddress);
     }
 
     @Override
@@ -109,18 +109,18 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void upsertUserFromJophielUser(JophielUser jophielUser) {
-        upsertUserFromJophielUser(jophielUser, RaguelUtils.getDefaultRoles());
+    public void upsertUserFromJophielUser(JophielUser jophielUser, String userJid, String userIpAddress) {
+        upsertUserFromJophielUser(jophielUser, RaguelUtils.getDefaultRoles(), userJid, userIpAddress);
     }
 
     @Override
-    public void upsertUserFromJophielUser(JophielUser jophielUser, List<String> roles) {
+    public void upsertUserFromJophielUser(JophielUser jophielUser, List<String> roles, String userJid, String userIpAddress) {
         if (!userDao.existsByJid(jophielUser.getJid())) {
-            createUser(jophielUser.getJid(), roles);
+            createUser(jophielUser.getJid(), roles, userJid, userIpAddress);
         }
 
-        JidCacheServiceImpl.getInstance().putDisplayName(jophielUser.getJid(), JudgelsPlayUtils.getUserDisplayName(jophielUser.getUsername()), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-        AvatarCacheServiceImpl.getInstance().putImageUrl(jophielUser.getJid(), jophielUser.getProfilePictureUrl(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        JidCacheServiceImpl.getInstance().putDisplayName(jophielUser.getJid(), JudgelsPlayUtils.getUserDisplayName(jophielUser.getUsername()), userJid, userIpAddress);
+        AvatarCacheServiceImpl.getInstance().putImageUrl(jophielUser.getJid(), jophielUser.getProfilePictureUrl(), userJid, userIpAddress);
     }
 
     @Override

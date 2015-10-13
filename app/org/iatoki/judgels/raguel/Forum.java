@@ -66,8 +66,36 @@ public final class Forum {
         return ImmutableList.copyOf(modules.values());
     }
 
-    public boolean containsModule(ForumModules forumModules) {
+    public boolean containModule(ForumModules forumModules) {
         return modules.containsKey(forumModules);
+    }
+
+    public boolean inheritModule(ForumModules forumModules) {
+        if (getParentForum() == null) {
+            return false;
+        }
+
+        if (getParentForum().containModule(forumModules)) {
+            return true;
+        }
+
+        return getParentForum().inheritModule(forumModules);
+    }
+
+    public boolean containOrInheritModule(ForumModules forumModules) {
+        return containModule(forumModules) || inheritModule(forumModules);
+    }
+
+    public Forum getForumOrParentWithModule(ForumModules forumModules) {
+        if (containModule(forumModules)) {
+            return this;
+        }
+
+        if (getParentForum() == null) {
+            return null;
+        }
+
+        return getParentForum().getForumOrParentWithModule(forumModules);
     }
 
     public ForumModule getModule(ForumModules forumModules) {

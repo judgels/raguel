@@ -88,6 +88,10 @@ public final class RaguelControllerUtils extends AbstractJudgelsControllerUtils 
         return RaguelUtils.hasRole("admin");
     }
 
+    public boolean isModeratorOrAbove() {
+        return isAdmin() || RaguelUtils.hasRole("moderator");
+    }
+
     public void addActivityLog(String log) {
         if (!RaguelUtils.isGuest()) {
             String newLog = log;

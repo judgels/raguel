@@ -8,9 +8,11 @@ import org.iatoki.judgels.jophiel.runnables.UserActivityMessagePusher;
 import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
 import org.iatoki.judgels.play.AbstractGlobal;
 import org.iatoki.judgels.play.services.BaseDataMigrationService;
+import org.iatoki.judgels.raguel.controllers.ForumControllerUtils;
 import org.iatoki.judgels.raguel.controllers.RaguelControllerUtils;
 import org.iatoki.judgels.raguel.models.daos.AvatarCacheDao;
 import org.iatoki.judgels.raguel.models.daos.JidCacheDao;
+import org.iatoki.judgels.raguel.services.ForumMemberService;
 import org.iatoki.judgels.raguel.services.impls.AvatarCacheServiceImpl;
 import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.raguel.services.impls.RaguelDataMigrationServiceImpl;
@@ -47,6 +49,7 @@ public final class Global extends AbstractGlobal {
     private void buildUtils(Injector injector) {
         JophielClientControllerUtils.buildInstance(RaguelProperties.getInstance().getJophielBaseUrl());
         RaguelControllerUtils.buildInstance(injector.instanceOf(JophielClientAPI.class), injector.instanceOf(JophielPublicAPI.class));
+        ForumControllerUtils.buildInstance(injector.instanceOf(ForumMemberService.class));
     }
 
     private void scheduleThreads(Injector injector) {

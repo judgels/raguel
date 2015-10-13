@@ -30,7 +30,7 @@
                 <div class="clearfix row">
                     <div class="col-md-7">
                         <a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a>
-                        @if(RaguelUtils.hasRole("admin")) {
+                        @if(RaguelUtils.hasRole("moderator") || RaguelUtils.hasRole("admin")) {
                             <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
                         }
                         @if(forum.getDescription != null) {

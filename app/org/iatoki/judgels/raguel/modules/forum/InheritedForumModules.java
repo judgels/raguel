@@ -1,8 +1,7 @@
 package org.iatoki.judgels.raguel.modules.forum;
 
-public enum ForumModules {
+public enum InheritedForumModules {
 
-    THREAD,
     MEMBER,
     EXCLUSIVE
 }
