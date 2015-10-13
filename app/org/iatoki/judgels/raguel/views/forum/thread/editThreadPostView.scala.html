@@ -27,5 +27,5 @@
     @b3.text(threadPostUpsertForm("subject"), '_label -> Messages.get("forum.thread.post.subject"))
     @b3.textarea(threadPostUpsertForm("content"), '_label -> Messages.get("forum.thread.post.content"), 'class -> "ckeditor")
 
-    @b3.submit('class -> "btn btn-primary") { @Messages.get("forum.thread.post.reply") }
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("forum.thread.post.edit") }
 }
