@@ -81,7 +81,7 @@ public final class ForumServiceUtils {
         ImmutableList.Builder<String> forumJids = ImmutableList.builder();
         Forum currentForum = forum;
         while (currentForum != null) {
-            forumJids.add(forum.getJid());
+            forumJids.add(currentForum.getJid());
             currentForum = currentForum.getParentForum();
         }
 
