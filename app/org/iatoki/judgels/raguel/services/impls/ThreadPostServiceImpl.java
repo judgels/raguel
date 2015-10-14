@@ -130,7 +130,7 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
     @Override
     public Page<ThreadPost> getPageOfThreadPosts(ForumThread forumThread, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalRowsCount = threadPostDao.countByFiltersEq(filterString, ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()));
-        List<ThreadPostModel> threadPostModels = threadPostDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()), pageIndex, pageSize);
+        List<ThreadPostModel> threadPostModels = threadPostDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()), pageIndex * pageSize, pageSize);
 
         ImmutableList.Builder<ThreadPost> threadPostBuilder = ImmutableList.builder();
         for (ThreadPostModel threadPostModel : threadPostModels) {
