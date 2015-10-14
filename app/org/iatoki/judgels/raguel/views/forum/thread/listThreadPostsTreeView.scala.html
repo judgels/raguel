@@ -24,7 +24,7 @@
                 <div class="clearfix">
                     <div class="post-wrapper-@threadPost.getLevel">
                         <div id="post-@threadPost.getThreadPost.getId" class="panel panel-default post">
-                        @postContentView(threadPost.getThreadPost, avatarUrlsMap.get(threadPost.getThreadPost.getUserJid), displayNamesMap.get(threadPost.getThreadPost.getUserJid), replyJidToIdMap.get(threadPost.getThreadPost.getReplyJid), replyJidToUserJidMap.get(replyJidToUserJidMap.get(threadPost.getThreadPost.getReplyJid)))
+                        @postContentView(threadPost.getThreadPost, avatarUrlsMap.get(threadPost.getThreadPost.getUserJid), displayNamesMap.get(threadPost.getThreadPost.getUserJid), replyJidToIdMap.get(threadPost.getThreadPost.getReplyJid), replyDisplayNamesMap.get(replyJidToUserJidMap.get(threadPost.getThreadPost.getReplyJid)))
                         </div>
                     </div>
                 </div>
