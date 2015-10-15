@@ -337,22 +337,22 @@ public final class ForumController extends AbstractJudgelsController {
 
     private LazyHtml getBaseForumContent() {
         if (RaguelUtils.isGuest()) {
-            List<Forum> childForums = forumService.getAllowedChildForums("");
+            List<Forum> childForums = forumService.getAllowedChildForums("", 2);
             return new LazyHtml(listBaseForumsView.render(childForums));
         }
 
         List<Forum> childForums;
         if (RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
-            childForums = forumService.getChildForums("");
+            childForums = forumService.getChildForums("", 2);
         } else {
-            childForums = forumService.getAllowedChildForums("");
+            childForums = forumService.getAllowedChildForums("", 2);
         }
         ImmutableMap.Builder<String, List<ForumWithStatus>> mapForumJidToForumsWithStatusBuilder = ImmutableMap.builder();
         for (Forum childForum : childForums) {
             if (RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
-                mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getChildForumsWithStatus(childForum.getJid(), IdentityUtils.getUserJid()));
+                mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getChildForumsWithStatus(childForum.getJid(), IdentityUtils.getUserJid(), 2));
             } else {
-                mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getAllowedChildForumsWithStatus(childForum.getJid(), IdentityUtils.getUserJid()));
+                mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getAllowedChildForumsWithStatus(childForum.getJid(), IdentityUtils.getUserJid(), 2));
             }
         }
 
@@ -361,7 +361,7 @@ public final class ForumController extends AbstractJudgelsController {
 
     private LazyHtml getNonBaseForumContent(Forum forum, long pageIndex, String orderBy, String orderDir, String filterString) {
         if (RaguelUtils.isGuest()) {
-            List<Forum> childForums = forumService.getAllowedChildForums(forum.getJid());
+            List<Forum> childForums = forumService.getAllowedChildForums(forum.getJid(), 1);
             if (forum.containModule(ForumModules.THREAD)) {
                 Page<ForumThreadWithStatistics> pageOfForumThreads = forumThreadService.getPageOfForumThreadsWithStatistic(forum, pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
@@ -373,9 +373,9 @@ public final class ForumController extends AbstractJudgelsController {
 
         List<ForumWithStatus> childForumsWithStatus;
         if (RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
-            childForumsWithStatus = forumService.getChildForumsWithStatus(forum.getJid(), IdentityUtils.getUserJid());
+            childForumsWithStatus = forumService.getChildForumsWithStatus(forum.getJid(), IdentityUtils.getUserJid(), 1);
         } else {
-            childForumsWithStatus = forumService.getAllowedChildForumsWithStatus(forum.getJid(), IdentityUtils.getUserJid());
+            childForumsWithStatus = forumService.getAllowedChildForumsWithStatus(forum.getJid(), IdentityUtils.getUserJid(), 1);
         }
         if (forum.containModule(ForumModules.THREAD)) {
             Page<ForumThreadWithStatisticsAndStatus> pageOfForumThreads = forumThreadService.getPageOfForumThreadsWithStatisticAndStatus(forum, IdentityUtils.getUserJid(), pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
@@ -387,7 +387,7 @@ public final class ForumController extends AbstractJudgelsController {
     }
 
     private Result showCreateForum(long parentId, Form<ForumUpsertForm> forumUpsertForm) {
-        LazyHtml content = new LazyHtml(createForumView.render(forumUpsertForm, forumService.getAllForums()));
+        LazyHtml content = new LazyHtml(createForumView.render(forumUpsertForm, forumService.getAllForumsForReferences()));
         content.appendLayout(c -> headingLayout.render(Messages.get("forum.create"), c));
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
         ForumControllerUtils.appendBreadcrumbsLayout(content,
@@ -398,7 +398,7 @@ public final class ForumController extends AbstractJudgelsController {
     }
 
     private Result showEditForumGeneral(Form<ForumUpsertForm> forumUpsertForm, Forum forum) {
-        LazyHtml content = new LazyHtml(editForumGeneralView.render(forumUpsertForm, forum.getId(), forumService.getAllForums().stream().filter(f -> !f.containsJidInHierarchy(forum.getJid())).collect(Collectors.toList())));
+        LazyHtml content = new LazyHtml(editForumGeneralView.render(forumUpsertForm, forum.getId(), forumService.getAllForumsForReferences().stream().filter(f -> !f.containsJidInHierarchy(forum.getJid())).collect(Collectors.toList())));
         ForumControllerUtils.appendUpdateLayout(content, forum);
         RaguelControllerUtils.getInstance().appendSidebarLayout(content);
         ForumControllerUtils.appendBreadcrumbsLayout(content,

@@ -38,10 +38,10 @@
                         }
                     </div>
                     <div class="col-md-2">
-                        <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forum.getLastUpdate.getTime)</time>
+                        @if(forum.getLastUpdate == null) { - } else { <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forum.getLastUpdate.getTime)</time> }
                     </div>
                     <div class="col-md-3">
-                    @displayNamesMap.get(forum.getLastUpdateUserJid)
+                        @displayNamesMap.get(forum.getLastUpdateUserJid)
                     </div>
                 </div>
                 @if(index != (childForums.size - 1)) {

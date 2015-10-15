@@ -12,15 +12,15 @@ public interface ForumService {
 
     boolean forumExistsByJid(String forumJid);
 
-    List<Forum> getAllForums();
+    List<Forum> getAllForumsForReferences();
 
-    List<Forum> getChildForums(String parentJid);
+    List<Forum> getChildForums(String parentJid, long maxDepth);
 
-    List<Forum> getAllowedChildForums(String parentJid);
+    List<Forum> getAllowedChildForums(String parentJid, long maxDepth);
 
-    List<ForumWithStatus> getChildForumsWithStatus(String parentJid, String userJid);
+    List<ForumWithStatus> getChildForumsWithStatus(String parentJid, String userJid, long maxDepth);
 
-    List<ForumWithStatus> getAllowedChildForumsWithStatus(String parentJid, String userJid);
+    List<ForumWithStatus> getAllowedChildForumsWithStatus(String parentJid, String userJid, long maxDepth);
 
     Forum findForumById(long forumId) throws ForumNotFoundException;
 

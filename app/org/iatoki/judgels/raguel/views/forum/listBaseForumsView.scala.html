@@ -14,7 +14,7 @@
             <div class="pull-left">
                 <h3 class="panel-title"><a href="@routes.ForumController.viewForums(forum.getId)">@forum.getName</a></h3>
             </div>
-            @if(RaguelUtils.hasRole("moderator") || RaguelUtils.hasRole("admin")) {
+            @if(RaguelUtils.hasRole("admin")) {
                 <div class="pull-right">
                     <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
                 </div>
@@ -25,13 +25,13 @@
                 <div class="panel-body">
                 @for((subforum, index) <- forum.getSubforums.zipWithIndex) {
                     <div class="clearfix">
-                        @if(RaguelUtils.hasRole("moderator") || RaguelUtils.hasRole("admin")) {
+                        @if(RaguelUtils.hasRole("admin")) {
                             <div class="pull-right">
                                 <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>
                             </div>
                         }
                         <div class="pull-right">
-                            <small>@Messages.get("forum.lastUpdate"): @lastUpdateDisplayNamesMap.get(subforum.getLastUpdateUserJid) @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforum.getLastUpdate.getTime)</time></small>
+                            <small>@Messages.get("forum.lastPost"): @lastUpdateDisplayNamesMap.get(subforum.getLastUpdateUserJid) @if(subforum.getLastUpdate != null){ @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforum.getLastUpdate.getTime)</time> } </small>
                         </div>
                         <div>
                             <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>

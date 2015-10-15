@@ -10,6 +10,7 @@ import org.iatoki.judgels.raguel.PostContent;
 import org.iatoki.judgels.raguel.ThreadPost;
 import org.iatoki.judgels.raguel.ThreadPostWithLevel;
 import org.iatoki.judgels.raguel.models.daos.ForumDao;
+import org.iatoki.judgels.raguel.models.daos.ForumLastPostDao;
 import org.iatoki.judgels.raguel.models.daos.ForumModuleDao;
 import org.iatoki.judgels.raguel.models.daos.ForumThreadDao;
 import org.iatoki.judgels.raguel.models.daos.PostContentDao;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 public final class ThreadPostServiceImpl implements ThreadPostService {
 
     private final ForumDao forumDao;
+    private final ForumLastPostDao forumLastPostDao;
     private final ForumModuleDao forumModuleDao;
     private final ForumModuleFactory forumModuleFactory;
     private final ForumThreadDao forumThreadDao;
@@ -44,8 +46,9 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
     private final PostContentDao postContentDao;
 
     @Inject
-    public ThreadPostServiceImpl(ForumDao forumDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, ThreadPostDao threadPostDao, PostContentDao postContentDao) {
+    public ThreadPostServiceImpl(ForumDao forumDao, ForumLastPostDao forumLastPostDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, ThreadPostDao threadPostDao, PostContentDao postContentDao) {
         this.forumDao = forumDao;
+        this.forumLastPostDao = forumLastPostDao;
         this.forumModuleDao = forumModuleDao;
         this.forumModuleFactory = forumModuleFactory;
         this.forumThreadDao = forumThreadDao;
@@ -59,7 +62,7 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         ForumThreadModel forumThreadModel = forumThreadDao.findByJid(threadPostModel.threadJid);
         ForumModel forumModel = forumDao.findByJid(forumThreadModel.forumJid);
 
-        Forum forum = ForumServiceUtils.createForumWithParentsFromModel(forumDao, forumModuleDao, forumModuleFactory, forumModel);
+        Forum forum = ForumServiceUtils.createForumWithParentFromModel(forumDao, forumLastPostDao, forumModuleDao, forumModuleFactory, forumModel);
         ForumThread forumThread = ForumThreadServiceUtils.createForumThreadFromModelAndForum(forumThreadModel, forum);
         List<PostContentModel> postContentModels = postContentDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(PostContentModel_.postJid, threadPostModel.jid), 0, -1);
         List<PostContent> postContents = postContentModels.stream().map(m -> new PostContent(m.id, m.postJid, m.subject, m.content, new Date(m.timeCreate))).collect(Collectors.toList());
@@ -178,7 +181,7 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
 
             forumThreadDao.edit(forumThreadModel, userJid, userIpAddress);
 
-            ForumServiceUtils.updateForumAndParents(forumDao, threadPost.getThread().getParentForum(), userJid, userIpAddress);
+            ForumServiceUtils.updateForumAndParents(forumDao, forumLastPostDao, threadPost.getThread().getParentForum(), userJid, userIpAddress);
         } else {
             updateThreadAndParents(threadPost.getThread(), userJid, userIpAddress);
         }
@@ -206,7 +209,7 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         ForumThreadModel forumThreadModel = forumThreadDao.findByJid(forumThread.getJid());
         forumThreadDao.edit(forumThreadModel, userJid, userIpAddress);
 
-        ForumServiceUtils.updateForumAndParents(forumDao, forumThread.getParentForum(), userJid, userIpAddress);
+        ForumServiceUtils.updateForumAndParents(forumDao, forumLastPostDao, forumThread.getParentForum(), userJid, userIpAddress);
     }
 
     private class ThreadPostModelWithLevel {

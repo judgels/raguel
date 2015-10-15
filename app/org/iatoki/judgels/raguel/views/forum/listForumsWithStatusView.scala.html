@@ -45,7 +45,7 @@
                             }
                         </div>
                         <div class="col-md-2">
-                            <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forumWithStatus.getForum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forumWithStatus.getForum.getLastUpdate.getTime)</time>
+                            @if(forumWithStatus.getForum.getLastUpdate == null) { - } else {<time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(forumWithStatus.getForum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(forumWithStatus.getForum.getLastUpdate.getTime)</time> }
                         </div>
                         <div class="col-md-3">
                             @displayNamesMap.get(forumWithStatus.getForum.getLastUpdateUserJid)

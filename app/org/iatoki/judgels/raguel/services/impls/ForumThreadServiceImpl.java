@@ -10,6 +10,7 @@ import org.iatoki.judgels.raguel.ForumThreadWithStatistics;
 import org.iatoki.judgels.raguel.ForumThreadWithStatisticsAndStatus;
 import org.iatoki.judgels.raguel.UserItemStatus;
 import org.iatoki.judgels.raguel.models.daos.ForumDao;
+import org.iatoki.judgels.raguel.models.daos.ForumLastPostDao;
 import org.iatoki.judgels.raguel.models.daos.ForumModuleDao;
 import org.iatoki.judgels.raguel.models.daos.ForumThreadDao;
 import org.iatoki.judgels.raguel.models.daos.ThreadPostDao;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 public final class ForumThreadServiceImpl implements ForumThreadService {
 
     private final ForumDao forumDao;
+    private final ForumLastPostDao forumLastPostDao;
     private final ForumModuleDao forumModuleDao;
     private final ForumModuleFactory forumModuleFactory;
     private final ForumThreadDao forumThreadDao;
@@ -42,8 +44,9 @@ public final class ForumThreadServiceImpl implements ForumThreadService {
     private final UserItemDao userItemDao;
 
     @Inject
-    public ForumThreadServiceImpl(ForumDao forumDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, ThreadPostDao threadPostDao, UserItemDao userItemDao) {
+    public ForumThreadServiceImpl(ForumDao forumDao, ForumLastPostDao forumLastPostDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, ThreadPostDao threadPostDao, UserItemDao userItemDao) {
         this.forumDao = forumDao;
+        this.forumLastPostDao = forumLastPostDao;
         this.forumModuleDao = forumModuleDao;
         this.forumModuleFactory = forumModuleFactory;
         this.forumThreadDao = forumThreadDao;
@@ -108,7 +111,7 @@ public final class ForumThreadServiceImpl implements ForumThreadService {
         }
 
         ForumModel forumModel = forumDao.findByJid(forumThreadModel.forumJid);
-        Forum forum = ForumServiceUtils.createForumWithParentsFromModel(forumDao, forumModuleDao, forumModuleFactory, forumModel);
+        Forum forum = ForumServiceUtils.createForumWithParentFromModel(forumDao, forumLastPostDao, forumModuleDao, forumModuleFactory, forumModel);
 
         return ForumThreadServiceUtils.createForumThreadFromModelAndForum(forumThreadModel, forum);
     }
@@ -121,7 +124,7 @@ public final class ForumThreadServiceImpl implements ForumThreadService {
 
         forumThreadDao.persist(forumThreadModel, userJid, userIpAddress);
 
-        ForumServiceUtils.updateForumAndParents(forumDao, forum, userJid, userIpAddress);
+        ForumServiceUtils.updateForumAndParents(forumDao, forumLastPostDao, forum, userJid, userIpAddress);
 
         return ForumThreadServiceUtils.createForumThreadFromModelAndForum(forumThreadModel, forum);
     }
