@@ -20,7 +20,6 @@ import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
 import org.iatoki.judgels.raguel.forms.ThreadPostUpsertForm;
 import org.iatoki.judgels.raguel.modules.forum.ForumModules;
-import org.iatoki.judgels.raguel.services.ForumMemberService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 import org.iatoki.judgels.raguel.services.ThreadPostService;
 import org.iatoki.judgels.raguel.services.UserItemService;
@@ -50,14 +49,12 @@ public final class ThreadPostController extends AbstractJudgelsController {
 
     private static final long PAGE_SIZE = 20;
 
-    private final ForumMemberService forumMemberService;
     private final ForumThreadService forumThreadService;
     private final ThreadPostService threadPostService;
     private final UserItemService userItemService;
 
     @Inject
-    public ThreadPostController(ForumMemberService forumMemberService, ForumThreadService forumThreadService, ThreadPostService threadPostService, UserItemService userItemService) {
-        this.forumMemberService = forumMemberService;
+    public ThreadPostController(ForumThreadService forumThreadService, ThreadPostService threadPostService, UserItemService userItemService) {
         this.forumThreadService = forumThreadService;
         this.threadPostService = threadPostService;
         this.userItemService = userItemService;
@@ -170,7 +167,7 @@ public final class ThreadPostController extends AbstractJudgelsController {
         }
 
         if (!IdentityUtils.getUserJid().equals(threadPost.getUserJid())) {
-            return notFound();
+            return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
         ThreadPostUpsertForm threadPostUpsertData = new ThreadPostUpsertForm();
@@ -198,7 +195,7 @@ public final class ThreadPostController extends AbstractJudgelsController {
         }
 
         if (!IdentityUtils.getUserJid().equals(threadPost.getUserJid())) {
-            return notFound();
+            return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
         Form<ThreadPostUpsertForm> threadPostUpsertForm = Form.form(ThreadPostUpsertForm.class).bindFromRequest();

@@ -172,7 +172,16 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
 
         threadPostDao.edit(threadPostModel, userJid, userIpAddress);
 
-        updateThreadAndParents(threadPost.getThread(), userJid, userIpAddress);
+        if (threadPostModel.replyJid == null) {
+            ForumThreadModel forumThreadModel = forumThreadDao.findByJid(threadPostModel.threadJid);
+            forumThreadModel.name = postContentModel.subject;
+
+            forumThreadDao.edit(forumThreadModel, userJid, userIpAddress);
+
+            ForumServiceUtils.updateForumAndParents(forumDao, threadPost.getThread().getParentForum(), userJid, userIpAddress);
+        } else {
+            updateThreadAndParents(threadPost.getThread(), userJid, userIpAddress);
+        }
     }
 
     @Override

@@ -16,7 +16,6 @@ import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
 import org.iatoki.judgels.raguel.forms.ForumThreadCreateForm;
 import org.iatoki.judgels.raguel.modules.forum.ForumModules;
-import org.iatoki.judgels.raguel.services.ForumMemberService;
 import org.iatoki.judgels.raguel.services.ForumService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 import org.iatoki.judgels.raguel.services.ThreadPostService;
@@ -37,14 +36,12 @@ public final class ForumThreadController extends AbstractJudgelsController {
     private static final long PAGE_SIZE = 20;
 
     private final ForumService forumService;
-    private final ForumMemberService forumMemberService;
     private final ForumThreadService forumThreadService;
     private final ThreadPostService threadPostService;
 
     @Inject
-    public ForumThreadController(ForumService forumService, ForumMemberService forumMemberService, ForumThreadService forumThreadService, ThreadPostService threadPostService) {
+    public ForumThreadController(ForumService forumService, ForumThreadService forumThreadService, ThreadPostService threadPostService) {
         this.forumService = forumService;
-        this.forumMemberService = forumMemberService;
         this.forumThreadService = forumThreadService;
         this.threadPostService = threadPostService;
     }
