@@ -194,11 +194,11 @@ public final class ForumServiceUtils {
             ForumLastPostModel forumLastPostModel;
             if (forumLastPostDao.existsByForumJid(forum.getJid())) {
                 forumLastPostModel = forumLastPostDao.findByForumJid(forum.getJid());
-                forumLastPostDao.persist(forumLastPostModel, userJid, userIpAddress);
+                forumLastPostDao.edit(forumLastPostModel, userJid, userIpAddress);
             } else {
                 forumLastPostModel = new ForumLastPostModel();
                 forumLastPostModel.forumJid = forum.getJid();
-                forumLastPostDao.edit(forumLastPostModel, userJid, userIpAddress);
+                forumLastPostDao.persist(forumLastPostModel, userJid, userIpAddress);
             }
         }
     }

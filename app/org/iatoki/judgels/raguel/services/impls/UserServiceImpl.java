@@ -4,11 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.iatoki.judgels.api.jophiel.JophielUser;
+import org.iatoki.judgels.jophiel.UserTokens;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.jophiel.UserTokens;
 import org.iatoki.judgels.raguel.RaguelUtils;
+import org.iatoki.judgels.raguel.User;
 import org.iatoki.judgels.raguel.UserNotFoundException;
 import org.iatoki.judgels.raguel.models.daos.UserDao;
 import org.iatoki.judgels.raguel.models.entities.UserModel;
@@ -101,10 +102,10 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<org.iatoki.judgels.raguel.User> getPageOfUsers(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
+    public Page<User> getPageOfUsers(long pageIndex, long pageSize, String orderBy, String orderDir, String filterString) {
         long totalPages = userDao.countByFilters(filterString, ImmutableMap.of(), ImmutableMap.of());
-        List<UserModel> userModels = userDao.findSortedByFilters(orderBy, orderDir, filterString, ImmutableMap.of(), ImmutableMap.of(), pageIndex * pageSize, pageSize);
-        List<org.iatoki.judgels.raguel.User> users = Lists.transform(userModels, m -> createUserFromUserModel(m));
+        List<UserModel> userModels = userDao.findSortedByFilters(orderBy, orderDir, filterString, pageIndex * pageSize, pageSize);
+        List<User> users = Lists.transform(userModels, m -> createUserFromUserModel(m));
         return new Page<>(users, totalPages, pageIndex, pageSize);
     }
 
@@ -134,7 +135,7 @@ public final class UserServiceImpl implements UserService {
         return new UserTokens(userModel.userJid, userModel.accessToken, userModel.refreshToken, userModel.idToken, userModel.expirationTime);
     }
 
-    private org.iatoki.judgels.raguel.User createUserFromUserModel(UserModel userModel) {
-        return new org.iatoki.judgels.raguel.User(userModel.id, userModel.userJid, Arrays.asList(userModel.roles.split(",")));
+    private User createUserFromUserModel(UserModel userModel) {
+        return new User(userModel.id, userModel.userJid, Arrays.asList(userModel.roles.split(",")));
     }
 }
