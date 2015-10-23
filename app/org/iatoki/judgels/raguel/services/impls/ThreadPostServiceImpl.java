@@ -83,6 +83,11 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
     }
 
     @Override
+    public long countThreadPost(ForumThread forumThread) {
+        return threadPostDao.countByFiltersEq("", ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()));
+    }
+
+    @Override
     public List<ThreadPostWithLevel> getAllThreadPostsWithLevel(ForumThread forumThread) {
         List<ThreadPostModel> threadPostModels = threadPostDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()), 0, -1);
         ThreadPostModel firstThreadPostModel = threadPostModels.get(0);

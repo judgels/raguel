@@ -16,6 +16,8 @@ public interface ThreadPostService {
 
     Map<String, String> getThreadPostsJidToUserJidMap(List<String> threadPostJids);
 
+    long countThreadPost(ForumThread forumThread);
+
     List<ThreadPostWithLevel> getAllThreadPostsWithLevel(ForumThread forumThread);
 
     Page<ThreadPost> getPageOfThreadPosts(ForumThread forumThread, long pageIndex, long pageSize, String orderBy, String orderDir, String filterString);

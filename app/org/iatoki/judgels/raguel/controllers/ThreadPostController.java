@@ -262,7 +262,9 @@ public final class ThreadPostController extends AbstractJudgelsController {
         ThreadPostUpsertForm threadPostUpsertData = threadPostUpsertForm.get();
         threadPostService.replyPost(threadPost, IdentityUtils.getUserJid(), threadPostUpsertData.subject, threadPostUpsertData.content, IdentityUtils.getIpAddress());
 
-        return redirect(routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
+        long totalPost = threadPostService.countThreadPost(threadPost.getThread());
+
+        return redirect(routes.ThreadPostController.listThreadPosts(threadPost.getThread().getId(), ((totalPost - 1) / PAGE_SIZE), "id", "asc", ""));
     }
 
     private Result showListThreadPosts(long forumThreadId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumThreadNotFoundException {
