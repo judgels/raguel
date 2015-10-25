@@ -6,6 +6,7 @@ GET         /authRole                                                           
 GET         /afterLogin                                                                                  @org.iatoki.judgels.raguel.controllers.ApplicationController.afterLogin(returnUri: String ?= "")
 POST        /viewAs                                                                                      @org.iatoki.judgels.raguel.controllers.ApplicationController.postViewAs()
 GET         /resetViewAs                                                                                 @org.iatoki.judgels.raguel.controllers.ApplicationController.resetViewAs()
+GET         /localLogout                                                                                 @org.iatoki.judgels.raguel.controllers.ApplicationController.logout(returnUri: String ?= "")
 
 GET         /                                                                                            @org.iatoki.judgels.raguel.controllers.ForumController.index()
 GET         /forums/create                                                                               @org.iatoki.judgels.raguel.controllers.ForumController.createForum(parentId: Long)
