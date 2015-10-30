@@ -8,6 +8,7 @@ import org.iatoki.judgels.play.InternalLink;
 import org.iatoki.judgels.play.LazyHtml;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
+import org.iatoki.judgels.play.views.html.layouts.descriptionHtmlLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingLayout;
 import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
 import org.iatoki.judgels.raguel.Forum;
@@ -312,6 +313,9 @@ public final class ForumController extends AbstractJudgelsController {
         }
 
         if (currentForum != null) {
+            if (!currentForum.getDescription().isEmpty()) {
+                content.appendLayout(c -> descriptionHtmlLayout.render(currentForum.getDescription(), c));
+            }
             ForumControllerUtils.getInstance().appendTabsLayout(content, currentForum, IdentityUtils.getUserJid());
         } else {
             if (RaguelControllerUtils.getInstance().isModeratorOrAbove()) {

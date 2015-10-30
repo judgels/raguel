@@ -5,12 +5,6 @@
 
 @(currentForum: Forum, childForumsWithStatus: List[ForumWithStatus], pageOfThreads: Page[ForumThreadWithStatisticsAndStatus], orderBy: String, orderDir: String, filterString: String)
 
-@if(currentForum != null) {
-    <div class="well">
-        @Html(currentForum.getDescription)
-    </div>
-}
-
 @if(!childForumsWithStatus.isEmpty) {
     @listForumsWithStatusView(currentForum, childForumsWithStatus)
 }
