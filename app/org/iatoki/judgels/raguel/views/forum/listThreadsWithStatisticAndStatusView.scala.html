@@ -22,22 +22,22 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         <div class="clearfix row">
-            <div class="col-md-4">
+            <div class="col-xs-4">
                 <small>@Messages.get("forum.thread")</small>
             </div>
-            <div class="col-md-2">
+            <div class="col-xs-2">
                 <small>@Messages.get("forum.thread.author")</small>
             </div>
-            <div class="col-md-1">
+            <div class="col-xs-1">
                 <small>@Messages.get("forum.thread.viewCount")</small>
             </div>
-            <div class="col-md-1">
+            <div class="col-xs-1">
                 <small>@Messages.get("forum.thread.replyCount")</small>
             </div>
-            <div class="col-md-2">
+            <div class="col-xs-2">
                 <small>@Messages.get("forum.thread.lastPost")</small>
             </div>
-            <div class="col-md-2">
+            <div class="col-xs-2">
                 <small>@Messages.get("forum.thread.lastUserUpdate")</small>
             </div>
         </div>
@@ -48,7 +48,7 @@
                 @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfThreads.getData.map(t => t.getForumThreadWithStatistics.getForumThread.getLastUpdateUserJid).toSeq))) { lastUpdateDisplayNamesMap =>
                     @for((thread, index) <- pageOfThreads.getData.zipWithIndex) {
                         <div class="clearfix">
-                            <div class="col-md-4">
+                            <div class="col-xs-4">
                                 @if(thread.isHasNewPost) {
                                     <strong>
                                 }
@@ -57,19 +57,19 @@
                                     </strong>
                                 }
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-xs-2">
                                 <small>@displayNamesMap.get(thread.getForumThreadWithStatistics.getForumThread.getAuthorJid)</small>
                             </div>
-                            <div class="col-md-1 text-center">
+                            <div class="col-xs-1 text-center">
                                 <small>@thread.getForumThreadWithStatistics.getViewCount</small>
                             </div>
-                            <div class="col-md-1 text-center">
+                            <div class="col-xs-1 text-center">
                                 <small>@thread.getForumThreadWithStatistics.getReplyCount</small>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-xs-2">
                                 <small><time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(thread.getForumThreadWithStatistics.getForumThread.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(thread.getForumThreadWithStatistics.getForumThread.getLastUpdate.getTime)</time></small>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-xs-2">
                                 <small>@lastUpdateDisplayNamesMap.get(thread.getForumThreadWithStatistics.getForumThread.getLastUpdateUserJid)</small>
                             </div>
                         </div>

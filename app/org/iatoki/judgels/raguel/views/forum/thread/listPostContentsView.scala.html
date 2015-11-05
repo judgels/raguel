@@ -20,7 +20,7 @@
         <div class="panel-body post-body">
             <div class="clearfix">
                 @avatarPostView(AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl), JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid))
-                <div class="col-md-10 post-content content-text">
+                <div class="col-xs-10 post-content content-text">
                     @Html(postContent.getContent)
                 </div>
             </div>
