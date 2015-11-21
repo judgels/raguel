@@ -33,7 +33,7 @@
 </div>
 <div class="panel-body post-body">
     <div class="clearfix">
-        @avatarPostView(avatarUrl, username)
+        @avatarPostView(avatarUrl, username, threadPost.getUserPostCount)
         <div class="col-xs-10 post-content content-text">
             @Html(threadPost.getLatestContent.getContent)
         </div>

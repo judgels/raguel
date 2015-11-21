@@ -1,8 +1,9 @@
 @import java.net.URL
 
-@(avatarUrl: URL, username: String)
+@(avatarUrl: URL, username: String, userPostCount: Long)
 
 <div class="user col-xs-2">
     <img class="avatar-picture center-block" src="@avatarUrl" alt="avatar" />
     <div class="text-center">@username</div>
+    <div class="text-center">Post: @userPostCount </div>
 </div>

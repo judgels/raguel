@@ -14,7 +14,7 @@ public final class ThreadPostServiceUtils {
         //prevent instantiation
     }
 
-    static ThreadPost createThreadPostFromModel(ThreadPostModel threadPostModel, ForumThread forumThread, List<PostContent> postContents) {
-        return new ThreadPost(threadPostModel.id, threadPostModel.jid, forumThread, postContents, threadPostModel.userCreate, threadPostModel.replyJid, new Date(threadPostModel.timeCreate));
+    static ThreadPost createThreadPostFromModel(ThreadPostModel threadPostModel, ForumThread forumThread, List<PostContent> postContents, long userPostCount) {
+        return new ThreadPost(threadPostModel.id, threadPostModel.jid, forumThread, postContents, threadPostModel.userCreate, userPostCount, threadPostModel.replyJid, new Date(threadPostModel.timeCreate));
     }
 }

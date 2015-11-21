@@ -19,7 +19,7 @@
         </div>
         <div class="panel-body post-body">
             <div class="clearfix">
-                @avatarPostView(AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl), JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid))
+                @avatarPostView(AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl), JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid), threadPost.getUserPostCount)
                 <div class="col-xs-10 post-content content-text">
                     @Html(postContent.getContent)
                 </div>
