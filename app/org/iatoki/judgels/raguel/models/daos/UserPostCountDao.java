@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface UserPostCountDao extends Dao<Long, UserPostCountModel> {
 
+    boolean existByUserJid(String userJid);
+
     UserPostCountModel getByUserJid(String userJid);
 
     List<UserPostCountModel> getByUserJids(List<String> userJids);
