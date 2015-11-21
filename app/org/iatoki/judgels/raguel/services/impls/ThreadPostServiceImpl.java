@@ -3,6 +3,7 @@ package org.iatoki.judgels.raguel.services.impls;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumThread;
@@ -15,12 +16,14 @@ import org.iatoki.judgels.raguel.models.daos.ForumModuleDao;
 import org.iatoki.judgels.raguel.models.daos.ForumThreadDao;
 import org.iatoki.judgels.raguel.models.daos.PostContentDao;
 import org.iatoki.judgels.raguel.models.daos.ThreadPostDao;
+import org.iatoki.judgels.raguel.models.daos.UserPostCountDao;
 import org.iatoki.judgels.raguel.models.entities.ForumModel;
 import org.iatoki.judgels.raguel.models.entities.ForumThreadModel;
 import org.iatoki.judgels.raguel.models.entities.PostContentModel;
 import org.iatoki.judgels.raguel.models.entities.PostContentModel_;
 import org.iatoki.judgels.raguel.models.entities.ThreadPostModel;
 import org.iatoki.judgels.raguel.models.entities.ThreadPostModel_;
+import org.iatoki.judgels.raguel.models.entities.UserPostCountModel;
 import org.iatoki.judgels.raguel.modules.forum.ForumModuleFactory;
 import org.iatoki.judgels.raguel.services.ThreadPostService;
 
@@ -28,8 +31,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -44,9 +49,10 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
     private final ForumThreadDao forumThreadDao;
     private final ThreadPostDao threadPostDao;
     private final PostContentDao postContentDao;
+    private final UserPostCountDao userPostCountDao;
 
     @Inject
-    public ThreadPostServiceImpl(ForumDao forumDao, ForumLastPostDao forumLastPostDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, ThreadPostDao threadPostDao, PostContentDao postContentDao) {
+    public ThreadPostServiceImpl(ForumDao forumDao, ForumLastPostDao forumLastPostDao, ForumModuleDao forumModuleDao, ForumModuleFactory forumModuleFactory, ForumThreadDao forumThreadDao, ThreadPostDao threadPostDao, PostContentDao postContentDao, UserPostCountDao userPostCountDao) {
         this.forumDao = forumDao;
         this.forumLastPostDao = forumLastPostDao;
         this.forumModuleDao = forumModuleDao;
@@ -54,6 +60,7 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         this.forumThreadDao = forumThreadDao;
         this.threadPostDao = threadPostDao;
         this.postContentDao = postContentDao;
+        this.userPostCountDao = userPostCountDao;
     }
 
     @Override
@@ -66,8 +73,9 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         ForumThread forumThread = ForumThreadServiceUtils.createForumThreadFromModelAndForum(forumThreadModel, forum);
         List<PostContentModel> postContentModels = postContentDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(PostContentModel_.postJid, threadPostModel.jid), 0, -1);
         List<PostContent> postContents = postContentModels.stream().map(m -> new PostContent(m.id, m.postJid, m.subject, m.content, new Date(m.timeCreate))).collect(Collectors.toList());
+        long userPostCount = getUserPostCountByUserJid(threadPostModel.userCreate);
 
-        return ThreadPostServiceUtils.createThreadPostFromModel(threadPostModel, forumThread, postContents);
+        return ThreadPostServiceUtils.createThreadPostFromModel(threadPostModel, forumThread, postContents, userPostCount);
     }
 
     @Override
@@ -83,6 +91,31 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
     }
 
     @Override
+    public Map<String, Long> getUserJidToPostCountMap(List<String> userJids) {
+        List<UserPostCountModel> postCountModelList = userPostCountDao.getByUserJids(userJids);
+        Set<String> allUser = new HashSet<>(userJids);
+        Set<String> existInDb = new HashSet<>(postCountModelList.stream().map(m -> m.userJid).collect(Collectors.toList()));
+        allUser.removeAll(existInDb);
+
+        for (String userJid : allUser) {
+            long postCount = postContentDao.getCountByUserJid(userJid);
+
+            UserPostCountModel userPostCountModel = new UserPostCountModel();
+            userPostCountModel.postCount = postCount;
+            userPostCountModel.userJid = userJid;
+            userPostCountDao.persist(userPostCountModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+
+            postCountModelList.add(userPostCountModel);
+        }
+        return postCountModelList.stream().collect(Collectors.toMap(m -> m.userJid, m -> m.postCount));
+    }
+
+    @Override
+    public long getUserPostCountByUserJid(String userJid) {
+        return userPostCountDao.getByUserJid(userJid).postCount;
+    }
+
+    @Override
     public long countThreadPost(ForumThread forumThread) {
         return threadPostDao.countByFiltersEq("", ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()));
     }
@@ -92,6 +125,7 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         List<ThreadPostModel> threadPostModels = threadPostDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()), 0, -1);
         ThreadPostModel firstThreadPostModel = threadPostModels.get(0);
         Map<String, Stack<ThreadPostModel>> threadPostsModelMap = Maps.newHashMap();
+        Map<String, Long> userJidToPostCountMap = getUserJidToPostCountMap(threadPostModels.stream().map(m -> m.userCreate).collect(Collectors.toList()));
 
         for (ThreadPostModel model : threadPostModels) {
             if ((model.replyJid != null) && !model.replyJid.isEmpty()) {
@@ -126,7 +160,7 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
             List<PostContentModel> postContentModels = postContentDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(PostContentModel_.postJid, threadPostModelWithLevel.threadPostModel.jid), 0, -1);
             List<PostContent> postContents = postContentModels.stream().map(m -> new PostContent(m.id, m.postJid, m.subject, m.content, new Date(m.timeCreate))).collect(Collectors.toList());
 
-            ThreadPost threadPost = ThreadPostServiceUtils.createThreadPostFromModel(threadPostModelWithLevel.threadPostModel, forumThread, postContents);
+            ThreadPost threadPost = ThreadPostServiceUtils.createThreadPostFromModel(threadPostModelWithLevel.threadPostModel, forumThread, postContents, userJidToPostCountMap.get(threadPostModelWithLevel.threadPostModel.userCreate));
             threadPostsWithLevelBuilder.add(new ThreadPostWithLevel(threadPost, threadPostModelWithLevel.level));
 
             threadPostsMap.put(threadPost.getJid(), threadPost);
@@ -141,11 +175,12 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         List<ThreadPostModel> threadPostModels = threadPostDao.findSortedByFiltersEq(orderBy, orderDir, filterString, ImmutableMap.of(ThreadPostModel_.threadJid, forumThread.getJid()), pageIndex * pageSize, pageSize);
 
         ImmutableList.Builder<ThreadPost> threadPostBuilder = ImmutableList.builder();
+        Map<String, Long> userJidToPostCountMap = getUserJidToPostCountMap(threadPostModels.stream().map(m -> m.userCreate).collect(Collectors.toList()));
         for (ThreadPostModel threadPostModel : threadPostModels) {
             List<PostContentModel> postContentModels = postContentDao.findSortedByFiltersEq("timeCreate", "asc", "", ImmutableMap.of(PostContentModel_.postJid, threadPostModel.jid), 0, -1);
             List<PostContent> postContents = postContentModels.stream().map(m -> new PostContent(m.id, m.postJid, m.subject, m.content, new Date(m.timeCreate))).collect(Collectors.toList());
 
-            threadPostBuilder.add(ThreadPostServiceUtils.createThreadPostFromModel(threadPostModel, forumThread, postContents));
+            threadPostBuilder.add(ThreadPostServiceUtils.createThreadPostFromModel(threadPostModel, forumThread, postContents, userJidToPostCountMap.get(threadPostModel.userCreate)));
         }
         return new Page<>(threadPostBuilder.build(), totalRowsCount, pageIndex, pageSize);
     }
@@ -163,6 +198,19 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         postContentModel.content = body;
 
         postContentDao.persist(postContentModel, userJid, userIpAddress);
+
+        UserPostCountModel userPostCountModel;
+        try {
+            userPostCountModel = userPostCountDao.getByUserJid(userJid);
+            userPostCountModel.postCount++;
+            userPostCountDao.edit(userPostCountModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        } catch (Exception e) {
+            userPostCountModel = new UserPostCountModel();
+            userPostCountModel.userJid = userJid;
+            userPostCountModel.postCount = postContentDao.getCountByUserJid(userJid);
+
+            userPostCountDao.persist(userPostCountModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        }
 
         updateThreadAndParents(forumThread, userJid, userIpAddress);
     }
