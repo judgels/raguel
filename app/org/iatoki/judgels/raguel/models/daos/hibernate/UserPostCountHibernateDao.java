@@ -22,6 +22,16 @@ public class UserPostCountHibernateDao extends AbstractHibernateDao<Long, UserPo
     }
 
     @Override
+    public boolean existByUserJid(String userJid) {
+        CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<UserPostCountModel> root = query.from(getModelClass());
+
+        query.select(cb.count(root)).where(cb.equal(root.get(UserPostCountModel_.userJid), userJid));
+        return JPA.em().createQuery(query).getSingleResult() != 0;
+    }
+
+    @Override
     public UserPostCountModel getByUserJid(String userJid) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<UserPostCountModel> query = cb.createQuery(getModelClass());

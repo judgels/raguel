@@ -200,11 +200,11 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         postContentDao.persist(postContentModel, userJid, userIpAddress);
 
         UserPostCountModel userPostCountModel;
-        try {
+        if (userPostCountDao.existByUserJid(userJid)) {
             userPostCountModel = userPostCountDao.getByUserJid(userJid);
             userPostCountModel.postCount++;
             userPostCountDao.edit(userPostCountModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-        } catch (Exception e) {
+        } else {
             userPostCountModel = new UserPostCountModel();
             userPostCountModel.userJid = userJid;
             userPostCountModel.postCount = postContentDao.getCountByUserJid(userJid);
