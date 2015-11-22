@@ -16,8 +16,6 @@ public interface ThreadPostService {
 
     Map<String, String> getThreadPostsJidToUserJidMap(List<String> threadPostJids);
 
-    Map<String, Long> getUserJidToPostCountMap(List<String> userJids);
-
     long getUserPostCountByUserJid(String userJid);
 
     long countThreadPost(ForumThread forumThread);
