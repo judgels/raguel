@@ -303,7 +303,7 @@ public final class ForumController extends AbstractForumController {
             content = getNonBaseForumContent(currentForum, pageIndex, orderBy, orderDir, filterString);
         }
 
-        HtmlTemplate htmlTemplate ;
+        HtmlTemplate htmlTemplate;
 
         if (currentForum != null) {
             htmlTemplate = super.getBaseHtmlTemplate(currentForum);
@@ -313,8 +313,7 @@ public final class ForumController extends AbstractForumController {
         } else {
             htmlTemplate = super.getBaseHtmlTemplate();
             if (isCurrentUserModeratorOrAdmin()) {
-                htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.new1", JudgelsPlayMessages
-                .get("forum.text.forum")), routes.ForumController.createForum(0));
+                htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.new1", JudgelsPlayMessages.get("forum.text.forum")), routes.ForumController.createForum(0));
             }
         }
 
