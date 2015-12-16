@@ -1,5 +1,5 @@
 @import org.iatoki.judgels.raguel.modules.forum.ForumModules
-@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayMessages
 @import org.iatoki.judgels.raguel.controllers.routes
 @import org.iatoki.judgels.raguel.Forum
 
@@ -7,29 +7,29 @@
 
 <div class="clearfix">
     <div class="col-md-6">
-        <h3>@Messages.get("forum.modules.disabled")</h3>
+        <h3>@JudgelsPlayMessages.get("forum.modules.text.disabled")</h3>
 
         @for(module <- ForumModules.values()) {
             @if(!forum.containOrInheritModule(module)) {
                 <div class="well clearfix">
-                    <div class="pull-right"><a href="@routes.ForumController.enableModule(forum.getId(), module.name())" class="btn btn-primary">@Messages.get("forum.module.enable")</a></div>
-                    <b>@Messages.get("forum.module." + module.name())</b>
+                    <div class="pull-right"><a href="@routes.ForumController.enableModule(forum.getId(), module.name())" class="btn btn-primary">@JudgelsPlayMessages.get("forum.module.button.enable")</a></div>
+                    <b>@JudgelsPlayMessages.get("forum.module.text." + module.name())</b>
                     <hr />
-                    @Messages.get("forum.module." + module.name() + ".description")
+                    @JudgelsPlayMessages.get("forum.module.text." + module.name() + ".description")
                 </div>
             }
         }
     </div>
 
     <div class="col-md-6">
-        <h3>@Messages.get("forum.modules.enabled")</h3>
+        <h3>@JudgelsPlayMessages.get("forum.modules.text.enabled")</h3>
 
         @for(module <- forum.getModulesSet) {
             <div class="well clearfix">
-                <div class="pull-right"><a href="@routes.ForumController.disableModule(forum.getId(), module.name())" class="btn btn-primary">@Messages.get("forum.module.disable")</a></div>
-                <b>@Messages.get("forum.module." + module.name())</b>
+                <div class="pull-right"><a href="@routes.ForumController.disableModule(forum.getId(), module.name())" class="btn btn-primary">@JudgelsPlayMessages.get("forum.module.button.disable")</a></div>
+                <b>@JudgelsPlayMessages.get("forum.module.text." + module.name())</b>
                 <hr />
-                @Messages.get("forum.module." + module.name() + ".description")
+                @JudgelsPlayMessages.get("forum.module.text." + module.name() + ".description")
             </div>
         }
     </div>
@@ -37,14 +37,14 @@
 
 <div class="clearfix">
     <div class="col-md-6">
-        <h3>@Messages.get("forum.modules.inherited")</h3>
+        <h3>@JudgelsPlayMessages.get("forum.modules.text.inherited")</h3>
 
         @for(module <- ForumModules.values()) {
             @if(forum.containOrInheritModule(module) && !forum.containModule(module)) {
                 <div class="well clearfix">
-                    <b>@Messages.get("forum.module." + module.name())</b>
+                    <b>@JudgelsPlayMessages.get("forum.module.text." + module.name())</b>
                     <hr />
-                    @Messages.get("forum.module." + module.name() + ".description")
+                    @JudgelsPlayMessages.get("forum.module.text." + module.name() + ".description")
                 </div>
             }
         }

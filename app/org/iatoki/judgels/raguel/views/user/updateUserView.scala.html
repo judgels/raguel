@@ -1,4 +1,4 @@
-@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayMessages
 @import org.iatoki.judgels.play.views.html.formErrorView
 @import org.iatoki.judgels.raguel.controllers.routes
 @import org.iatoki.judgels.raguel.forms.UserUpdateForm
@@ -12,7 +12,7 @@
 @b3.form(routes.UserController.postUpdateUser(userId)) {
     @helper.CSRF.formField
 
-    @b3.text(userUpdateForm("roles"), '_label -> Messages.get("user.roles"), 'class -> "form-control")
+    @b3.text(userUpdateForm("roles"), '_label -> JudgelsPlayMessages.get("user.field.roles"), 'class -> "form-control")
 
-    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
+    @b3.submit('class -> "btn btn-primary") { @JudgelsPlayMessages.get("commons.button.edit") }
 }

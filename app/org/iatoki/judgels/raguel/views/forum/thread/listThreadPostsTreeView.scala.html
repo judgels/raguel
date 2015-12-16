@@ -1,4 +1,4 @@
-@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayMessages
 @import scala.collection.JavaConversions
 @import org.iatoki.judgels.raguel.controllers.routes
 @import org.iatoki.judgels.play.IdentityUtils
@@ -11,9 +11,9 @@
 
 @(forumThread: ForumThread, threadPostsWithLevel: List[ThreadPostWithLevel], replyJidToIdMap: Map[String, Long], replyJidToUserJidMap: Map[String, String])
 
-<h3>@Messages.get("forum.thread.posts")</h3>
+<h3>@JudgelsPlayMessages.get("forum.thread.text.posts")</h3>
 <div class="clearfix">
-    @Messages.get("forum.thread.posts.view"): <a href="@routes.ThreadPostController.viewThreadPosts(forumThread.getId)">@Messages.get("forum.thread.posts.flat")</a> | <span>@Messages.get("forum.thread.posts.tree")</span>
+    @JudgelsPlayMessages.get("commons.text.view"): <a href="@routes.ThreadPostController.viewThreadPosts(forumThread.getId)">@JudgelsPlayMessages.get("forum.thread.post.text.flat")</a> | <span>@JudgelsPlayMessages.get("forum.thread.post.text.tree")</span>
 </div>
 <br />
 

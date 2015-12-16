@@ -1,4 +1,4 @@
-@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayMessages
 @import org.iatoki.judgels.play.views.html.table.tableView
 @import org.iatoki.judgels.play.views.html.table.tableHeadersView
 @import org.iatoki.judgels.play.views.html.table.searchView
@@ -15,7 +15,7 @@
 
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ForumThreadController.listThreads(currentForum.getId, newPageIndex, newOrderBy, newOrderDir, newFilterString)}
 
-<h3>@Messages.get("forum.threads")</h3>
+<h3>@JudgelsPlayMessages.get("forum.text.threads")</h3>
 
 @searchView(pageOfThreads.getPageIndex, orderBy, orderDir, filterString, listFunc)
 
@@ -23,10 +23,10 @@
 
 @tableView() {
     @tableHeadersView(pageOfThreads.getPageIndex, orderBy, orderDir, filterString, listFunc)(
-        "id" -> Messages.get("commons.id"),
-        "name" -> Messages.get("forum.thread.name"),
-        "" -> Messages.get("forum.thread.author"),
-        "timeUpdate" -> Messages.get("forum.thread.lastUpdate")
+        "id" -> JudgelsPlayMessages.get("commons.field.id"),
+        "name" -> JudgelsPlayMessages.get("forum.thread.field.name"),
+        "" -> JudgelsPlayMessages.get("forum.thread.text.author"),
+        "timeUpdate" -> JudgelsPlayMessages.get("forum.thread.text.lastUpdate")
     )
     <tbody>
         @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfThreads.getData.map(t => t.getAuthorJid).toSeq))) { displayNamesMap =>

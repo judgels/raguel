@@ -1,4 +1,4 @@
-@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayMessages
 @import org.iatoki.judgels.play.views.html.formErrorView
 @import org.iatoki.judgels.raguel.controllers.routes
 @import org.iatoki.judgels.raguel.Forum
@@ -12,12 +12,14 @@
 
 <script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/ckeditor.js")"></script>
 
+<h3>JudgelsPlayMessages.get("commons.text.new1", JudgelsPlayMessages.get("forum.text.thread"))</h3>
+
 @b3.form(routes.ForumThreadController.postCreateForumThread(forum.getId)) {
 
     @helper.CSRF.formField
 
-    @b3.text(forumThreadCreateForm("name"), '_label -> Messages.get("forum.thread.name"))
-    @b3.textarea(forumThreadCreateForm("content"), '_label -> Messages.get("forum.thread.content"), 'class -> "ckeditor")
+    @b3.text(forumThreadCreateForm("name"), '_label -> JudgelsPlayMessages.get("forum.thread.field.name"))
+    @b3.textarea(forumThreadCreateForm("content"), '_label -> JudgelsPlayMessages.get("forum.thread.field.content"), 'class -> "ckeditor")
 
-    @b3.submit('class -> "btn btn-primary") { @Messages.get("forum.thread.post") }
+    @b3.submit('class -> "btn btn-primary") { @JudgelsPlayMessages.get("forum.thread.button.post") }
 }

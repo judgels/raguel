@@ -1,110 +1,211 @@
-forum.forum=Forum
-forum.forums=Forums
+forum.field.name                                    = Name
+forum.field.description                             = Description
+forum.field.parent                                  = Parent
+forum.field.parent.none                             = None
 
-forum.subforums=Subforums
-forum.home=Home
-forum.create=New Forum
-forum.edit=Edit Forum
-forum.config.general=General
-forum.config.modules=Modules
-forum.config.specific=Specific
-forum.parent.none=None
-forum.parent=Parent
-forum.name=Name
-forum.description=Description
-forum.enter=Enter Forum
-forum.backTo=Back to
+forum.text.forum                                    = Forum
+forum.text.forum1                                   = Forum {0}
+forum.text.forums                                   = Forums
+forum.text.home                                     = Home
+forum.text.subforum                                 = Subforum
+forum.text.subforums                                = Subforums
+forum.text.lastPost                                 = Last post
+forum.text.lastPostBy                               = Last post by
+forum.text.lastUpdate                               = Last update
 
-forum.modules.enabled=Enabled Modules
-forum.modules.disabled=Disabled Modules
-forum.modules.inherited=Inherited Modules
+forum.text.thread                                   = Thread
+forum.text.threads                                  = Threads
+forum.text.member                                   = Member
+forum.text.members                                  = Members
 
-forum.module.enable=Enable
-forum.module.enable.error.dependencies=Modules can''t be enabled because it requires {0}.
-forum.module.enable.error.contradiction=Modules can''t be enabled because it conflicts with {0}.
-forum.module.enabled.error.inherited=Modules is already enabled in parent.
-forum.module.disable=Disable
-forum.module.disable.error.dependencies=Modules can''t be disabled because it is required by {0}.
+forum.config.text.general                           = General
+forum.config.text.modules                           = Modules
+forum.config.text.specific                          = Specific
 
-forum.module.THREAD=Threads
-forum.module.THREAD.description=Enable threads in the forum.
-forum.module.MEMBER=Members
-forum.module.MEMBER.description=Enable members in the forum.
-forum.module.EXCLUSIVE=Exclusive
-forum.module.EXCLUSIVE.description=Limit only moderator and admin to create thread. Requires Threads modules.
+forum.modules.text.enabled                          = Enabled Modules
+forum.modules.text.disabled                         = Disabled Modules
+forum.modules.text.inherited                        = Inherited Modules
 
-forum.canRegister=Can register?
-forum.password=Password
+forum.module.button.enable                          = Enable
+forum.module.button.disable                         = Disable
+forum.module.enable.error.dependencies              = Modules can''t be enabled because it requires {0}.
+forum.module.enable.error.contradiction             = Modules can''t be enabled because it conflicts with {0}.
+forum.module.disable.error.dependencies             = Modules can''t be disabled because it is required by {0}.
 
-forum.subforum=Subforum
-forum.lastPost=Last post
-forum.lastUserUpdate=Last post by
-forum.lastUpdate=Last update
+forum.module.text.THREAD                            = Thread
+forum.module.text.THREAD.description                = Enable threads in forum.
+forum.module.text.MEMBER                            = Member
+forum.module.text.MEMBER.description                = Enable members in forum.
+forum.module.text.EXCLUSIVE                         = Exclusive
+forum.module.text.EXCLUSIVE.description             = Limit only moderator and admin to create thread. Requires Threads modules.
 
-forum.thread=Thread
-forum.threads=Threads
-forum.thread.author=Author
-forum.thread.replyCount=Replies
-forum.thread.viewCount=Views
-forum.thread.lastUpdate=Last Update Time
-forum.thread.lastPost=Last post
-forum.thread.lastUserUpdate=Last post by
+forum.module.MEMBERS.field.canRegister              = Can register?
 
-forum.thread.create=New Thread
-forum.thread.post=Post Thread
-forum.thread.name=Name
-forum.thread.content=Content
+forum.thread.text.author                            = Author
+forum.thread.text.replies                           = Replies
+forum.thread.text.views                             = Views
+forum.thread.text.lastPost                          = Last post
+forum.thread.text.lastPostBy                        = Last post by
+forum.thread.text.lastUpdate                        = Last Update
 
-forum.member=Member
-forum.members=Members
-forum.member.edit=Edit Member
-forum.member.delete.confirmation=Are you sure you want to delete?
+forum.thread.button.post                            = Post Thread
 
-forum.member.name=Name
-forum.member.status=Status
-forum.member.importTXT=Import via txt
-forum.member.manualCreate=Manual Create
-forum.member.delete.confirmation=Are you sure you want to delete?
-forum.member.username=Username
-forum.member.usernames=Usernames
+forum.thread.field.name                             = Name
+forum.thread.field.description                      = Description
 
-forum.member.upload.success=Upload Success
-forum.member.upload.result=Upload Result
+forum.member.text.importTXT                         = Import via txt
+forum.member.text.manualAdd                         = Manual add
 
-error.member.create.userIsAlreadyMember=User is already member.
-error.member.create.userNotExist=User not exist..
-error.member.isAlreadyMember=User is already member.
-error.member.userNotExist=User not exist.
+forum.member.upload.text.success                    = Upload Success
+forum.member.upload.text.result                     = Upload Result
 
-forum.thread.posts=Posts
-forum.thread.post.subject=Subject
-forum.thread.post.content=Content
-forum.thread.post.edit=Edit
-forum.thread.post.versions=Versions
-forum.thread.post.previousContents=Previous Contents
-forum.thread.post.reply=Reply
-forum.thread.post.repliedPost=Replied Post
-forum.thread.post.responseTo=Response to
-forum.thread.post.by=by
-forum.thread.post.backTo=Back to
-forum.thread.posts.view=View
-forum.thread.posts.flat=Flat
-forum.thread.posts.tree=Tree
+forum.member.field.name                             = Name
+forum.member.field.status                           = Status
+forum.member.field.username                         = Username
+forum.member.field.usernames                        = Usernames
 
-forum.members=Members
+forum.member.new.error.registered                   = User is already member.
+forum.member.new.error.invalid                      = User is invalid.
 
-user.users=Users
-user.user=User
+forum.thread.post.field.subject                     = Subject
+forum.thread.post.field.content                     = Content
 
-user.list=Users
-user.create=Create User
-user.view=View User
-user.update=Update User
+forum.thread.post.text.reply                        = Reply
 
-user.create.error.usernameNotFound=Username not found
-user.create.error.userAlreadyExists=User already exists
-user.delete.confirmation=Are you sure you want to delete?
+forum.thread.post.button.reply                      = Reply
 
-user.username=Username
-user.name=Name
-user.roles=Roles
+forum.thread.text.post                              = Post
+forum.thread.text.posts                             = Posts
+forum.thread.post.text.versions                     = Versions
+forum.thread.post.content.text.previous             = Previous Contents
+forum.thread.post.text.replied                      = Replied Post
+forum.thread.post.text.response                     = Response to
+forum.thread.post.text.by                           = by
+forum.thread.post.text.flat                         = Flat
+forum.thread.post.text.tree                         = Tree
+
+user.text.user                                      = User
+user.text.users                                     = Users
+
+user.new.error.added                                = User already exists.
+user.new.error.invalid                              = User is invalid.
+
+user.field.username                                 = Username
+user.field.name                                     = Name
+user.field.roles                                    = Roles
+
+upload.text.value                                   = Value
+upload.text.status                                  = Status
+
+#Old Values
+
+# forum.forum=Forum
+# forum.forums=Forums
+#
+# forum.subforums=Subforums
+# forum.home=Home
+# forum.create=New Forum
+# forum.edit=Edit Forum
+# forum.config.general=General
+# forum.config.modules=Modules
+# forum.config.specific=Specific
+# forum.parent.none=None
+# forum.parent=Parent
+# forum.name=Name
+# forum.description=Description
+# forum.enter=Enter Forum
+# forum.backTo=Back to
+#
+# forum.modules.enabled=Enabled Modules
+# forum.modules.disabled=Disabled Modules
+# forum.modules.inherited=Inherited Modules
+#
+# forum.module.enable=Enable
+# forum.module.enable.error.dependencies=Modules can''t be enabled because it requires {0}.
+# forum.module.enable.error.contradiction=Modules can''t be enabled because it conflicts with {0}.
+# forum.module.enabled.error.inherited=Modules is already enabled in parent.
+# forum.module.disable=Disable
+# forum.module.disable.error.dependencies=Modules can''t be disabled because it is required by {0}.
+#
+# forum.module.THREAD=Threads
+# forum.module.THREAD.description=Enable threads in the forum.
+# forum.module.MEMBER=Members
+# forum.module.MEMBER.description=Enable members in the forum.
+# forum.module.EXCLUSIVE=Exclusive
+# forum.module.EXCLUSIVE.description=Limit only moderator and admin to create thread. Requires Threads modules.
+#
+# forum.canRegister=Can register?
+# forum.password=Password
+#
+# forum.subforum=Subforum
+# forum.lastPost=Last post
+# forum.lastUserUpdate=Last post by
+# forum.lastUpdate=Last update
+#
+# forum.thread=Thread
+# forum.threads=Threads
+# forum.thread.author=Author
+# forum.thread.replyCount=Replies
+# forum.thread.viewCount=Views
+# forum.thread.lastUpdate=Last Update Time
+# forum.thread.lastPost=Last post
+# forum.thread.lastUserUpdate=Last post by
+#
+# forum.thread.create=New Thread
+# forum.thread.post=Post Thread
+# forum.thread.name=Name
+# forum.thread.content=Content
+#
+# forum.member=Member
+# forum.members=Members
+# forum.member.edit=Edit Member
+# forum.member.delete.confirmation=Are you sure you want to delete?
+#
+# forum.member.name=Name
+# forum.member.status=Status
+# forum.member.importTXT=Import via txt
+# forum.member.manualCreate=Manual Create
+# forum.member.delete.confirmation=Are you sure you want to delete?
+# forum.member.username=Username
+# forum.member.usernames=Usernames
+#
+# forum.member.upload.success=Upload Success
+# forum.member.upload.result=Upload Result
+#
+# error.member.create.userIsAlreadyMember=User is already member.
+# error.member.create.userNotExist=User not exist..
+# error.member.isAlreadyMember=User is already member.
+# error.member.userNotExist=User not exist.
+#
+# forum.thread.posts=Posts
+# forum.thread.post.subject=Subject
+# forum.thread.post.content=Content
+# forum.thread.post.edit=Edit
+# forum.thread.post.versions=Versions
+# forum.thread.post.previousContents=Previous Contents
+# forum.thread.post.reply=Reply
+# forum.thread.post.repliedPost=Replied Post
+# forum.thread.post.responseTo=Response to
+# forum.thread.post.by=by
+# forum.thread.post.backTo=Back to
+# forum.thread.posts.view=View
+# forum.thread.posts.flat=Flat
+# forum.thread.posts.tree=Tree
+#
+# forum.members=Members
+#
+# user.users=Users
+# user.user=User
+#
+# user.list=Users
+# user.create=Create User
+# user.view=View User
+# user.update=Update User
+#
+# user.create.error.usernameNotFound=Username not found
+# user.create.error.userAlreadyExists=User already exists
+# user.delete.confirmation=Are you sure you want to delete?
+#
+# user.username=Username
+# user.name=Name
+# user.roles=Roles

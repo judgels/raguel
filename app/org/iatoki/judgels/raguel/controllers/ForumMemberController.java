@@ -3,14 +3,14 @@ package org.iatoki.judgels.raguel.controllers;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
 import org.iatoki.judgels.api.JudgelsAPIClientException;
+import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.api.jophiel.JophielUser;
-import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.InternalLink;
-import org.iatoki.judgels.play.LazyHtml;
+import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
+import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
+import org.iatoki.judgels.play.HtmlTemplate;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
-import org.iatoki.judgels.play.views.html.layouts.heading3Layout;
+import org.iatoki.judgels.play.services.BaseJidCacheService;
 import org.iatoki.judgels.play.views.html.layouts.messageView;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumMember;
@@ -28,17 +28,17 @@ import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
-import play.i18n.Messages;
+import org.iatoki.judgels.play.JudgelsPlayMessages;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.twirl.api.Html;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
-public final class ForumMemberController extends AbstractJudgelsController {
+public final class ForumMemberController extends AbstractForumController {
 
     private static final long PAGE_SIZE = 1000;
 
@@ -48,7 +48,8 @@ public final class ForumMemberController extends AbstractJudgelsController {
     private final UserService userService;
 
     @Inject
-    public ForumMemberController(JophielPublicAPI jophielPublicAPI, ForumService forumService, ForumMemberService forumMemberService, UserService userService) {
+    public ForumMemberController(BaseJidCacheService jidCacheService, BaseAvatarCacheService avatarCacheService, JophielClientAPI jophielClientAPI, JophielPublicAPI jophielPublicAPI, UserActivityMessageService userActivityMessageService, ForumMemberService forumMemberService, ForumService forumService, UserService userService) {
+        super(jidCacheService, avatarCacheService, jophielClientAPI, jophielPublicAPI, userActivityMessageService, forumMemberService);
         this.jophielPublicAPI = jophielPublicAPI;
         this.forumService = forumService;
         this.forumMemberService = forumMemberService;
@@ -65,7 +66,7 @@ public final class ForumMemberController extends AbstractJudgelsController {
     @AddCSRFToken
     public Result listAddMembers(long forumId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumNotFoundException {
         Forum forum = forumService.findForumById(forumId);
-        if (!RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
+        if (!isCurrentUserModeratorOrAdmin()) {
             return redirect(routes.ForumController.viewForums(forumId));
         }
 
@@ -81,7 +82,7 @@ public final class ForumMemberController extends AbstractJudgelsController {
     @RequireCSRFCheck
     public Result postAddMember(long forumId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumNotFoundException {
         Forum forum = forumService.findForumById(forumId);
-        if (!RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
+        if (!isCurrentUserModeratorOrAdmin()) {
             return redirect(routes.ForumController.viewForums(forumId));
         }
 
@@ -113,8 +114,8 @@ public final class ForumMemberController extends AbstractJudgelsController {
             return showlistAddMemberWithMemberAddForm(pageIndex, orderBy, orderDir, filterString, forumMemberCreateForm, forum);
         }
 
-        userService.upsertUserFromJophielUser(jophielUser, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-        forumMemberService.createForumMember(forum.getJid(), jophielUser.getJid(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userService.upsertUserFromJophielUser(jophielUser, getCurrentUserJid(), getCurrentUserIpAddress());
+        forumMemberService.createForumMember(forum.getJid(), jophielUser.getJid(), getCurrentUserJid(), getCurrentUserIpAddress());
 
         return redirect(routes.ForumMemberController.viewMembers(forum.getId()));
     }
@@ -123,7 +124,7 @@ public final class ForumMemberController extends AbstractJudgelsController {
     @RequireCSRFCheck
     public Result postUploadMember(long forumId) throws ForumNotFoundException {
         Forum forum = forumService.findForumById(forumId);
-        if (!RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
+        if (!isCurrentUserModeratorOrAdmin()) {
             return redirect(routes.ForumController.viewForums(forumId));
         }
 
@@ -141,16 +142,16 @@ public final class ForumMemberController extends AbstractJudgelsController {
                         JophielUser jophielUser = jophielPublicAPI.findUserByUsername(username);
                         if (jophielUser != null) {
                             if (!forumMemberService.isMemberInForum(forum.getJid(), jophielUser.getJid())) {
-                                userService.upsertUserFromJophielUser(jophielUser, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
-                                forumMemberService.createForumMember(forum.getJid(), jophielUser.getJid(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+                                userService.upsertUserFromJophielUser(jophielUser, getCurrentUserJid(), getCurrentUserIpAddress());
+                                forumMemberService.createForumMember(forum.getJid(), jophielUser.getJid(), getCurrentUserJid(), getCurrentUserIpAddress());
                             } else {
-                                failedUploadsBuilder.add(new UploadResult(username, Messages.get("error.member.isAlreadyMember")));
+                                failedUploadsBuilder.add(new UploadResult(username, JudgelsPlayMessages.get("forum.member.new.error.registered")));
                             }
                         } else {
-                            failedUploadsBuilder.add(new UploadResult(username, Messages.get("error.member.userNotExist")));
+                            failedUploadsBuilder.add(new UploadResult(username, JudgelsPlayMessages.get("forum.member.new.error.invalid")));
                         }
                     } catch (JudgelsAPIClientException e) {
-                        failedUploadsBuilder.add(new UploadResult(username, Messages.get("error.member.userNotExist")));
+                        failedUploadsBuilder.add(new UploadResult(username, JudgelsPlayMessages.get("forum.member.new.error.invalid")));
                     }
                 }
 
@@ -167,7 +168,7 @@ public final class ForumMemberController extends AbstractJudgelsController {
     public Result removeMember(long forumId, long forumMemberId) throws ForumNotFoundException, ForumMemberNotFoundException {
         Forum forum = forumService.findForumById(forumId);
         ForumMember forumMember = forumMemberService.findMemberInForumById(forumMemberId);
-        if (!RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
+        if (!isCurrentUserModeratorOrAdmin()) {
             return redirect(routes.ForumController.viewForums(forumId));
         }
 
@@ -185,48 +186,39 @@ public final class ForumMemberController extends AbstractJudgelsController {
     }
 
     private Result showlistAddMember(Page<ForumMember> forumMembers, long pageIndex, String orderBy, String orderDir, String filterString, Form<ForumMemberAddForm> forumMemberCreateForm, Form<ForumMemberUploadForm> forumMemberUploadForm, Forum forum) {
-        LazyHtml content = new LazyHtml(listAddMembersView.render(forum.getId(), forumMembers, pageIndex, orderBy, orderDir, filterString, forumMemberCreateForm, forumMemberUploadForm, jophielPublicAPI.getUserAutocompleteAPIEndpoint()));
-        content.appendLayout(c -> heading3Layout.render(Messages.get("forum.members"), c));
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate(forum);
 
-        ForumControllerUtils.getInstance().appendTabsLayout(content, forum, IdentityUtils.getUserJid());
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        appendBreadcrumbsLayout(content, forum,
-                new InternalLink(Messages.get("forum.members"), routes.ForumMemberController.viewMembers(forum.getId()))
-        );
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Members");
+        Html content = listAddMembersView.render(forum.getId(), forumMembers, pageIndex, orderBy, orderDir, filterString, forumMemberCreateForm, forumMemberUploadForm, jophielPublicAPI.getUserAutocompleteAPIEndpoint());
+        htmlTemplate.setContent(content);
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.text.members"), routes.ForumMemberController.viewMembers(forum.getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 
     private Result showUploadMemberResult(List<UploadResult> failedUploads, Forum forum) {
-        LazyHtml content;
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate(forum);
+
+        Html content;
         if (failedUploads.size() > 0) {
-            content = new LazyHtml(uploadResultView.render(failedUploads));
+            content = uploadResultView.render(failedUploads);
         } else {
-            content = new LazyHtml(messageView.render(Messages.get("forum.member.upload.success")));
+            content = messageView.render(JudgelsPlayMessages.get("forum.member.upload.text.success"));
         }
-        content.appendLayout(c -> heading3Layout.render(Messages.get("forum.member.upload.result"), c));
 
-        ForumControllerUtils.getInstance().appendTabsLayout(content, forum, IdentityUtils.getUserJid());
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        appendBreadcrumbsLayout(content, forum,
-                new InternalLink(Messages.get("forum.members"), routes.ForumMemberController.viewMembers(forum.getId()))
-        );
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Members - Upload Result");
+        htmlTemplate.setContent(content);
+        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("forum.member.upload.text.result"));
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.text.members"), routes.ForumMemberController.viewMembers(forum.getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 
-    private void appendBreadcrumbsLayout(LazyHtml content, Forum forum, InternalLink... lastLinks) {
-        Forum parentForum = forum.getParentForum();
-        ImmutableList.Builder<InternalLink> internalLinkBuilder;
-        if (parentForum != null) {
-            internalLinkBuilder = ForumControllerUtils.getForumBreadcrumbsBuilder(parentForum);
-        } else {
-            internalLinkBuilder = ImmutableList.builder();
-        }
-        internalLinkBuilder.add(new InternalLink(Messages.get("forum.members"), routes.ForumController.jumpToMembers(forum.getId())));
-        internalLinkBuilder.addAll(Arrays.asList(lastLinks));
-        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
+    @Override
+    protected HtmlTemplate getBaseHtmlTemplate(Forum forum) {
+        HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate(forum);
+
+        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.text.members"), routes.ForumController.jumpToMembers(forum.getId()));
+        return htmlTemplate;
     }
 }
