@@ -16,7 +16,7 @@
             </div>
             @if(RaguelUtils.hasRole("admin")) {
                 <div class="pull-right">
-                    <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forum.getId)">@Messages.get("commons.update")</a>
+                    <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forum.getId)">@Messages.get("commons.button.edit")</a>
                 </div>
             }
         </div>
@@ -27,11 +27,11 @@
                     <div class="clearfix">
                         @if(RaguelUtils.hasRole("admin")) {
                             <div class="pull-right">
-                                <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(subforum.getId)">@Messages.get("commons.update")</a>
+                                <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(subforum.getId)">@Messages.get("commons.button.edit")</a>
                             </div>
                         }
                         <div class="pull-right">
-                            <small>@Messages.get("forum.lastPost"): @lastUpdateDisplayNamesMap.get(subforum.getLastUpdateUserJid) @if(subforum.getLastUpdate != null){ @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforum.getLastUpdate.getTime)</time> } </small>
+                            <small>@Messages.get("forum.text.lastPost"): @lastUpdateDisplayNamesMap.get(subforum.getLastUpdateUserJid) @if(subforum.getLastUpdate != null){ @@ <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(subforum.getLastUpdate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(subforum.getLastUpdate.getTime)</time> } </small>
                         </div>
                         <div>
                             <h4><a href="@routes.ForumController.viewForums(subforum.getId)">@subforum.getName</a></h4>

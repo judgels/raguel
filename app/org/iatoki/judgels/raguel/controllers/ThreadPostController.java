@@ -1,12 +1,12 @@
 package org.iatoki.judgels.raguel.controllers;
 
-import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.InternalLink;
-import org.iatoki.judgels.play.LazyHtml;
+import org.iatoki.judgels.api.jophiel.JophielClientAPI;
+import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
+import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
-import org.iatoki.judgels.play.views.html.layouts.headingWithBackLayout;
+import org.iatoki.judgels.play.jid.BaseJidCacheService;
+import org.iatoki.judgels.play.template.HtmlTemplate;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumThread;
 import org.iatoki.judgels.raguel.ForumThreadNotFoundException;
@@ -20,6 +20,7 @@ import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
 import org.iatoki.judgels.raguel.forms.ThreadPostUpsertForm;
 import org.iatoki.judgels.raguel.modules.forum.ForumModules;
+import org.iatoki.judgels.raguel.services.ForumMemberService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
 import org.iatoki.judgels.raguel.services.ThreadPostService;
 import org.iatoki.judgels.raguel.services.UserItemService;
@@ -34,18 +35,18 @@ import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Result;
+import play.twirl.api.Html;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Singleton
 @Named
-public final class ThreadPostController extends AbstractJudgelsController {
+public final class ThreadPostController extends AbstractForumController {
 
     private static final long PAGE_SIZE = 20;
 
@@ -54,7 +55,8 @@ public final class ThreadPostController extends AbstractJudgelsController {
     private final UserItemService userItemService;
 
     @Inject
-    public ThreadPostController(ForumThreadService forumThreadService, ThreadPostService threadPostService, UserItemService userItemService) {
+    public ThreadPostController(BaseJidCacheService jidCacheService, BaseAvatarCacheService avatarCacheService, JophielClientAPI jophielClientAPI, JophielPublicAPI jophielPublicAPI, UserActivityMessageService userActivityMessageService, ForumMemberService forumMemberService, ForumThreadService forumThreadService, ThreadPostService threadPostService, UserItemService userItemService) {
+        super(jidCacheService, avatarCacheService, jophielClientAPI, jophielPublicAPI, userActivityMessageService, forumMemberService);
         this.forumThreadService = forumThreadService;
         this.threadPostService = threadPostService;
         this.userItemService = userItemService;
@@ -82,7 +84,7 @@ public final class ThreadPostController extends AbstractJudgelsController {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+        if (!isCurrentUserAllowedToEnterForum(forum)) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
@@ -91,28 +93,19 @@ public final class ThreadPostController extends AbstractJudgelsController {
         Map<String, Long> replyJidToIdMap = threadPostService.getThreadPostsJidToIdMap(replyJids);
         Map<String, String> replyJidToUserJidMap = threadPostService.getThreadPostsJidToUserJidMap(replyJids);
 
-        userItemService.upsertUserItem(IdentityUtils.getUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
+        userItemService.upsertUserItem(getCurrentUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
 
-        LazyHtml content = new LazyHtml(listThreadPostsTreeView.render(forumThread, threadPostsWithLevel, replyJidToIdMap, replyJidToUserJidMap));
-        content.appendLayout(c -> headingWithBackLayout.render(forumThread.getName(), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + forumThread.getParentForum().getName(), routes.ForumController.viewForums(forumThread.getParentForum().getId())), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate(forum);
 
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        Stack<InternalLink> internalLinkStack = new Stack<>();
-        Forum currentParent = forumThread.getParentForum();
-        while (currentParent != null) {
-            internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
-            currentParent = currentParent.getParentForum();
-        }
+        Html content = listThreadPostsTreeView.render(forumThread, threadPostsWithLevel, replyJidToIdMap, replyJidToUserJidMap);
+        htmlTemplate.setContent(content);
 
-        while (!internalLinkStack.isEmpty()) {
-            internalLinkBuilder.add(internalLinkStack.pop());
-        }
-        internalLinkBuilder.add(new InternalLink(forumThread.getName(), routes.ThreadPostController.viewThreadPosts(forumThread.getId())));
-        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Thread " + forumThread.getName());
+        htmlTemplate.setMainTitle(forumThread.getName());
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", forumThread.getParentForum().getName()), routes.ForumController.viewForums(forumThread.getParentForum().getId()));
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        htmlTemplate.markBreadcrumbLocation(forumThread.getName(), routes.ThreadPostController.viewThreadPosts(forumThread.getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 
     @Authenticated(value = GuestView.class)
@@ -125,30 +118,21 @@ public final class ThreadPostController extends AbstractJudgelsController {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+        if (!isCurrentUserAllowedToEnterForum(forum)) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        LazyHtml content = new LazyHtml(listPostContentsView.render(threadPost));
-        content.appendLayout(c -> headingWithBackLayout.render(Messages.get("forum.thread.post.versions"), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId())), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate(forum);
 
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        Stack<InternalLink> internalLinkStack = new Stack<>();
-        Forum currentParent = threadPost.getThread().getParentForum();
-        while (currentParent != null) {
-            internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
-            currentParent = currentParent.getParentForum();
-        }
+        Html content = listPostContentsView.render(threadPost);
+        htmlTemplate.setContent(content);
 
-        while (!internalLinkStack.isEmpty()) {
-            internalLinkBuilder.add(internalLinkStack.pop());
-        }
-        internalLinkBuilder.add(new InternalLink(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId())));
-        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Post Version");
+        htmlTemplate.setMainTitle(Messages.get("forum.thread.post.text.versions"));
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", threadPost.getThread().getName()), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        htmlTemplate.markBreadcrumbLocation(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -162,11 +146,11 @@ public final class ThreadPostController extends AbstractJudgelsController {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+        if (!isCurrentUserAllowedToEnterForum(forum)) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!IdentityUtils.getUserJid().equals(threadPost.getUserJid())) {
+        if (!getCurrentUserJid().equals(threadPost.getUserJid())) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
@@ -190,11 +174,11 @@ public final class ThreadPostController extends AbstractJudgelsController {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+        if (!isCurrentUserAllowedToEnterForum(forum)) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!IdentityUtils.getUserJid().equals(threadPost.getUserJid())) {
+        if (!getCurrentUserJid().equals(threadPost.getUserJid())) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
@@ -205,7 +189,7 @@ public final class ThreadPostController extends AbstractJudgelsController {
         }
 
         ThreadPostUpsertForm threadPostUpsertData = threadPostUpsertForm.get();
-        threadPostService.editPost(threadPost, IdentityUtils.getUserJid(), threadPostUpsertData.subject, threadPostUpsertData.content, IdentityUtils.getIpAddress());
+        threadPostService.editPost(threadPost, getCurrentUserJid(), threadPostUpsertData.subject, threadPostUpsertData.content, getCurrentUserIpAddress());
 
         return redirect(routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
     }
@@ -221,7 +205,7 @@ public final class ThreadPostController extends AbstractJudgelsController {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+        if (!isCurrentUserAllowedToEnterForum(forum)) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
@@ -249,7 +233,7 @@ public final class ThreadPostController extends AbstractJudgelsController {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+        if (!isCurrentUserAllowedToEnterForum(forum)) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
@@ -260,11 +244,19 @@ public final class ThreadPostController extends AbstractJudgelsController {
         }
 
         ThreadPostUpsertForm threadPostUpsertData = threadPostUpsertForm.get();
-        threadPostService.replyPost(threadPost, IdentityUtils.getUserJid(), threadPostUpsertData.subject, threadPostUpsertData.content, IdentityUtils.getIpAddress());
+        threadPostService.replyPost(threadPost, getCurrentUserJid(), threadPostUpsertData.subject, threadPostUpsertData.content, getCurrentUserIpAddress());
 
         long totalPost = threadPostService.countThreadPost(threadPost.getThread());
 
         return redirect(routes.ThreadPostController.listThreadPosts(threadPost.getThread().getId(), ((totalPost - 1) / PAGE_SIZE), "id", "asc", ""));
+    }
+
+    @Override
+    protected HtmlTemplate getBaseHtmlTemplate(Forum forum) {
+        HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
+        markForumBreadcrumbs(htmlTemplate, forum);
+
+        return htmlTemplate;
     }
 
     private Result showListThreadPosts(long forumThreadId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumThreadNotFoundException {
@@ -275,7 +267,7 @@ public final class ThreadPostController extends AbstractJudgelsController {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
-        if (!ForumControllerUtils.getInstance().isAllowedToEnterForum(forum, IdentityUtils.getUserJid())) {
+        if (!isCurrentUserAllowedToEnterForum(forum)) {
             return redirect(routes.ForumController.viewForums(forum.getId()));
         }
 
@@ -284,71 +276,49 @@ public final class ThreadPostController extends AbstractJudgelsController {
         Map<String, Long> replyJidToIdMap = threadPostService.getThreadPostsJidToIdMap(replyJids);
         Map<String, String> replyJidToUserJidMap = threadPostService.getThreadPostsJidToUserJidMap(replyJids);
 
-        userItemService.upsertUserItem(IdentityUtils.getUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
+        userItemService.upsertUserItem(getCurrentUserJid(), forumThread.getJid(), UserItemStatus.VIEWED);
 
-        LazyHtml content = new LazyHtml(listThreadPostsView.render(forumThread, pageOfThreadPosts, replyJidToIdMap, replyJidToUserJidMap, orderBy, orderDir, filterString));
-        content.appendLayout(c -> headingWithBackLayout.render(forumThread.getName(), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + forumThread.getParentForum().getName(), routes.ForumController.viewForums(forumThread.getParentForum().getId())), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate(forum);
 
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        Stack<InternalLink> internalLinkStack = new Stack<>();
-        Forum currentParent = forumThread.getParentForum();
-        while (currentParent != null) {
-            internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
-            currentParent = currentParent.getParentForum();
-        }
+        Html content = listThreadPostsView.render(forumThread, pageOfThreadPosts, replyJidToIdMap, replyJidToUserJidMap, orderBy, orderDir, filterString);
+        htmlTemplate.setContent(content);
 
-        while (!internalLinkStack.isEmpty()) {
-            internalLinkBuilder.add(internalLinkStack.pop());
-        }
-        internalLinkBuilder.add(new InternalLink(forumThread.getName(), routes.ThreadPostController.viewThreadPosts(forumThread.getId())));
-        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Thread " + forumThread.getName());
+        htmlTemplate.setMainTitle(forumThread.getName());
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", forumThread.getParentForum().getName()), routes.ForumController.viewForums(forumThread.getParentForum().getId()));
+
+        htmlTemplate.markBreadcrumbLocation(forumThread.getName(), routes.ThreadPostController.viewThreadPosts(forumThread.getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 
     private Result showEditThreadPost(ThreadPost threadPost, Form<ThreadPostUpsertForm> threadPostUpsertForm) {
-        LazyHtml content = new LazyHtml(editThreadPostView.render(threadPost, threadPostUpsertForm));
-        content.appendLayout(c -> headingWithBackLayout.render(Messages.get("forum.thread.post.edit"), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + threadPost.getThread().getParentForum().getName(), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId())), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        Stack<InternalLink> internalLinkStack = new Stack<>();
-        Forum currentParent = threadPost.getThread().getParentForum();
-        while (currentParent != null) {
-            internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
-            currentParent = currentParent.getParentForum();
-        }
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate(threadPost.getThread().getParentForum());
 
-        while (!internalLinkStack.isEmpty()) {
-            internalLinkBuilder.add(internalLinkStack.pop());
-        }
-        internalLinkBuilder.add(new InternalLink(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId())));
-        internalLinkBuilder.add(new InternalLink(Messages.get("forum.thread.post.edit"), routes.ThreadPostController.editThreadPost(threadPost.getId())));
-        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Post - Edit");
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        Html content = editThreadPostView.render(threadPost, threadPostUpsertForm);
+        htmlTemplate.setContent(content);
+
+        htmlTemplate.setMainTitle(Messages.get("commons.button.edit"));
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", threadPost.getThread().getParentForum().getName()), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId()));
+
+        htmlTemplate.markBreadcrumbLocation(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.button.edit"), routes.ThreadPostController.editThreadPost(threadPost.getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 
     private Result showReplyThreadPost(ThreadPost threadPost, Form<ThreadPostUpsertForm> threadPostUpsertForm) {
-        LazyHtml content = new LazyHtml(replyThreadPostView.render(threadPost, threadPostUpsertForm));
-        content.appendLayout(c -> headingWithBackLayout.render(Messages.get("forum.thread.post.reply"), new InternalLink(Messages.get("forum.thread.post.backTo") + " " + threadPost.getThread().getParentForum().getName(), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId())), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        ImmutableList.Builder<InternalLink> internalLinkBuilder = ImmutableList.builder();
-        Stack<InternalLink> internalLinkStack = new Stack<>();
-        Forum currentParent = threadPost.getThread().getParentForum();
-        while (currentParent != null) {
-            internalLinkStack.push(new InternalLink(currentParent.getName(), routes.ForumController.viewForums(currentParent.getId())));
-            currentParent = currentParent.getParentForum();
-        }
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate(threadPost.getThread().getParentForum());
 
-        while (!internalLinkStack.isEmpty()) {
-            internalLinkBuilder.add(internalLinkStack.pop());
-        }
-        internalLinkBuilder.add(new InternalLink(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId())));
-        internalLinkBuilder.add(new InternalLink(Messages.get("forum.thread.post.reply"), routes.ThreadPostController.replyThreadPost(threadPost.getId())));
-        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Post - Reply");
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        Html content = replyThreadPostView.render(threadPost, threadPostUpsertForm);
+        htmlTemplate.setContent(content);
+
+        htmlTemplate.setMainTitle(Messages.get("forum.thread.post.text.reply"));
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", threadPost.getThread().getParentForum().getName()), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId()));
+
+        htmlTemplate.markBreadcrumbLocation(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.thread.post.text.reply"), routes.ThreadPostController.replyThreadPost(threadPost.getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 }

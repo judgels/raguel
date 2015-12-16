@@ -7,15 +7,15 @@
 <script type="text/javascript" src="@controllers.routes.Assets.versioned("javascripts/ckeditor.js")"></script>
 
 <div class="form-group" id="parentJid_field">
-    <label class="control-label col-md-2" for="parentJid">@Messages.get("forum.parent")</label>
+    <label class="control-label col-md-2" for="parentJid">@Messages.get("forum.field.parent")</label>
     <div class="col-md-10">
         <select id="parentJid" name="parentJid" class="form-control selectpicker">
-            <option value="">@Messages.get("forum.parent.none")</option>
+            <option value="">@Messages.get("forum.field.parent.none")</option>
             @for(forum <- forums) {
                 <option value="@forum.getJid" @if(forum.getJid.equals(forumUpsertForm("parentJid").value)) { selected="selected" }>@Html(forum.prependSpacesBasedOnLevel(3))</option>
             }
         </select>
     </div>
 </div>
-@b3.text(forumUpsertForm("name"), '_label -> Messages.get("forum.name"))
-@b3.textarea(forumUpsertForm("description"), '_label -> Messages.get("forum.description"), 'class -> "ckeditor form-control")
+@b3.text(forumUpsertForm("name"), '_label -> Messages.get("forum.field.name"))
+@b3.textarea(forumUpsertForm("description"), '_label -> Messages.get("forum.field.description"), 'class -> "ckeditor form-control")

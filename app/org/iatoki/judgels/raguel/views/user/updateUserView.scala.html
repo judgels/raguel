@@ -12,7 +12,7 @@
 @b3.form(routes.UserController.postUpdateUser(userId)) {
     @helper.CSRF.formField
 
-    @b3.text(userUpdateForm("roles"), '_label -> Messages.get("user.roles"), 'class -> "form-control")
+    @b3.text(userUpdateForm("roles"), '_label -> Messages.get("user.field.roles"), 'class -> "form-control")
 
-    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.update") }
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.button.edit") }
 }
