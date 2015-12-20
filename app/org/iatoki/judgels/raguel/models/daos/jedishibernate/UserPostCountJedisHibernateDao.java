@@ -25,7 +25,7 @@ public class UserPostCountJedisHibernateDao extends AbstractJedisHibernateDao<Lo
     }
 
     @Override
-    public boolean existByUserJid(String userJid) {
+    public boolean existsByUserJid(String userJid) {
         CriteriaBuilder cb = JPA.em().getCriteriaBuilder();
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
         Root<UserPostCountModel> root = query.from(getModelClass());
