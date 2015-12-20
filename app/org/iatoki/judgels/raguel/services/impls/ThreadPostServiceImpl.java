@@ -179,16 +179,16 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
         postContentDao.persist(postContentModel, userJid, userIpAddress);
 
         UserPostCountModel userPostCountModel;
-        if (userPostCountDao.existByUserJid(userJid)) {
+        if (userPostCountDao.existsByUserJid(userJid)) {
             userPostCountModel = userPostCountDao.getByUserJid(userJid);
             userPostCountModel.postCount++;
-            userPostCountDao.edit(userPostCountModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            userPostCountDao.edit(userPostCountModel, userJid, userIpAddress);
         } else {
             userPostCountModel = new UserPostCountModel();
             userPostCountModel.userJid = userJid;
             userPostCountModel.postCount = postContentDao.getCountByUserJid(userJid);
 
-            userPostCountDao.persist(userPostCountModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+            userPostCountDao.persist(userPostCountModel, userJid, userIpAddress);
         }
 
         updateThreadAndParents(forumThread, userJid, userIpAddress);
@@ -234,21 +234,35 @@ public final class ThreadPostServiceImpl implements ThreadPostService {
 
         postContentDao.persist(postContentModel, userJid, userIpAddress);
 
+        UserPostCountModel userPostCountModel;
+        if (userPostCountDao.existsByUserJid(userJid)) {
+            userPostCountModel = userPostCountDao.getByUserJid(userJid);
+            userPostCountModel.postCount++;
+            userPostCountDao.edit(userPostCountModel, userJid, userIpAddress);
+        } else {
+            userPostCountModel = new UserPostCountModel();
+            userPostCountModel.userJid = userJid;
+            userPostCountModel.postCount = postContentDao.getCountByUserJid(userJid);
+
+            userPostCountDao.persist(userPostCountModel, userJid, userIpAddress);
+        }
+
         updateThreadAndParents(threadPost.getThread(), userJid, userIpAddress);
     }
 
     private Map<String, Long> getUserJidToPostCountMap(List<String> userJids) {
         List<UserPostCountModel> postCountModelList = userPostCountDao.getByUserJids(userJids);
-        Set<String> allUser = userJids.stream().collect(Collectors.toSet());
+        Set<String> allUsers = userJids.stream().collect(Collectors.toSet());
         Set<String> existInDb = postCountModelList.stream().map(m -> m.userJid).collect(Collectors.toSet());
-        allUser.removeAll(existInDb);
+        allUsers.removeAll(existInDb);
 
-        for (String userJid : allUser) {
+        for (String userJid : allUsers) {
             long postCount = postContentDao.getCountByUserJid(userJid);
 
             UserPostCountModel userPostCountModel = new UserPostCountModel();
             userPostCountModel.postCount = postCount;
             userPostCountModel.userJid = userJid;
+            // TODO inject userJid and userIpAddress
             userPostCountDao.persist(userPostCountModel, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
 
             postCountModelList.add(userPostCountModel);
