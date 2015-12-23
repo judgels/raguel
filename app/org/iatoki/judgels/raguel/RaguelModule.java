@@ -1,18 +1,39 @@
-package org.iatoki.judgels.raguel.config;
+package org.iatoki.judgels.raguel;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielFactory;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.jophiel.JophielAuthAPI;
 import org.iatoki.judgels.jophiel.services.BaseUserService;
+import org.iatoki.judgels.play.JudgelsPlayProperties;
 import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
-import org.iatoki.judgels.raguel.RaguelProperties;
+import org.iatoki.judgels.play.general.GeneralName;
+import org.iatoki.judgels.play.general.GeneralVersion;
+import org.iatoki.judgels.play.migration.BaseDataMigrationService;
+import org.iatoki.judgels.raguel.services.impls.RaguelDataMigrationServiceImpl;
 import org.iatoki.judgels.raguel.services.impls.UserServiceImpl;
 
 public class RaguelModule extends AbstractJudgelsPlayModule {
 
     @Override
     protected void manualBinding() {
+        org.iatoki.judgels.raguel.BuildInfo$ buildInfo = org.iatoki.judgels.raguel.BuildInfo$.MODULE$;
+
+        bindConstant().annotatedWith(GeneralName.class).to(buildInfo.name());
+        bindConstant().annotatedWith(GeneralVersion.class).to(buildInfo.version());
+
+        // <DEPRECATED>
+        Config config = ConfigFactory.load();
+        JudgelsPlayProperties.buildInstance(buildInfo.name(), buildInfo.version(), config);
+        RaguelProperties.buildInstance(config);
+        bind(RaguelSingletonsBuilder.class).asEagerSingleton();
+        bind(RaguelThreadsScheduler.class).asEagerSingleton();
+        // </DEPRECATED>
+
+        bind(BaseDataMigrationService.class).to(RaguelDataMigrationServiceImpl.class);
+
         bind(JophielAuthAPI.class).toInstance(jophielAuthAPI());
         bind(JophielClientAPI.class).toInstance(jophielClientAPI());
         bind(JophielPublicAPI.class).toInstance(jophielPublicAPI());
