@@ -1,4 +1,4 @@
-@import org.iatoki.judgels.play.JudgelsPlayMessages
+@import play.i18n.Messages
 @import org.iatoki.judgels.play.JudgelsPlayUtils
 @import scala.collection.JavaConversions
 @import org.iatoki.judgels.raguel.controllers.routes
@@ -10,18 +10,18 @@
 @(currentForum: Forum, childForumsWithStatus: List[ForumWithStatus])
 
 @if(childForumsWithStatus.nonEmpty) {
-    <h3>@JudgelsPlayMessages.get("forum.text.subforums")</h3>
+    <h3>@Messages.get("forum.text.subforums")</h3>
     <div class="panel panel-default">
         <div class="panel-heading">
             <div class="clearfix row">
                 <div class="col-xs-7">
-                    @JudgelsPlayMessages.get("forum.text.subforum")
+                    @Messages.get("forum.text.subforum")
                 </div>
                 <div class="col-xs-2">
-                    @JudgelsPlayMessages.get("forum.text.lastPost")
+                    @Messages.get("forum.text.lastPost")
                 </div>
                 <div class="col-xs-3">
-                    @JudgelsPlayMessages.get("forum.text.lastPostBy")
+                    @Messages.get("forum.text.lastPostBy")
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                                 </strong>
                             }
                             @if(RaguelUtils.hasRole("moderator") || RaguelUtils.hasRole("admin")) {
-                                <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forumWithStatus.getForum.getId)">@JudgelsPlayMessages.get("commons.button.edit")</a>
+                                <a class="btn btn-primary" href="@routes.ForumController.editForumGeneralConfig(forumWithStatus.getForum.getId)">@Messages.get("commons.button.edit")</a>
                             }
                             @if(forumWithStatus.getForum.getDescription != null) {
                                 <p><small>@Html(forumWithStatus.getForum.getDescription)</small></p>

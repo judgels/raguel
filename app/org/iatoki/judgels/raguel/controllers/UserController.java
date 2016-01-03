@@ -28,7 +28,7 @@ import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
-import org.iatoki.judgels.play.JudgelsPlayMessages;
+import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
@@ -68,9 +68,9 @@ public final class UserController extends AbstractRaguelController {
 
         Html content = listUsersView.render(pageOfUsers, sortBy, orderBy, filterString);
         htmlTemplate.setContent(content);
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("commons.text.list1", JudgelsPlayMessages.get("user.text.user")));
+        htmlTemplate.setMainTitle(Messages.get("commons.text.list1", Messages.get("user.text.user")));
 
-        htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.new1", JudgelsPlayMessages.get("user.text.user")), routes.UserController.createUser());
+        htmlTemplate.addMainButton(Messages.get("commons.button.new1", Messages.get("user.text.user")), routes.UserController.createUser());
 
         addActivityLog("List all users <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -107,12 +107,12 @@ public final class UserController extends AbstractRaguelController {
         }
 
         if (jophielUser == null) {
-            userCreateForm.reject(JudgelsPlayMessages.get("user.new.error.invalid"));
+            userCreateForm.reject(Messages.get("user.new.error.invalid"));
             return showCreateUser(userCreateForm);
         }
 
         if (userService.existsByUserJid(jophielUser.getJid())) {
-            userCreateForm.reject(JudgelsPlayMessages.get("user.new.error.registered"));
+            userCreateForm.reject(Messages.get("user.new.error.registered"));
             return showCreateUser(userCreateForm);
         }
 
@@ -132,10 +132,10 @@ public final class UserController extends AbstractRaguelController {
         Html content = viewUserView.render(user);
         htmlTemplate.setContent(content);
 
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("user.text.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()));
-        htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.edit"), routes.UserController.updateUser(user.getId()));
+        htmlTemplate.setMainTitle(Messages.get("user.text.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()));
+        htmlTemplate.addMainButton(Messages.get("commons.button.edit"), routes.UserController.updateUser(user.getId()));
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("commons.text.view"), routes.UserController.viewUser(user.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.view"), routes.UserController.viewUser(user.getId()));
 
         addActivityLog("View user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
@@ -187,7 +187,7 @@ public final class UserController extends AbstractRaguelController {
     protected HtmlTemplate getBaseHtmlTemplate() {
         HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("user.text.users"), routes.UserController.index());
+        htmlTemplate.markBreadcrumbLocation(Messages.get("user.text.users"), routes.UserController.index());
         return htmlTemplate;
     }
 
@@ -197,8 +197,8 @@ public final class UserController extends AbstractRaguelController {
         Html content = createUserView.render(userCreateForm, jophielPublicAPI.getUserAutocompleteAPIEndpoint());
         htmlTemplate.setContent(content);
 
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("commons.text.new1", JudgelsPlayMessages.get("user.text.user")));
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("commons.text.new"), routes.UserController.createUser());
+        htmlTemplate.setMainTitle(Messages.get("commons.text.new1", Messages.get("user.text.user")));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.new"), routes.UserController.createUser());
 
         return renderTemplate(htmlTemplate);
     }
@@ -209,8 +209,8 @@ public final class UserController extends AbstractRaguelController {
         Html content = updateUserView.render(userUpdateForm, user.getId());
         htmlTemplate.setContent(content);
 
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("user.text.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()));
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("commons.text.edit"), routes.UserController.updateUser(user.getId()));
+        htmlTemplate.setMainTitle(Messages.get("user.text.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.edit"), routes.UserController.updateUser(user.getId()));
 
         return renderTemplate(htmlTemplate);
     }

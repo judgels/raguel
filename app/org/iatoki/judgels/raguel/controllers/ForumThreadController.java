@@ -26,7 +26,7 @@ import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
-import org.iatoki.judgels.play.JudgelsPlayMessages;
+import play.i18n.Messages;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
@@ -130,7 +130,7 @@ public final class ForumThreadController extends AbstractForumController {
     protected HtmlTemplate getBaseHtmlTemplate(Forum forum) {
         HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate(forum);
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.text.threads"), routes.ForumThreadController.viewThreads(forum.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.text.threads"), routes.ForumThreadController.viewThreads(forum.getId()));
         return htmlTemplate;
     }
 

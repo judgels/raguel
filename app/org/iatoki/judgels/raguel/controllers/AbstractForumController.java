@@ -15,7 +15,7 @@ import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 import org.iatoki.judgels.raguel.modules.forum.TabbedForumModule;
 import org.iatoki.judgels.raguel.services.ForumMemberService;
 import play.api.mvc.Call;
-import org.iatoki.judgels.play.JudgelsPlayMessages;
+import play.i18n.Messages;
 import play.mvc.Result;
 
 import java.util.Collections;
@@ -55,7 +55,7 @@ public abstract class AbstractForumController extends AbstractRaguelController {
     protected HtmlTemplate getBaseHtmlTemplate() {
         HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.text.forums"), routes.ForumController.index());
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.text.forums"), routes.ForumController.index());
 
         return htmlTemplate;
     }
@@ -80,7 +80,7 @@ public abstract class AbstractForumController extends AbstractRaguelController {
     }
 
     private void fillTemplateForForumView(HtmlTemplate htmlTemplate, Forum forum) {
-        htmlTemplate.addMainTab(JudgelsPlayMessages.get("forum.text.forums"), routes.ForumController.viewForums(forum.getId()));
+        htmlTemplate.addMainTab(Messages.get("forum.text.forums"), routes.ForumController.viewForums(forum.getId()));
 
         List<TabbedForumModule> moduleWithTabs = Lists.newArrayList();
         for (ForumModule forumModule : forum.getModules()) {
@@ -99,7 +99,7 @@ public abstract class AbstractForumController extends AbstractRaguelController {
         final String parentForumName;
         final Call backCall;
         if (parentForum == null) {
-            parentForumName = JudgelsPlayMessages.get("forum.text.home");
+            parentForumName = Messages.get("forum.text.home");
             backCall = routes.ForumController.index();
         } else {
             parentForumName = parentForum.getName();
@@ -107,18 +107,18 @@ public abstract class AbstractForumController extends AbstractRaguelController {
         }
 
         htmlTemplate.setMainTitle(forum.getName());
-        htmlTemplate.setMainBackButton(JudgelsPlayMessages.get("commons.button.backTo1", parentForumName), backCall);
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", parentForumName), backCall);
 
         if (isCurrentUserModeratorOrAdmin()) {
-            htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.edit"), routes.ForumController.editForumGeneralConfig(forum.getId()));
-            htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.new1", JudgelsPlayMessages.get("forum.text.forum")), routes.ForumController.createForum(forum.getId()));
+            htmlTemplate.addMainButton(Messages.get("commons.button.edit"), routes.ForumController.editForumGeneralConfig(forum.getId()));
+            htmlTemplate.addMainButton(Messages.get("commons.button.new1", Messages.get("forum.text.forum")), routes.ForumController.createForum(forum.getId()));
             if (forum.containModule(ForumModules.THREAD)) {
-                htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.new1", JudgelsPlayMessages.get("forum.text.thread")), routes.ForumThreadController.createForumThread(forum.getId()));
+                htmlTemplate.addMainButton(Messages.get("commons.button.new1", Messages.get("forum.text.thread")), routes.ForumThreadController.createForumThread(forum.getId()));
             }
 
         } else {
             if (forum.containModule(ForumModules.THREAD) && (!forum.containOrInheritModule(ForumModules.EXCLUSIVE))) {
-                htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.new1", JudgelsPlayMessages.get("forum.text.thread")), routes.ForumThreadController.createForumThread(forum.getId()));
+                htmlTemplate.addMainButton(Messages.get("commons.button.new1", Messages.get("forum.text.thread")), routes.ForumThreadController.createForumThread(forum.getId()));
             }
         }
     }

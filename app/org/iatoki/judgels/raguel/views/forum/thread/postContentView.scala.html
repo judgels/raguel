@@ -1,5 +1,5 @@
 @import java.net.URL
-@import org.iatoki.judgels.play.JudgelsPlayMessages
+@import play.i18n.Messages
 @import org.iatoki.judgels.raguel.controllers.routes
 @import org.iatoki.judgels.play.IdentityUtils
 @import org.iatoki.judgels.play.JudgelsPlayUtils
@@ -14,18 +14,18 @@
     <div class="pull-left">
         <span class="panel-title">@threadPost.getLatestContent.getSubject</span>
         @if(threadPost.getReplyJid != null) {
-            (@JudgelsPlayMessages.get("forum.thread.post.text.response") <a href="@routes.ThreadPostController.viewTreeThreadPosts(threadPost.getThread.getId)#post-@replyId">@JudgelsPlayMessages.get("forum.thread.text.post")</a> @JudgelsPlayMessages.get("forum.thread.post.text.by") @replyUsername)
+            (@Messages.get("forum.thread.post.text.response") <a href="@routes.ThreadPostController.viewTreeThreadPosts(threadPost.getThread.getId)#post-@replyId">@Messages.get("forum.thread.text.post")</a> @Messages.get("forum.thread.post.text.by") @replyUsername)
         }
         |
-        <a href="@routes.ThreadPostController.replyThreadPost(threadPost.getId)">@JudgelsPlayMessages.get("forum.thread.post.button.reply")</a>
+        <a href="@routes.ThreadPostController.replyThreadPost(threadPost.getId)">@Messages.get("forum.thread.post.button.reply")</a>
         @if(IdentityUtils.getUserJid.equals(threadPost.getUserJid)) {
             |
-            <a href="@routes.ThreadPostController.editThreadPost(threadPost.getId)">@JudgelsPlayMessages.get("commons.button.edit")</a>
+            <a href="@routes.ThreadPostController.editThreadPost(threadPost.getId)">@Messages.get("commons.button.edit")</a>
         }
     </div>
     <div class="pull-right">
         @if(threadPost.getContents.size > 1) {
-            <a href="@routes.ThreadPostController.viewPostVersions(threadPost.getId)">@{threadPost.getContents.size - 1} @JudgelsPlayMessages.get("commons.text.edit")</a>
+            <a href="@routes.ThreadPostController.viewPostVersions(threadPost.getId)">@{threadPost.getContents.size - 1} @Messages.get("commons.text.edit")</a>
             |
         }
         <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(threadPost.getTimeCreate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(threadPost.getTimeCreate.getTime)</time>

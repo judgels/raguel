@@ -1,4 +1,4 @@
-@import org.iatoki.judgels.play.JudgelsPlayMessages
+@import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.searchView
 @import org.iatoki.judgels.play.views.html.table.paginationView
 @import scala.collection.JavaConversions
@@ -13,9 +13,9 @@
 
 @(forumThread: ForumThread, pageOfThreadPosts: Page[ThreadPost], replyJidToIdMap: Map[String, Long], replyJidToUserJidMap: Map[String, String], orderBy: String, orderDir: String, filterString: String)
 
-<h3>@JudgelsPlayMessages.get("forum.thread.text.posts")</h3>
+<h3>@Messages.get("forum.thread.text.posts")</h3>
 <div class="clearfix">
-    @JudgelsPlayMessages.get("commons.text.view"): <span>@JudgelsPlayMessages.get("forum.thread.post.text.flat")</span> | <a href="@routes.ThreadPostController.viewTreeThreadPosts(forumThread.getId)">@JudgelsPlayMessages.get("forum.thread.post.text.tree")</a>
+    @Messages.get("commons.text.view"): <span>@Messages.get("forum.thread.post.text.flat")</span> | <a href="@routes.ThreadPostController.viewTreeThreadPosts(forumThread.getId)">@Messages.get("forum.thread.post.text.tree")</a>
 </div>
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ThreadPostController.listThreadPosts(forumThread.getId, newPageIndex, newOrderBy, newOrderDir, newFilterString)}
 

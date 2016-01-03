@@ -1,4 +1,4 @@
-@import org.iatoki.judgels.play.JudgelsPlayMessages
+@import play.i18n.Messages
 @import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl
 @import org.iatoki.judgels.raguel.User
 
@@ -7,16 +7,16 @@
 <table class="table">
     <tbody>
         <tr>
-            <td>@JudgelsPlayMessages.get("commons.field.id")</td><td>@user.getId</td>
+            <td>@Messages.get("commons.field.id")</td><td>@user.getId</td>
         </tr>
         <tr>
-            <td>@JudgelsPlayMessages.get("commons.field.jid")</td><td>@user.getUserJid</td>
+            <td>@Messages.get("commons.field.jid")</td><td>@user.getUserJid</td>
         </tr>
         <tr>
-            <td>@JudgelsPlayMessages.get("user.field.name")</td><td>@JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid)</td>
+            <td>@Messages.get("user.field.name")</td><td>@JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid)</td>
         </tr>
         <tr>
-            <td>@JudgelsPlayMessages.get("user.field.roles")</td><td>@user.getRoles</td>
+            <td>@Messages.get("user.field.roles")</td><td>@user.getRoles</td>
         </tr>
     </tbody>
 </table>

@@ -1,6 +1,6 @@
 package org.iatoki.judgels.raguel.modules.forum.member;
 
-import org.iatoki.judgels.play.JudgelsPlayMessages;
+import play.i18n.Messages;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.controllers.routes;
 import org.iatoki.judgels.raguel.modules.forum.ForumModules;
@@ -18,7 +18,7 @@ public final class ForumMemberModule extends TabbedForumModule {
 
     @Override
     public String getTabName() {
-        return JudgelsPlayMessages.get("forum.text.members");
+        return Messages.get("forum.text.members");
     }
 
     @Override

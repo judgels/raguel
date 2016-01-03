@@ -43,7 +43,7 @@ import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
-import org.iatoki.judgels.play.JudgelsPlayMessages;
+import play.i18n.Messages;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
@@ -195,18 +195,18 @@ public final class ForumController extends AbstractForumController {
 
         ForumModules forumModuleType = ForumModules.valueOf(forumModule);
         if (!ForumModuleUtils.getModuleContradiction(forumModuleType).isEmpty() && forum.getModulesSet().containsAll(ForumModuleUtils.getModuleContradiction(forumModuleType))) {
-            flashError(JudgelsPlayMessages.get("forum.module.enable.error.contradiction", ForumModuleUtils.getModuleContradiction(forumModuleType).toString()));
+            flashError(Messages.get("forum.module.enable.error.contradiction", ForumModuleUtils.getModuleContradiction(forumModuleType).toString()));
             return redirect(routes.ForumController.editForumModuleConfig(forum.getId()));
         }
 
         if (!forum.getModulesSet().containsAll(ForumModuleUtils.getModuleDependencies(forumModuleType))) {
-            flashError(JudgelsPlayMessages.get("forum.module.enable.error.dependencies", ForumModuleUtils.getModuleDependencies(forumModuleType).toString()));
+            flashError(Messages.get("forum.module.enable.error.dependencies", ForumModuleUtils.getModuleDependencies(forumModuleType).toString()));
             return redirect(routes.ForumController.editForumModuleConfig(forum.getId()));
         }
 
         // error if inherited
         if (EnumUtils.isValidEnum(InheritedForumModules.class, forumModule) && (forum.inheritModule(forumModuleType))) {
-            flashError(JudgelsPlayMessages.get("forum.module.enable.error.inherited", ForumModuleUtils.getModuleDependencies(forumModuleType).toString()));
+            flashError(Messages.get("forum.module.enable.error.inherited", ForumModuleUtils.getModuleDependencies(forumModuleType).toString()));
             return redirect(routes.ForumController.editForumModuleConfig(forum.getId()));
         }
 
@@ -227,7 +227,7 @@ public final class ForumController extends AbstractForumController {
 
         ForumModules forumModuleType = ForumModules.valueOf(forumModule);
         if (forum.getModulesSet().containsAll(ForumModuleUtils.getDependedModules(forumModuleType)) && !ForumModuleUtils.getDependedModules(forumModuleType).isEmpty()) {
-            flashError(JudgelsPlayMessages.get("forum.module.disable.error.dependencies", ForumModuleUtils.getDependedModules(forumModuleType).toString()));
+            flashError(Messages.get("forum.module.disable.error.dependencies", ForumModuleUtils.getDependedModules(forumModuleType).toString()));
             return redirect(routes.ForumController.editForumModuleConfig(forum.getId()));
         }
 
@@ -313,12 +313,12 @@ public final class ForumController extends AbstractForumController {
         } else {
             htmlTemplate = super.getBaseHtmlTemplate();
             if (isCurrentUserModeratorOrAdmin()) {
-                htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.button.new1", JudgelsPlayMessages.get("forum.text.forum")), routes.ForumController.createForum(0));
+                htmlTemplate.addMainButton(Messages.get("commons.button.new1", Messages.get("forum.text.forum")), routes.ForumController.createForum(0));
             }
         }
 
         htmlTemplate.setContent(content);
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("forum.text.forum"));
+        htmlTemplate.setMainTitle(Messages.get("forum.text.forum"));
 
         return renderTemplate(htmlTemplate);
     }
@@ -378,8 +378,8 @@ public final class ForumController extends AbstractForumController {
         HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
 
         htmlTemplate.setContent(createForumView.render(forumUpsertForm, forumService.getAllForumsForReferences()));
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("commons.text.new1", JudgelsPlayMessages.get("forum.text.forum")));
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("commons.text.new"), routes.ForumController.createForum(parentId));
+        htmlTemplate.setMainTitle(Messages.get("commons.text.new1", Messages.get("forum.text.forum")));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.new"), routes.ForumController.createForum(parentId));
 
         return renderTemplate(htmlTemplate);
     }
@@ -389,9 +389,9 @@ public final class ForumController extends AbstractForumController {
 
         htmlTemplate.setContent(editForumGeneralView.render(forumUpsertForm, forum.getId(), forumService.getAllForumsForReferences().stream().filter(f -> !f.containsJidInHierarchy(forum.getJid())).collect(Collectors.toList())));
         addUpdateView(htmlTemplate, forum);
-        htmlTemplate.addMainButton(JudgelsPlayMessages.get("commons.text.view"), routes.ForumController.viewForums(forum.getId()));
+        htmlTemplate.addMainButton(Messages.get("commons.text.view"), routes.ForumController.viewForums(forum.getId()));
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.config.text.general"), routes.ForumController.editForumGeneralConfig(forum.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.config.text.general"), routes.ForumController.editForumGeneralConfig(forum.getId()));
 
         return renderTemplate(htmlTemplate);
     }
@@ -402,7 +402,7 @@ public final class ForumController extends AbstractForumController {
         htmlTemplate.setContent(listModulesView.render(forum));
         addUpdateView(htmlTemplate, forum);
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.config.text.specific"), routes.ForumController.editForumModuleConfig(forum.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.config.text.specific"), routes.ForumController.editForumModuleConfig(forum.getId()));
 
         return renderTemplate(htmlTemplate);
     }
@@ -413,17 +413,17 @@ public final class ForumController extends AbstractForumController {
         htmlTemplate.setContent(editForumSpecificView.render(forum, moduleFormMap));
         addUpdateView(htmlTemplate, forum);
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.config.text.specific"), routes.ForumController.editForumSpecificConfig(forum.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.config.text.specific"), routes.ForumController.editForumSpecificConfig(forum.getId()));
 
         return renderTemplate(htmlTemplate);
     }
 
     private void addUpdateView(HtmlTemplate htmlTemplate, Forum forum) {
-        htmlTemplate.addCategoryTab(JudgelsPlayMessages.get("forum.config.text.general"), routes.ForumController.editForumGeneralConfig(forum.getId()));
-        htmlTemplate.addCategoryTab(JudgelsPlayMessages.get("forum.config.text.modules"), routes.ForumController.editForumModuleConfig(forum.getId()));
-        htmlTemplate.addCategoryTab(JudgelsPlayMessages.get("forum.config.text.specific"), routes.ForumController.editForumSpecificConfig(forum.getId()));
+        htmlTemplate.addCategoryTab(Messages.get("forum.config.text.general"), routes.ForumController.editForumGeneralConfig(forum.getId()));
+        htmlTemplate.addCategoryTab(Messages.get("forum.config.text.modules"), routes.ForumController.editForumModuleConfig(forum.getId()));
+        htmlTemplate.addCategoryTab(Messages.get("forum.config.text.specific"), routes.ForumController.editForumSpecificConfig(forum.getId()));
 
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("forum.text.forum1", forum.getName()));
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("commons.text.edit"), routes.ForumController.editForumGeneralConfig(forum.getId()));
+        htmlTemplate.setMainTitle(Messages.get("forum.text.forum1", forum.getName()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.edit"), routes.ForumController.editForumGeneralConfig(forum.getId()));
     }
 }

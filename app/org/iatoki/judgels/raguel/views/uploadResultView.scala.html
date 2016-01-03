@@ -1,4 +1,4 @@
-@import org.iatoki.judgels.play.JudgelsPlayMessages
+@import play.i18n.Messages
 @import org.iatoki.judgels.raguel.UploadResult
 
 @(failedUploadResults: List[UploadResult])
@@ -6,8 +6,8 @@
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>@JudgelsPlayMessages.get("upload.text.value")</th>
-            <th>@JudgelsPlayMessages.get("upload.text.status")</th>
+            <th>@Messages.get("upload.text.value")</th>
+            <th>@Messages.get("upload.text.status")</th>
         </tr>
     </thead>
         @for(failedUploadResult <- failedUploadResults) {

@@ -28,7 +28,7 @@ import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
-import org.iatoki.judgels.play.JudgelsPlayMessages;
+import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
@@ -145,13 +145,13 @@ public final class ForumMemberController extends AbstractForumController {
                                 userService.upsertUserFromJophielUser(jophielUser, getCurrentUserJid(), getCurrentUserIpAddress());
                                 forumMemberService.createForumMember(forum.getJid(), jophielUser.getJid(), getCurrentUserJid(), getCurrentUserIpAddress());
                             } else {
-                                failedUploadsBuilder.add(new UploadResult(username, JudgelsPlayMessages.get("forum.member.new.error.registered")));
+                                failedUploadsBuilder.add(new UploadResult(username, Messages.get("forum.member.new.error.registered")));
                             }
                         } else {
-                            failedUploadsBuilder.add(new UploadResult(username, JudgelsPlayMessages.get("forum.member.new.error.invalid")));
+                            failedUploadsBuilder.add(new UploadResult(username, Messages.get("forum.member.new.error.invalid")));
                         }
                     } catch (JudgelsAPIClientException e) {
-                        failedUploadsBuilder.add(new UploadResult(username, JudgelsPlayMessages.get("forum.member.new.error.invalid")));
+                        failedUploadsBuilder.add(new UploadResult(username, Messages.get("forum.member.new.error.invalid")));
                     }
                 }
 
@@ -191,7 +191,7 @@ public final class ForumMemberController extends AbstractForumController {
         Html content = listAddMembersView.render(forum.getId(), forumMembers, pageIndex, orderBy, orderDir, filterString, forumMemberCreateForm, forumMemberUploadForm, jophielPublicAPI.getUserAutocompleteAPIEndpoint());
         htmlTemplate.setContent(content);
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.text.members"), routes.ForumMemberController.viewMembers(forum.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.text.members"), routes.ForumMemberController.viewMembers(forum.getId()));
 
         return renderTemplate(htmlTemplate);
     }
@@ -203,13 +203,13 @@ public final class ForumMemberController extends AbstractForumController {
         if (failedUploads.size() > 0) {
             content = uploadResultView.render(failedUploads);
         } else {
-            content = messageView.render(JudgelsPlayMessages.get("forum.member.upload.text.success"));
+            content = messageView.render(Messages.get("forum.member.upload.text.success"));
         }
 
         htmlTemplate.setContent(content);
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("forum.member.upload.text.result"));
+        htmlTemplate.setMainTitle(Messages.get("forum.member.upload.text.result"));
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.text.members"), routes.ForumMemberController.viewMembers(forum.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.text.members"), routes.ForumMemberController.viewMembers(forum.getId()));
 
         return renderTemplate(htmlTemplate);
     }
@@ -218,7 +218,7 @@ public final class ForumMemberController extends AbstractForumController {
     protected HtmlTemplate getBaseHtmlTemplate(Forum forum) {
         HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate(forum);
 
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.text.members"), routes.ForumController.jumpToMembers(forum.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.text.members"), routes.ForumController.jumpToMembers(forum.getId()));
         return htmlTemplate;
     }
 }

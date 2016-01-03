@@ -1,4 +1,4 @@
-@import org.iatoki.judgels.play.JudgelsPlayMessages
+@import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.formErrorView
 @import org.iatoki.judgels.raguel.controllers.routes
 @import org.iatoki.judgels.raguel.forms.ForumUpsertForm
@@ -16,5 +16,5 @@
 
     @upsertForumView(forumUpsertForm, forums)
 
-    @b3.submit('class -> "btn btn-primary") { @JudgelsPlayMessages.get("commons.button.edit") }
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.button.edit") }
 }

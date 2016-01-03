@@ -1,4 +1,4 @@
-@import org.iatoki.judgels.play.JudgelsPlayMessages
+@import play.i18n.Messages
 @import org.iatoki.judgels.play.views.html.table.searchView
 @import org.iatoki.judgels.play.views.html.table.paginationView
 @import scala.collection.JavaConversions
@@ -11,7 +11,7 @@
 
 @(currentForum: Forum, pageOfThreads: Page[ForumThreadWithStatisticsAndStatus], orderBy: String, orderDir: String, filterString: String)
 
-<h3>@JudgelsPlayMessages.get("forum.text.threads")</h3>
+<h3>@Messages.get("forum.text.threads")</h3>
 
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ForumController.listForumsThreads(currentForum.getId, newPageIndex, newOrderBy, newOrderDir, newFilterString)}
 
@@ -23,22 +23,22 @@
     <div class="panel-heading">
         <div class="clearfix row">
             <div class="col-xs-4">
-                <small>@JudgelsPlayMessages.get("forum.text.thread")</small>
+                <small>@Messages.get("forum.text.thread")</small>
             </div>
             <div class="col-xs-2">
-                <small>@JudgelsPlayMessages.get("forum.thread.text.author")</small>
+                <small>@Messages.get("forum.thread.text.author")</small>
             </div>
             <div class="col-xs-1">
-                <small>@JudgelsPlayMessages.get("forum.thread.text.views")</small>
+                <small>@Messages.get("forum.thread.text.views")</small>
             </div>
             <div class="col-xs-1">
-                <small>@JudgelsPlayMessages.get("forum.thread.text.replies")</small>
+                <small>@Messages.get("forum.thread.text.replies")</small>
             </div>
             <div class="col-xs-2">
-                <small>@JudgelsPlayMessages.get("forum.thread.text.lastPost")</small>
+                <small>@Messages.get("forum.thread.text.lastPost")</small>
             </div>
             <div class="col-xs-2">
-                <small>@JudgelsPlayMessages.get("forum.thread.text.lastPostBy")</small>
+                <small>@Messages.get("forum.thread.text.lastPostBy")</small>
             </div>
         </div>
     </div>

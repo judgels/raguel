@@ -33,7 +33,7 @@ import play.data.Form;
 import play.db.jpa.Transactional;
 import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
-import org.iatoki.judgels.play.JudgelsPlayMessages;
+import play.i18n.Messages;
 import play.mvc.Result;
 import play.twirl.api.Html;
 
@@ -101,7 +101,7 @@ public final class ThreadPostController extends AbstractForumController {
         htmlTemplate.setContent(content);
 
         htmlTemplate.setMainTitle(forumThread.getName());
-        htmlTemplate.setMainBackButton(JudgelsPlayMessages.get("commons.button.backTo1", forumThread.getParentForum().getName()), routes.ForumController.viewForums(forumThread.getParentForum().getId()));
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", forumThread.getParentForum().getName()), routes.ForumController.viewForums(forumThread.getParentForum().getId()));
 
         htmlTemplate.markBreadcrumbLocation(forumThread.getName(), routes.ThreadPostController.viewThreadPosts(forumThread.getId()));
 
@@ -127,8 +127,8 @@ public final class ThreadPostController extends AbstractForumController {
         Html content = listPostContentsView.render(threadPost);
         htmlTemplate.setContent(content);
 
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("forum.thread.post.text.versions"));
-        htmlTemplate.setMainBackButton(JudgelsPlayMessages.get("commons.button.backTo1", threadPost.getThread().getName()), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
+        htmlTemplate.setMainTitle(Messages.get("forum.thread.post.text.versions"));
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", threadPost.getThread().getName()), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
 
         htmlTemplate.markBreadcrumbLocation(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
 
@@ -285,7 +285,7 @@ public final class ThreadPostController extends AbstractForumController {
 
         htmlTemplate.setMainTitle(forumThread.getName());
 
-        htmlTemplate.setMainBackButton(JudgelsPlayMessages.get("commons.button.backTo1", forumThread.getParentForum().getName()), routes.ForumController.viewForums(forumThread.getParentForum().getId()));
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", forumThread.getParentForum().getName()), routes.ForumController.viewForums(forumThread.getParentForum().getId()));
 
         htmlTemplate.markBreadcrumbLocation(forumThread.getName(), routes.ThreadPostController.viewThreadPosts(forumThread.getId()));
 
@@ -298,11 +298,11 @@ public final class ThreadPostController extends AbstractForumController {
         Html content = editThreadPostView.render(threadPost, threadPostUpsertForm);
         htmlTemplate.setContent(content);
 
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("commons.button.edit"));
-        htmlTemplate.setMainBackButton(JudgelsPlayMessages.get("commons.button.backTo1", threadPost.getThread().getParentForum().getName()), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId()));
+        htmlTemplate.setMainTitle(Messages.get("commons.button.edit"));
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", threadPost.getThread().getParentForum().getName()), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId()));
 
         htmlTemplate.markBreadcrumbLocation(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("commons.button.edit"), routes.ThreadPostController.editThreadPost(threadPost.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.button.edit"), routes.ThreadPostController.editThreadPost(threadPost.getId()));
 
         return renderTemplate(htmlTemplate);
     }
@@ -313,11 +313,11 @@ public final class ThreadPostController extends AbstractForumController {
         Html content = replyThreadPostView.render(threadPost, threadPostUpsertForm);
         htmlTemplate.setContent(content);
 
-        htmlTemplate.setMainTitle(JudgelsPlayMessages.get("forum.thread.post.text.reply"));
-        htmlTemplate.setMainBackButton(JudgelsPlayMessages.get("commons.button.backTo1", threadPost.getThread().getParentForum().getName()), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId()));
+        htmlTemplate.setMainTitle(Messages.get("forum.thread.post.text.reply"));
+        htmlTemplate.setMainBackButton(Messages.get("commons.button.backTo1", threadPost.getThread().getParentForum().getName()), routes.ForumController.viewForums(threadPost.getThread().getParentForum().getId()));
 
         htmlTemplate.markBreadcrumbLocation(threadPost.getThread().getName(), routes.ThreadPostController.viewThreadPosts(threadPost.getThread().getId()));
-        htmlTemplate.markBreadcrumbLocation(JudgelsPlayMessages.get("forum.thread.post.text.reply"), routes.ThreadPostController.replyThreadPost(threadPost.getId()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.thread.post.text.reply"), routes.ThreadPostController.replyThreadPost(threadPost.getId()));
 
         return renderTemplate(htmlTemplate);
     }

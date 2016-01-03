@@ -22,7 +22,7 @@ import org.iatoki.judgels.play.services.BaseJidCacheService;
 import org.iatoki.judgels.play.views.html.sidebar.guestView;
 import org.iatoki.judgels.raguel.RaguelUtils;
 import play.data.Form;
-import org.iatoki.judgels.play.JudgelsPlayMessages;
+import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
@@ -84,13 +84,13 @@ public abstract class AbstractRaguelController extends AbstractBaseJophielClient
             Html userProfileWidget = userProfileView.render(getCurrentUsername(), getCurrentUserRealName(), getCurrentUserAvatarUrl(), editProfileUrl, logoutUrl);
             htmlTemplate.addUpperSidebarWidget(userProfileWidget);
 
-            htmlTemplate.addSidebarMenu(JudgelsPlayMessages.get("forum.text.forums"), routes.ForumController.index());
+            htmlTemplate.addSidebarMenu(Messages.get("forum.text.forums"), routes.ForumController.index());
 
             Html isLoggedOutScript = isLoggedOut.render(jophielClientAPI.getUserIsLoggedInAPIEndpoint(), getAbsoluteUrl(routes.ApplicationController.logout(ControllerUtils.getCurrentUrl(Http.Context.current().request()))), "lib/jophielcommons/javascripts/isLoggedOut.js", RaguelUtils.getRealUserJid());
             htmlTemplate.addAdditionalScript(isLoggedOutScript);
 
             if (isCurrentUserAdmin()) {
-                htmlTemplate.addSidebarMenu(JudgelsPlayMessages.get("user.text.users"), routes.UserController.index());
+                htmlTemplate.addSidebarMenu(Messages.get("user.text.users"), routes.UserController.index());
 
                 Form<ViewpointForm> form = Form.form(ViewpointForm.class);
                 if (JudgelsPlayUtils.hasViewPoint()) {
