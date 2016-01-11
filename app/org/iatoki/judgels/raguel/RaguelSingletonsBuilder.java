@@ -4,8 +4,6 @@ import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils;
 import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
-import org.iatoki.judgels.raguel.controllers.ForumControllerUtils;
-import org.iatoki.judgels.raguel.controllers.RaguelControllerUtils;
 import org.iatoki.judgels.raguel.models.daos.AvatarCacheDao;
 import org.iatoki.judgels.raguel.models.daos.JidCacheDao;
 import org.iatoki.judgels.raguel.services.ForumMemberService;
@@ -29,7 +27,5 @@ public final class RaguelSingletonsBuilder {
         UserActivityMessageServiceImpl.buildInstance();
 
         JophielClientControllerUtils.buildInstance(RaguelProperties.getInstance().getJophielBaseUrl());
-        RaguelControllerUtils.buildInstance(jophielClientAPI, jophielPublicAPI);
-        ForumControllerUtils.buildInstance(forumMemberService);
     }
 }

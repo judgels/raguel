@@ -3,20 +3,18 @@ package org.iatoki.judgels.raguel.controllers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.EnumUtils;
-import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.InternalLink;
-import org.iatoki.judgels.play.LazyHtml;
+import org.iatoki.judgels.api.jophiel.JophielClientAPI;
+import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
+import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
+import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
-import org.iatoki.judgels.play.views.html.layouts.descriptionHtmlLayout;
-import org.iatoki.judgels.play.views.html.layouts.headingLayout;
-import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
+import org.iatoki.judgels.play.jid.BaseJidCacheService;
+import org.iatoki.judgels.play.template.HtmlTemplate;
 import org.iatoki.judgels.raguel.Forum;
 import org.iatoki.judgels.raguel.ForumNotFoundException;
 import org.iatoki.judgels.raguel.ForumThreadWithStatistics;
 import org.iatoki.judgels.raguel.ForumThreadWithStatisticsAndStatus;
 import org.iatoki.judgels.raguel.ForumWithStatus;
-import org.iatoki.judgels.raguel.RaguelUtils;
 import org.iatoki.judgels.raguel.controllers.securities.Authenticated;
 import org.iatoki.judgels.raguel.controllers.securities.Authorized;
 import org.iatoki.judgels.raguel.controllers.securities.GuestView;
@@ -27,6 +25,7 @@ import org.iatoki.judgels.raguel.modules.forum.ForumModule;
 import org.iatoki.judgels.raguel.modules.forum.ForumModuleUtils;
 import org.iatoki.judgels.raguel.modules.forum.ForumModules;
 import org.iatoki.judgels.raguel.modules.forum.InheritedForumModules;
+import org.iatoki.judgels.raguel.services.ForumMemberService;
 import org.iatoki.judgels.raguel.services.ForumModuleService;
 import org.iatoki.judgels.raguel.services.ForumService;
 import org.iatoki.judgels.raguel.services.ForumThreadService;
@@ -46,6 +45,7 @@ import play.filters.csrf.AddCSRFToken;
 import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Result;
+import play.twirl.api.Html;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 
 @Singleton
 @Named
-public final class ForumController extends AbstractJudgelsController {
+public final class ForumController extends AbstractForumController {
 
     private static final long PAGE_SIZE = 20;
 
@@ -65,7 +65,8 @@ public final class ForumController extends AbstractJudgelsController {
     private final ForumThreadService forumThreadService;
 
     @Inject
-    public ForumController(ForumModuleService forumModuleService, ForumService forumService, ForumThreadService forumThreadService) {
+    public ForumController(BaseJidCacheService jidCacheService, BaseAvatarCacheService avatarCacheService, JophielClientAPI jophielClientAPI, JophielPublicAPI jophielPublicAPI, UserActivityMessageService userActivityMessageService, ForumMemberService forumMemberService, ForumModuleService forumModuleService, ForumService forumService, ForumThreadService forumThreadService) {
+        super(jidCacheService, avatarCacheService, jophielClientAPI, jophielPublicAPI, userActivityMessageService, forumMemberService);
         this.forumModuleService = forumModuleService;
         this.forumService = forumService;
         this.forumThreadService = forumThreadService;
@@ -127,7 +128,7 @@ public final class ForumController extends AbstractJudgelsController {
             forum = forumService.findForumByJid(forumUpsertData.parentJid);
         }
 
-        forumService.createForum(forum, forumUpsertData.name, forumUpsertData.description, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        forumService.createForum(forum, forumUpsertData.name, forumUpsertData.description, getCurrentUserJid(), getCurrentUserIpAddress());
 
         return redirect(routes.ForumController.index());
     }
@@ -168,7 +169,7 @@ public final class ForumController extends AbstractJudgelsController {
             parentForum = forumService.findForumByJid(forumUpsertData.parentJid);
         }
 
-        forumService.updateForum(forum, parentForum, forumUpsertData.name, forumUpsertData.description, IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        forumService.updateForum(forum, parentForum, forumUpsertData.name, forumUpsertData.description, getCurrentUserJid(), getCurrentUserIpAddress());
 
         return redirect(routes.ForumController.index());
     }
@@ -179,17 +180,7 @@ public final class ForumController extends AbstractJudgelsController {
     public Result editForumModuleConfig(long forumId) throws ForumNotFoundException {
         Forum forum = forumService.findForumById(forumId);
 
-        LazyHtml content = new LazyHtml(listModulesView.render(forum));
-        ForumControllerUtils.appendUpdateLayout(content, forum);
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        ForumControllerUtils.appendBreadcrumbsLayout(content,
-                new InternalLink(Messages.get("forum.update"), routes.ForumController.editForumGeneralConfig(forum.getId())),
-                new InternalLink(Messages.get("forum.config.modules"), routes.ForumController.editForumModuleConfig(forum.getId()))
-        );
-
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Update Module");
-
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        return showEditForumModuleConfig(forum);
     }
 
     @Authenticated(value = {LoggedIn.class, HasRole.class})
@@ -283,14 +274,14 @@ public final class ForumController extends AbstractJudgelsController {
             return showEditForumSpecificConfig(forum, moduleFormMap.build());
         }
 
-        forumService.updateForumModuleConfiguration(forum.getJid(), updatedForumModuleBuilder.build(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        forumService.updateForumModuleConfiguration(forum.getJid(), updatedForumModuleBuilder.build(), getCurrentUserJid(), getCurrentUserIpAddress());
 
         return redirect(routes.ForumController.editForumSpecificConfig(forum.getId()));
     }
 
     private Result showListForumsThreads(long forumId, long pageIndex, String orderBy, String orderDir, String filterString) throws ForumNotFoundException {
         Forum currentForum;
-        LazyHtml content;
+        Html content;
 
         if (forumId == 0) {
             currentForum = null;
@@ -298,7 +289,7 @@ public final class ForumController extends AbstractJudgelsController {
         } else {
             currentForum = forumService.findForumById(forumId);
 
-            if (!RaguelControllerUtils.getInstance().isModeratorOrAbove() && !ForumControllerUtils.getInstance().isAllowedToEnterForum(currentForum, IdentityUtils.getUserJid())) {
+            if (!isCurrentUserModeratorOrAdmin() && !isCurrentUserAllowedToEnterForum(currentForum)) {
                 long parentForumId;
                 if (currentForum.getParentForum() != null) {
                     parentForumId = currentForum.getParentForum().getId();
@@ -312,116 +303,127 @@ public final class ForumController extends AbstractJudgelsController {
             content = getNonBaseForumContent(currentForum, pageIndex, orderBy, orderDir, filterString);
         }
 
+        HtmlTemplate htmlTemplate;
+
         if (currentForum != null) {
+            htmlTemplate = super.getBaseHtmlTemplate(currentForum);
             if (!currentForum.getDescription().isEmpty()) {
-                content.appendLayout(c -> descriptionHtmlLayout.render(currentForum.getDescription(), c));
+                htmlTemplate.setDescription(currentForum.getDescription());
             }
-            ForumControllerUtils.getInstance().appendTabsLayout(content, currentForum, IdentityUtils.getUserJid());
         } else {
-            if (RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
-                content.appendLayout(c -> headingWithActionLayout.render(Messages.get("forum.forums"), new InternalLink(Messages.get("commons.create"), routes.ForumController.createForum(0)), c));
-            } else {
-                content.appendLayout(c -> headingLayout.render(Messages.get("forum.forums"), c));
+            htmlTemplate = super.getBaseHtmlTemplate();
+            if (isCurrentUserModeratorOrAdmin()) {
+                htmlTemplate.addMainButton(Messages.get("commons.button.new1", Messages.get("forum.text.forum")), routes.ForumController.createForum(0));
             }
         }
 
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
+        htmlTemplate.setContent(content);
+        htmlTemplate.setMainTitle(Messages.get("forum.text.forum"));
 
-        ImmutableList.Builder<InternalLink> internalLinkBuilder;
-        if (currentForum != null) {
-            internalLinkBuilder = ForumControllerUtils.getForumBreadcrumbsBuilder(currentForum);
-        } else {
-            internalLinkBuilder = ImmutableList.builder();
-        }
-        ForumControllerUtils.appendBreadcrumbsLayout(content, internalLinkBuilder.build());
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forums");
-
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        return renderTemplate(htmlTemplate);
     }
 
-    private LazyHtml getBaseForumContent() {
-        if (RaguelUtils.isGuest()) {
+    private Html getBaseForumContent() {
+        if (isCurrentUserGuest()) {
             List<Forum> childForums = forumService.getAllowedChildForums("", 2);
-            return new LazyHtml(listBaseForumsView.render(childForums));
+            return listBaseForumsView.render(childForums);
         }
 
         List<Forum> childForums;
-        if (RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
+        if (isCurrentUserModeratorOrAdmin()) {
             childForums = forumService.getChildForums("", 2);
         } else {
             childForums = forumService.getAllowedChildForums("", 2);
         }
         ImmutableMap.Builder<String, List<ForumWithStatus>> mapForumJidToForumsWithStatusBuilder = ImmutableMap.builder();
         for (Forum childForum : childForums) {
-            if (RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
-                mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getChildForumsWithStatus(childForum.getJid(), IdentityUtils.getUserJid(), 2));
+            if (isCurrentUserModeratorOrAdmin()) {
+                mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getChildForumsWithStatus(childForum.getJid(), getCurrentUserJid(), 2));
             } else {
-                mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getAllowedChildForumsWithStatus(childForum.getJid(), IdentityUtils.getUserJid(), 2));
+                mapForumJidToForumsWithStatusBuilder.put(childForum.getJid(), forumService.getAllowedChildForumsWithStatus(childForum.getJid(), getCurrentUserJid(), 2));
             }
         }
 
-        return new LazyHtml(listBaseForumsWithStatusView.render(childForums, mapForumJidToForumsWithStatusBuilder.build()));
+        return listBaseForumsWithStatusView.render(childForums, mapForumJidToForumsWithStatusBuilder.build());
     }
 
-    private LazyHtml getNonBaseForumContent(Forum forum, long pageIndex, String orderBy, String orderDir, String filterString) {
-        if (RaguelUtils.isGuest()) {
+    private Html getNonBaseForumContent(Forum forum, long pageIndex, String orderBy, String orderDir, String filterString) {
+        if (isCurrentUserGuest()) {
             List<Forum> childForums = forumService.getAllowedChildForums(forum.getJid(), 1);
             if (forum.containModule(ForumModules.THREAD)) {
                 Page<ForumThreadWithStatistics> pageOfForumThreads = forumThreadService.getPageOfForumThreadsWithStatistic(forum, pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
-                return new LazyHtml(listForumsAndThreadsView.render(forum, childForums, pageOfForumThreads, orderBy, orderDir, filterString));
+                return listForumsAndThreadsView.render(forum, childForums, pageOfForumThreads, orderBy, orderDir, filterString);
             }
 
-            return new LazyHtml(listForumsView.render(forum, childForums));
+            return listForumsView.render(forum, childForums);
         }
 
         List<ForumWithStatus> childForumsWithStatus;
-        if (RaguelControllerUtils.getInstance().isModeratorOrAbove()) {
-            childForumsWithStatus = forumService.getChildForumsWithStatus(forum.getJid(), IdentityUtils.getUserJid(), 1);
+        if (isCurrentUserModeratorOrAdmin()) {
+            childForumsWithStatus = forumService.getChildForumsWithStatus(forum.getJid(), getCurrentUserJid(), 1);
         } else {
-            childForumsWithStatus = forumService.getAllowedChildForumsWithStatus(forum.getJid(), IdentityUtils.getUserJid(), 1);
+            childForumsWithStatus = forumService.getAllowedChildForumsWithStatus(forum.getJid(), getCurrentUserJid(), 1);
         }
         if (forum.containModule(ForumModules.THREAD)) {
-            Page<ForumThreadWithStatisticsAndStatus> pageOfForumThreads = forumThreadService.getPageOfForumThreadsWithStatisticAndStatus(forum, IdentityUtils.getUserJid(), pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
+            Page<ForumThreadWithStatisticsAndStatus> pageOfForumThreads = forumThreadService.getPageOfForumThreadsWithStatisticAndStatus(forum, getCurrentUserJid(), pageIndex, PAGE_SIZE, orderBy, orderDir, filterString);
 
-            return new LazyHtml(listForumsAndThreadsWithStatusView.render(forum, childForumsWithStatus, pageOfForumThreads, orderBy, orderDir, filterString));
+            return listForumsAndThreadsWithStatusView.render(forum, childForumsWithStatus, pageOfForumThreads, orderBy, orderDir, filterString);
         }
 
-        return new LazyHtml(listForumsWithStatusView.render(forum, childForumsWithStatus));
+        return listForumsWithStatusView.render(forum, childForumsWithStatus);
     }
 
     private Result showCreateForum(long parentId, Form<ForumUpsertForm> forumUpsertForm) {
-        LazyHtml content = new LazyHtml(createForumView.render(forumUpsertForm, forumService.getAllForumsForReferences()));
-        content.appendLayout(c -> headingLayout.render(Messages.get("forum.create"), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        ForumControllerUtils.appendBreadcrumbsLayout(content,
-                new InternalLink(Messages.get("forum.create"), routes.ForumController.createForum(parentId))
-        );
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Create");
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
+
+        htmlTemplate.setContent(createForumView.render(forumUpsertForm, forumService.getAllForumsForReferences()));
+        htmlTemplate.setMainTitle(Messages.get("commons.text.new1", Messages.get("forum.text.forum")));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.new"), routes.ForumController.createForum(parentId));
+
+        return renderTemplate(htmlTemplate);
     }
 
     private Result showEditForumGeneral(Form<ForumUpsertForm> forumUpsertForm, Forum forum) {
-        LazyHtml content = new LazyHtml(editForumGeneralView.render(forumUpsertForm, forum.getId(), forumService.getAllForumsForReferences().stream().filter(f -> !f.containsJidInHierarchy(forum.getJid())).collect(Collectors.toList())));
-        ForumControllerUtils.appendUpdateLayout(content, forum);
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        ForumControllerUtils.appendBreadcrumbsLayout(content,
-                new InternalLink(Messages.get("forum.edit"), routes.ForumController.editForumGeneralConfig(forum.getId())),
-                new InternalLink(Messages.get("forum.config.general"), routes.ForumController.editForumGeneralConfig(forum.getId()))
-        );
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Edit General");
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
+
+        htmlTemplate.setContent(editForumGeneralView.render(forumUpsertForm, forum.getId(), forumService.getAllForumsForReferences().stream().filter(f -> !f.containsJidInHierarchy(forum.getJid())).collect(Collectors.toList())));
+        addUpdateView(htmlTemplate, forum);
+        htmlTemplate.addMainButton(Messages.get("commons.text.view"), routes.ForumController.viewForums(forum.getId()));
+
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.config.text.general"), routes.ForumController.editForumGeneralConfig(forum.getId()));
+
+        return renderTemplate(htmlTemplate);
+    }
+
+    private Result showEditForumModuleConfig(Forum forum) {
+        HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
+
+        htmlTemplate.setContent(listModulesView.render(forum));
+        addUpdateView(htmlTemplate, forum);
+
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.config.text.specific"), routes.ForumController.editForumModuleConfig(forum.getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 
     private Result showEditForumSpecificConfig(Forum forum, Map<ForumModule, Form<?>> moduleFormMap) {
-        LazyHtml content = new LazyHtml(editForumSpecificView.render(forum, moduleFormMap));
-        ForumControllerUtils.appendUpdateLayout(content, forum);
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        ForumControllerUtils.appendBreadcrumbsLayout(content,
-                new InternalLink(Messages.get("forum.edit"), routes.ForumController.editForumGeneralConfig(forum.getId())),
-                new InternalLink(Messages.get("forum.config.specific"), routes.ForumController.editForumSpecificConfig(forum.getId()))
-        );
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Forum - Edit Specific");
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
+
+        htmlTemplate.setContent(editForumSpecificView.render(forum, moduleFormMap));
+        addUpdateView(htmlTemplate, forum);
+
+        htmlTemplate.markBreadcrumbLocation(Messages.get("forum.config.text.specific"), routes.ForumController.editForumSpecificConfig(forum.getId()));
+
+        return renderTemplate(htmlTemplate);
+    }
+
+    private void addUpdateView(HtmlTemplate htmlTemplate, Forum forum) {
+        htmlTemplate.addCategoryTab(Messages.get("forum.config.text.general"), routes.ForumController.editForumGeneralConfig(forum.getId()));
+        htmlTemplate.addCategoryTab(Messages.get("forum.config.text.modules"), routes.ForumController.editForumModuleConfig(forum.getId()));
+        htmlTemplate.addCategoryTab(Messages.get("forum.config.text.specific"), routes.ForumController.editForumSpecificConfig(forum.getId()));
+
+        htmlTemplate.setMainTitle(Messages.get("forum.text.forum1", forum.getName()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.edit"), routes.ForumController.editForumGeneralConfig(forum.getId()));
     }
 }

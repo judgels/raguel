@@ -20,13 +20,13 @@
 
     @helper.CSRF.formField
 
-    @b3.text(threadPostUpsertForm("subject"), '_label -> Messages.get("forum.thread.post.subject"))
-    @b3.textarea(threadPostUpsertForm("content"), '_label -> Messages.get("forum.thread.post.content"), 'class -> "ckeditor")
+    @b3.text(threadPostUpsertForm("subject"), '_label -> Messages.get("forum.thread.post.field.subject"))
+    @b3.textarea(threadPostUpsertForm("content"), '_label -> Messages.get("forum.thread.post.field.content"), 'class -> "ckeditor")
 
-    @b3.submit('class -> "btn btn-primary") { @Messages.get("forum.thread.post.reply") }
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("forum.thread.post.button.reply") }
 }
 
-<h4>@Messages.get("forum.thread.post.repliedPost")</h4>
+<h4>@Messages.get("forum.thread.post.text.replied")</h4>
 
 <div class="panel panel-default post">
     <div class="panel-heading clearfix">

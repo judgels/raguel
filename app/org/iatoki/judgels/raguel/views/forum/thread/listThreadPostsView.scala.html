@@ -13,9 +13,9 @@
 
 @(forumThread: ForumThread, pageOfThreadPosts: Page[ThreadPost], replyJidToIdMap: Map[String, Long], replyJidToUserJidMap: Map[String, String], orderBy: String, orderDir: String, filterString: String)
 
-<h3>@Messages.get("forum.thread.posts")</h3>
+<h3>@Messages.get("forum.thread.text.posts")</h3>
 <div class="clearfix">
-    @Messages.get("forum.thread.posts.view"): <span>@Messages.get("forum.thread.posts.flat")</span> | <a href="@routes.ThreadPostController.viewTreeThreadPosts(forumThread.getId)">@Messages.get("forum.thread.posts.tree")</a>
+    @Messages.get("commons.text.view"): <span>@Messages.get("forum.thread.post.text.flat")</span> | <a href="@routes.ThreadPostController.viewTreeThreadPosts(forumThread.getId)">@Messages.get("forum.thread.post.text.tree")</a>
 </div>
 @listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ThreadPostController.listThreadPosts(forumThread.getId, newPageIndex, newOrderBy, newOrderDir, newFilterString)}
 

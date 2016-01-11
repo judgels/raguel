@@ -1,6 +1,6 @@
 package org.iatoki.judgels.raguel.models.daos.jedishibernate;
 
-import org.iatoki.judgels.play.models.daos.impls.AbstractJidCacheJedisHibernateDao;
+import org.iatoki.judgels.play.jid.AbstractJidCacheJedisHibernateDao;
 import org.iatoki.judgels.raguel.models.daos.JidCacheDao;
 import org.iatoki.judgels.raguel.models.entities.JidCacheModel;
 import redis.clients.jedis.JedisPool;

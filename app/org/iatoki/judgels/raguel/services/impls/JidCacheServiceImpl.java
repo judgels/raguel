@@ -1,6 +1,6 @@
 package org.iatoki.judgels.raguel.services.impls;
 
-import org.iatoki.judgels.play.services.impls.AbstractBaseJidCacheServiceImpl;
+import org.iatoki.judgels.play.jid.AbstractBaseJidCacheServiceImpl;
 import org.iatoki.judgels.raguel.models.daos.JidCacheDao;
 import org.iatoki.judgels.raguel.models.entities.JidCacheModel;
 

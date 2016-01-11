@@ -1,28 +1,25 @@
 package org.iatoki.judgels.raguel.controllers;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.iatoki.judgels.api.JudgelsAPIClientException;
+import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.api.jophiel.JophielUser;
-import org.iatoki.judgels.play.IdentityUtils;
-import org.iatoki.judgels.play.InternalLink;
-import org.iatoki.judgels.play.LazyHtml;
+import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
+import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
 import org.iatoki.judgels.play.Page;
-import org.iatoki.judgels.play.controllers.AbstractJudgelsController;
-import org.iatoki.judgels.play.views.html.layouts.headingLayout;
-import org.iatoki.judgels.play.views.html.layouts.headingWithActionLayout;
-import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl;
-import org.iatoki.judgels.raguel.RaguelUtils;
+import org.iatoki.judgels.play.jid.BaseJidCacheService;
+import org.iatoki.judgels.play.template.HtmlTemplate;
 import org.iatoki.judgels.raguel.User;
-import org.iatoki.judgels.raguel.forms.UserCreateForm;
 import org.iatoki.judgels.raguel.UserNotFoundException;
-import org.iatoki.judgels.raguel.services.UserService;
-import org.iatoki.judgels.raguel.forms.UserUpdateForm;
 import org.iatoki.judgels.raguel.controllers.securities.Authenticated;
 import org.iatoki.judgels.raguel.controllers.securities.Authorized;
 import org.iatoki.judgels.raguel.controllers.securities.HasRole;
 import org.iatoki.judgels.raguel.controllers.securities.LoggedIn;
+import org.iatoki.judgels.raguel.forms.UserCreateForm;
+import org.iatoki.judgels.raguel.forms.UserUpdateForm;
+import org.iatoki.judgels.raguel.services.UserService;
+import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl;
 import org.iatoki.judgels.raguel.views.html.user.createUserView;
 import org.iatoki.judgels.raguel.views.html.user.listUsersView;
 import org.iatoki.judgels.raguel.views.html.user.updateUserView;
@@ -34,6 +31,7 @@ import play.filters.csrf.RequireCSRFCheck;
 import play.i18n.Messages;
 import play.mvc.Http;
 import play.mvc.Result;
+import play.twirl.api.Html;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -43,7 +41,7 @@ import javax.inject.Singleton;
 @Authorized(value = "admin")
 @Singleton
 @Named
-public final class UserController extends AbstractJudgelsController {
+public final class UserController extends AbstractRaguelController {
 
     private static final long PAGE_SIZE = 20;
 
@@ -51,7 +49,8 @@ public final class UserController extends AbstractJudgelsController {
     private final UserService userService;
 
     @Inject
-    public UserController(JophielPublicAPI jophielPublicAPI, UserService userService) {
+    public UserController(BaseJidCacheService jidCacheService, BaseAvatarCacheService avatarCacheService, JophielClientAPI jophielClientAPI, JophielPublicAPI jophielPublicAPI, UserActivityMessageService userActivityMessageService, UserService userService) {
+        super(jidCacheService, avatarCacheService, jophielClientAPI, jophielPublicAPI, userActivityMessageService);
         this.jophielPublicAPI = jophielPublicAPI;
         this.userService = userService;
     }
@@ -65,27 +64,27 @@ public final class UserController extends AbstractJudgelsController {
     public Result listUsers(long pageIndex, String sortBy, String orderBy, String filterString) {
         Page<User> pageOfUsers = userService.getPageOfUsers(pageIndex, PAGE_SIZE, sortBy, orderBy, filterString);
 
-        LazyHtml content = new LazyHtml(listUsersView.render(pageOfUsers, sortBy, orderBy, filterString));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("user.list"), new InternalLink(Messages.get("commons.create"), routes.UserController.createUser()), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        RaguelControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("user.users"), routes.UserController.index())
-        ));
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "Users - List");
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate();
 
-        RaguelControllerUtils.getInstance().addActivityLog("List all users <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        Html content = listUsersView.render(pageOfUsers, sortBy, orderBy, filterString);
+        htmlTemplate.setContent(content);
+        htmlTemplate.setMainTitle(Messages.get("commons.text.list1", Messages.get("user.text.user")));
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        htmlTemplate.addMainButton(Messages.get("commons.button.new1", Messages.get("user.text.user")), routes.UserController.createUser());
+
+        addActivityLog("List all users <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return renderTemplate(htmlTemplate);
     }
 
     @Transactional(readOnly = true)
     @AddCSRFToken
     public Result createUser() {
         UserCreateForm userCreateData = new UserCreateForm();
-        userCreateData.roles = StringUtils.join(RaguelUtils.getDefaultRoles(), ",");
+        userCreateData.roles = StringUtils.join(getDefaultUserRoles(), ",");
         Form<UserCreateForm> userCreateForm = Form.form(UserCreateForm.class).fill(userCreateData);
 
-        RaguelControllerUtils.getInstance().addActivityLog("Try to create user <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        addActivityLog("Try to create user <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showCreateUser(userCreateForm);
     }
@@ -108,18 +107,18 @@ public final class UserController extends AbstractJudgelsController {
         }
 
         if (jophielUser == null) {
-            userCreateForm.reject(Messages.get("user.create.error.usernameNotFound"));
+            userCreateForm.reject(Messages.get("user.new.error.invalid"));
             return showCreateUser(userCreateForm);
         }
 
         if (userService.existsByUserJid(jophielUser.getJid())) {
-            userCreateForm.reject(Messages.get("user.create.error.userAlreadyExists"));
+            userCreateForm.reject(Messages.get("user.new.error.registered"));
             return showCreateUser(userCreateForm);
         }
 
-        userService.upsertUserFromJophielUser(jophielUser, userCreateData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userService.upsertUserFromJophielUser(jophielUser, userCreateData.getRolesAsList(), getCurrentUserJid(), getCurrentUserIpAddress());
 
-        RaguelControllerUtils.getInstance().addActivityLog("Create user " + jophielUser.getJid() + ".");
+        addActivityLog("Create user " + jophielUser.getJid() + ".");
 
         return redirect(routes.UserController.index());
     }
@@ -128,18 +127,19 @@ public final class UserController extends AbstractJudgelsController {
     public Result viewUser(long userId) throws UserNotFoundException {
         User user = userService.findUserById(userId);
 
-        LazyHtml content = new LazyHtml(viewUserView.render(user));
-        content.appendLayout(c -> headingWithActionLayout.render(Messages.get("user.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()), new InternalLink(Messages.get("commons.update"), routes.UserController.updateUser(user.getId())), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        RaguelControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("user.users"), routes.UserController.index()),
-                new InternalLink(Messages.get("user.view"), routes.UserController.viewUser(user.getId()))
-        ));
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "User - View");
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate();
 
-        RaguelControllerUtils.getInstance().addActivityLog("View user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        Html content = viewUserView.render(user);
+        htmlTemplate.setContent(content);
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        htmlTemplate.setMainTitle(Messages.get("user.text.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()));
+        htmlTemplate.addMainButton(Messages.get("commons.button.edit"), routes.UserController.updateUser(user.getId()));
+
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.view"), routes.UserController.viewUser(user.getId()));
+
+        addActivityLog("View user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+
+        return renderTemplate(htmlTemplate);
     }
 
     @Transactional(readOnly = true)
@@ -150,7 +150,7 @@ public final class UserController extends AbstractJudgelsController {
         userUpdateData.roles = StringUtils.join(user.getRoles(), ",");
         Form<UserUpdateForm> userUpdateForm = Form.form(UserUpdateForm.class).fill(userUpdateData);
 
-        RaguelControllerUtils.getInstance().addActivityLog("Try to update user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        addActivityLog("Try to update user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return showUpdateUser(userUpdateForm, user);
     }
@@ -166,9 +166,9 @@ public final class UserController extends AbstractJudgelsController {
         }
 
         UserUpdateForm userUpdateData = userUpdateForm.get();
-        userService.updateUser(user.getId(), userUpdateData.getRolesAsList(), IdentityUtils.getUserJid(), IdentityUtils.getIpAddress());
+        userService.updateUser(user.getId(), userUpdateData.getRolesAsList(), getCurrentUserJid(), getCurrentUserIpAddress());
 
-        RaguelControllerUtils.getInstance().addActivityLog("Update user " + user.getUserJid() + ".");
+        addActivityLog("Update user " + user.getUserJid() + ".");
 
         return redirect(routes.UserController.index());
     }
@@ -178,34 +178,40 @@ public final class UserController extends AbstractJudgelsController {
         User user = userService.findUserById(userId);
         userService.deleteUser(user.getId());
 
-        RaguelControllerUtils.getInstance().addActivityLog("Delete user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
+        addActivityLog("Delete user " + user.getUserJid() + " <a href=\"" + "http://" + Http.Context.current().request().host() + Http.Context.current().request().uri() + "\">link</a>.");
 
         return redirect(routes.UserController.index());
     }
 
-    private Result showCreateUser(Form<UserCreateForm> userCreateForm) {
-        LazyHtml content = new LazyHtml(createUserView.render(userCreateForm, jophielPublicAPI.getUserAutocompleteAPIEndpoint()));
-        content.appendLayout(c -> headingLayout.render(Messages.get("user.create"), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        RaguelControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("user.users"), routes.UserController.index()),
-                new InternalLink(Messages.get("user.create"), routes.UserController.createUser())
-        ));
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "User - Create");
+    @Override
+    protected HtmlTemplate getBaseHtmlTemplate() {
+        HtmlTemplate htmlTemplate = super.getBaseHtmlTemplate();
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        htmlTemplate.markBreadcrumbLocation(Messages.get("user.text.users"), routes.UserController.index());
+        return htmlTemplate;
+    }
+
+    private Result showCreateUser(Form<UserCreateForm> userCreateForm) {
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate();
+
+        Html content = createUserView.render(userCreateForm, jophielPublicAPI.getUserAutocompleteAPIEndpoint());
+        htmlTemplate.setContent(content);
+
+        htmlTemplate.setMainTitle(Messages.get("commons.text.new1", Messages.get("user.text.user")));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.new"), routes.UserController.createUser());
+
+        return renderTemplate(htmlTemplate);
     }
 
     private Result showUpdateUser(Form<UserUpdateForm> userUpdateForm, User user) {
-        LazyHtml content = new LazyHtml(updateUserView.render(userUpdateForm, user.getId()));
-        content.appendLayout(c -> headingLayout.render(Messages.get("user.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()), c));
-        RaguelControllerUtils.getInstance().appendSidebarLayout(content);
-        RaguelControllerUtils.getInstance().appendBreadcrumbsLayout(content, ImmutableList.of(
-                new InternalLink(Messages.get("user.users"), routes.UserController.index()),
-                new InternalLink(Messages.get("user.update"), routes.UserController.updateUser(user.getId()))
-        ));
-        RaguelControllerUtils.getInstance().appendTemplateLayout(content, "User - Update");
+        HtmlTemplate htmlTemplate = getBaseHtmlTemplate();
 
-        return RaguelControllerUtils.getInstance().lazyOk(content);
+        Html content = updateUserView.render(userUpdateForm, user.getId());
+        htmlTemplate.setContent(content);
+
+        htmlTemplate.setMainTitle(Messages.get("user.text.user") + " #" + user.getId() + ": " + JidCacheServiceImpl.getInstance().getDisplayName(user.getUserJid()));
+        htmlTemplate.markBreadcrumbLocation(Messages.get("commons.text.edit"), routes.UserController.updateUser(user.getId()));
+
+        return renderTemplate(htmlTemplate);
     }
 }

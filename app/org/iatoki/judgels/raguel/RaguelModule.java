@@ -6,11 +6,14 @@ import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielFactory;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.jophiel.JophielAuthAPI;
+import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
 import org.iatoki.judgels.jophiel.services.BaseUserService;
+import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
 import org.iatoki.judgels.play.JudgelsPlayProperties;
 import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.play.general.GeneralName;
 import org.iatoki.judgels.play.general.GeneralVersion;
+import org.iatoki.judgels.play.jid.BaseJidCacheService;
 import org.iatoki.judgels.play.migration.BaseDataMigrationService;
 import org.iatoki.judgels.raguel.services.impls.RaguelDataMigrationServiceImpl;
 import org.iatoki.judgels.raguel.services.impls.UserServiceImpl;
@@ -38,6 +41,10 @@ public class RaguelModule extends AbstractJudgelsPlayModule {
         bind(JophielClientAPI.class).toInstance(jophielClientAPI());
         bind(JophielPublicAPI.class).toInstance(jophielPublicAPI());
         bind(BaseUserService.class).to(UserServiceImpl.class);
+
+        bind(BaseJidCacheService.class).toProvider(JidCacheServiceProvider.class);
+        bind(BaseAvatarCacheService.class).toProvider(AvatarCacheServiceProvider.class);
+        bind(UserActivityMessageService.class).toProvider(UserActivityMessageServiceProvider.class);
     }
 
     @Override
