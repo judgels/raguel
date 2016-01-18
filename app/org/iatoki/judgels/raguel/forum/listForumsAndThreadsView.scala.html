@@ -1,0 +1,14 @@
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.raguel.forum.thread.ForumThreadWithStatistics
+@import org.iatoki.judgels.raguel.forum.Forum
+@import org.iatoki.judgels.raguel.forum.thread.html.listThreadsWithStatisticView
+
+@(currentForum: Forum, childForums: List[Forum], pageOfThreads: Page[ForumThreadWithStatistics], orderBy: String, orderDir: String, filterString: String)
+
+@if(!childForums.isEmpty) {
+    @listForumsView(currentForum, childForums)
+}
+
+@if(!pageOfThreads.getData.isEmpty) {
+    @listThreadsWithStatisticView(currentForum, pageOfThreads, orderBy, orderDir, filterString)
+}

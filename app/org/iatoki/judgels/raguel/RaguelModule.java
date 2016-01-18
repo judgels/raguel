@@ -15,8 +15,10 @@ import org.iatoki.judgels.play.general.GeneralName;
 import org.iatoki.judgels.play.general.GeneralVersion;
 import org.iatoki.judgels.play.jid.BaseJidCacheService;
 import org.iatoki.judgels.play.migration.BaseDataMigrationService;
-import org.iatoki.judgels.raguel.services.impls.RaguelDataMigrationServiceImpl;
-import org.iatoki.judgels.raguel.services.impls.UserServiceImpl;
+import org.iatoki.judgels.raguel.activity.UserActivityMessageServiceProvider;
+import org.iatoki.judgels.raguel.avatar.AvatarCacheServiceProvider;
+import org.iatoki.judgels.raguel.jid.JidCacheServiceProvider;
+import org.iatoki.judgels.raguel.user.UserServiceImpl;
 
 public class RaguelModule extends AbstractJudgelsPlayModule {
 

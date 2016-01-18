@@ -1,0 +1,37 @@
+@import org.iatoki.judgels.raguel.avatar.AvatarCacheServiceImpl
+@import org.iatoki.judgels.raguel.forum.thread.ForumThread
+@import org.iatoki.judgels.raguel.forum.thread.post.ThreadPost
+@import org.iatoki.judgels.raguel.jid.JidCacheServiceImpl
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.views.html.table.searchView
+@import org.iatoki.judgels.play.views.html.table.paginationView
+@import scala.collection.JavaConversions
+@import org.iatoki.judgels.raguel.forum.thread.post.routes
+@import org.iatoki.judgels.play.Page
+@import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils
+
+@(forumThread: ForumThread, pageOfThreadPosts: Page[ThreadPost], replyJidToIdMap: Map[String, Long], replyJidToUserJidMap: Map[String, String], orderBy: String, orderDir: String, filterString: String)
+
+<h3>@Messages.get("forum.thread.text.posts")</h3>
+<div class="clearfix">
+    @Messages.get("commons.text.view"): <span>@Messages.get("forum.thread.post.text.flat")</span> | <a href="@routes.ThreadPostController.viewTreeThreadPosts(forumThread.getId)">@Messages.get("forum.thread.post.text.tree")</a>
+</div>
+@listFunc(newPageIndex: scala.Long, newOrderBy: String, newOrderDir: String, newFilterString: String) = @{routes.ThreadPostController.listThreadPosts(forumThread.getId, newPageIndex, newOrderBy, newOrderDir, newFilterString)}
+
+@searchView(pageOfThreadPosts.getPageIndex, orderBy, orderDir, filterString, listFunc)
+
+<div class="clearfix"></div>
+
+@defining(AvatarCacheServiceImpl.getInstance().getAvatarUrls(JavaConversions.seqAsJavaList(pageOfThreadPosts.getData.map(p => p.getUserJid).toSeq), JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl)) { avatarUrlsMap =>
+    @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(pageOfThreadPosts.getData.map(p => p.getUserJid).toSeq))) { displayNamesMap =>
+        @defining(JidCacheServiceImpl.getInstance().getDisplayNames(JavaConversions.seqAsJavaList(replyJidToUserJidMap.values.toSeq))) { replyDisplayNamesMap =>
+            @for((threadPost, index) <- pageOfThreadPosts.getData.zipWithIndex) {
+                <div class="panel panel-default post">
+                @postContentView(threadPost, avatarUrlsMap.get(threadPost.getUserJid), displayNamesMap.get(threadPost.getUserJid), replyJidToIdMap.get(threadPost.getReplyJid), replyDisplayNamesMap.get(replyJidToUserJidMap.get(threadPost.getReplyJid)))
+                </div>
+            }
+        }
+    }
+}
+
+@paginationView(pageOfThreadPosts, orderBy, orderDir, filterString, listFunc)

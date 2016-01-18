@@ -4,11 +4,11 @@ import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils;
 import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
-import org.iatoki.judgels.raguel.models.daos.AvatarCacheDao;
-import org.iatoki.judgels.raguel.models.daos.JidCacheDao;
-import org.iatoki.judgels.raguel.services.ForumMemberService;
-import org.iatoki.judgels.raguel.services.impls.AvatarCacheServiceImpl;
-import org.iatoki.judgels.raguel.services.impls.JidCacheServiceImpl;
+import org.iatoki.judgels.raguel.avatar.AvatarCacheDao;
+import org.iatoki.judgels.raguel.jid.JidCacheDao;
+import org.iatoki.judgels.raguel.forum.member.ForumMemberService;
+import org.iatoki.judgels.raguel.avatar.AvatarCacheServiceImpl;
+import org.iatoki.judgels.raguel.jid.JidCacheServiceImpl;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

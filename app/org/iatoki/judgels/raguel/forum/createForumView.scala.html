@@ -1,0 +1,20 @@
+@import org.iatoki.judgels.raguel.forum.Forum
+@import org.iatoki.judgels.raguel.forum.ForumUpsertForm
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.views.html.formErrorView
+@import org.iatoki.judgels.raguel.forum.routes
+
+@(forumUpsertForm: Form[ForumUpsertForm], forums: List[Forum])
+
+@implicitFieldConstructor = @{ b3.horizontal.fieldConstructor("col-md-2", "col-md-10") }
+
+@formErrorView(forumUpsertForm)
+
+@b3.form(routes.ForumController.postCreateForum()) {
+
+    @helper.CSRF.formField
+
+    @upsertForumView(forumUpsertForm, forums)
+
+    @b3.submit('class -> "btn btn-primary") { @Messages.get("commons.button.new") }
+}

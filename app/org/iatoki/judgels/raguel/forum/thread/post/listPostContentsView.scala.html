@@ -1,0 +1,29 @@
+@import org.iatoki.judgels.raguel.avatar.AvatarCacheServiceImpl
+@import org.iatoki.judgels.raguel.forum.thread.post.ThreadPost
+@import org.iatoki.judgels.raguel.jid.JidCacheServiceImpl
+@import play.i18n.Messages
+@import org.iatoki.judgels.play.JudgelsPlayUtils
+@import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils
+
+@(threadPost: ThreadPost)
+
+@for(postContent <- threadPost.getContents) {
+    <div class="panel panel-default post">
+        <div class="panel-heading clearfix">
+            <div class="pull-left">
+                <span class="panel-title">@postContent.getSubject</span>
+            </div>
+            <div class="pull-right">
+                <time class="display-time" datetime="@JudgelsPlayUtils.formatISOUTCDateTime(postContent.getTimeCreate.getTime)">@JudgelsPlayUtils.formatDetailedDateTime(postContent.getTimeCreate.getTime)</time>
+            </div>
+        </div>
+        <div class="panel-body post-body">
+            <div class="clearfix">
+                @avatarPostView(AvatarCacheServiceImpl.getInstance().getAvatarUrl(threadPost.getUserJid, JophielClientControllerUtils.getInstance().getUserDefaultAvatarUrl), JidCacheServiceImpl.getInstance().getDisplayName(threadPost.getUserJid), threadPost.getUserPostCount)
+                <div class="col-xs-10 post-content content-text">
+                    @Html(postContent.getContent)
+                </div>
+            </div>
+        </div>
+    </div>
+}
