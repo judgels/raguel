@@ -6,7 +6,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 
 @Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
 @StaticMetamodel(ForumModuleModel.class)
-public abstract class ForumModuleModel_ extends org.iatoki.judgels.play.models.entities.AbstractModel_ {
+public abstract class ForumModuleModel_ extends org.iatoki.judgels.play.model.AbstractModel_ {
 
 	public static volatile SingularAttribute<ForumModuleModel, Long> id;
 	public static volatile SingularAttribute<ForumModuleModel, String> forumJid;

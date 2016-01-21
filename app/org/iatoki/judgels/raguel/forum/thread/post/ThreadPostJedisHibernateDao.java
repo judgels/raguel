@@ -1,6 +1,6 @@
 package org.iatoki.judgels.raguel.forum.thread.post;
 
-import org.iatoki.judgels.play.models.daos.impls.AbstractJudgelsJedisHibernateDao;
+import org.iatoki.judgels.play.model.AbstractJudgelsJedisHibernateDao;
 import redis.clients.jedis.JedisPool;
 
 import javax.inject.Inject;

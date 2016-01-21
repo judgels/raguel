@@ -2,23 +2,23 @@ package org.iatoki.judgels.raguel;
 
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
-import org.iatoki.judgels.jophiel.UserActivityMessage;
-import org.iatoki.judgels.jophiel.controllers.AbstractBaseJophielClientController;
-import org.iatoki.judgels.jophiel.forms.UserProfileSearchForm;
-import org.iatoki.judgels.jophiel.forms.ViewpointForm;
-import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
-import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
-import org.iatoki.judgels.jophiel.views.html.script.isLoggedIn;
-import org.iatoki.judgels.jophiel.views.html.script.isLoggedOut;
-import org.iatoki.judgels.jophiel.views.html.sidebar.linkedClientsView;
-import org.iatoki.judgels.jophiel.views.html.sidebar.userProfileSearchView;
-import org.iatoki.judgels.jophiel.views.html.sidebar.userProfileView;
-import org.iatoki.judgels.jophiel.views.html.viewas.viewAs;
-import org.iatoki.judgels.play.template.HtmlTemplate;
+import org.iatoki.judgels.jophiel.AbstractBaseJophielClientController;
+import org.iatoki.judgels.jophiel.activity.UserActivityMessage;
+import org.iatoki.judgels.jophiel.activity.UserActivityMessageService;
+import org.iatoki.judgels.jophiel.avatar.BaseAvatarCacheService;
+import org.iatoki.judgels.jophiel.client.html.linkedClientsView;
+import org.iatoki.judgels.jophiel.logincheck.html.isLoggedIn;
+import org.iatoki.judgels.jophiel.logincheck.html.isLoggedOut;
+import org.iatoki.judgels.jophiel.profile.UserProfileSearchForm;
+import org.iatoki.judgels.jophiel.profile.html.userProfileSearchView;
+import org.iatoki.judgels.jophiel.profile.html.userProfileView;
+import org.iatoki.judgels.jophiel.viewpoint.ViewpointForm;
+import org.iatoki.judgels.jophiel.viewpoint.html.viewAs;
 import org.iatoki.judgels.play.IdentityUtils;
 import org.iatoki.judgels.play.JudgelsPlayUtils;
 import org.iatoki.judgels.play.controllers.ControllerUtils;
 import org.iatoki.judgels.play.jid.BaseJidCacheService;
+import org.iatoki.judgels.play.template.HtmlTemplate;
 import org.iatoki.judgels.play.views.html.sidebar.guestView;
 import play.data.Form;
 import play.i18n.Messages;
@@ -71,14 +71,14 @@ public abstract class AbstractRaguelController extends AbstractBaseJophielClient
 
         if (isCurrentUserGuest()) {
             String registerUrl = jophielClientAPI.getRegisterEndpoint();
-            String loginUrl = getAbsoluteUrl(org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.login(ControllerUtils.getCurrentUrl(request())));
+            String loginUrl = getAbsoluteUrl(org.iatoki.judgels.jophiel.routes.JophielClientController.login(ControllerUtils.getCurrentUrl(request())));
             Html guestWidget = guestView.render(registerUrl, loginUrl);
             htmlTemplate.addUpperSidebarWidget(guestWidget);
             Html isLoggedInScript = isLoggedIn.render(jophielClientAPI.getUserIsLoggedInAPIEndpoint(), getAbsoluteUrl(routes.ApplicationController.auth(ControllerUtils.getCurrentUrl(Http.Context.current().request()))), "lib/jophielcommons/javascripts/isLoggedIn.js");
             htmlTemplate.addAdditionalScript(isLoggedInScript);
         } else {
             String editProfileUrl = jophielClientAPI.getUserEditProfileEndpoint();
-            String logoutUrl = getAbsoluteUrl(org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.logout(ControllerUtils.getCurrentUrl(Http.Context.current().request())));
+            String logoutUrl = getAbsoluteUrl(org.iatoki.judgels.jophiel.routes.JophielClientController.logout(ControllerUtils.getCurrentUrl(Http.Context.current().request())));
 
             Html userProfileWidget = userProfileView.render(getCurrentUsername(), getCurrentUserRealName(), getCurrentUserAvatarUrl(), editProfileUrl, logoutUrl);
             htmlTemplate.addUpperSidebarWidget(userProfileWidget);

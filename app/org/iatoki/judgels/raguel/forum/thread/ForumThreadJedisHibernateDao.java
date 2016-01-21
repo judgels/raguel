@@ -1,7 +1,7 @@
 package org.iatoki.judgels.raguel.forum.thread;
 
 import com.google.common.collect.ImmutableList;
-import org.iatoki.judgels.play.models.daos.impls.AbstractJudgelsJedisHibernateDao;
+import org.iatoki.judgels.play.model.AbstractJudgelsJedisHibernateDao;
 import redis.clients.jedis.JedisPool;
 
 import javax.inject.Inject;

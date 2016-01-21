@@ -1,6 +1,6 @@
 package org.iatoki.judgels.raguel.forum.thread.post;
 
-import org.iatoki.judgels.play.models.daos.impls.AbstractJudgelsHibernateDao;
+import org.iatoki.judgels.play.model.AbstractJudgelsHibernateDao;
 
 import javax.inject.Singleton;
 

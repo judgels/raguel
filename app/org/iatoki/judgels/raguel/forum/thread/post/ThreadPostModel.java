@@ -1,7 +1,7 @@
 package org.iatoki.judgels.raguel.forum.thread.post;
 
-import org.iatoki.judgels.play.models.JidPrefix;
-import org.iatoki.judgels.play.models.entities.AbstractJudgelsModel;
+import org.iatoki.judgels.play.jid.JidPrefix;
+import org.iatoki.judgels.play.model.AbstractJudgelsModel;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;

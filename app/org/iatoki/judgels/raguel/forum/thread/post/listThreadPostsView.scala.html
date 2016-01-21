@@ -1,3 +1,4 @@
+@import org.iatoki.judgels.jophiel.JophielClientControllerUtils
 @import org.iatoki.judgels.raguel.avatar.AvatarCacheServiceImpl
 @import org.iatoki.judgels.raguel.forum.thread.ForumThread
 @import org.iatoki.judgels.raguel.forum.thread.post.ThreadPost
@@ -8,7 +9,6 @@
 @import scala.collection.JavaConversions
 @import org.iatoki.judgels.raguel.forum.thread.post.routes
 @import org.iatoki.judgels.play.Page
-@import org.iatoki.judgels.jophiel.controllers.JophielClientControllerUtils
 
 @(forumThread: ForumThread, pageOfThreadPosts: Page[ThreadPost], replyJidToIdMap: Map[String, Long], replyJidToUserJidMap: Map[String, String], orderBy: String, orderDir: String, filterString: String)
 

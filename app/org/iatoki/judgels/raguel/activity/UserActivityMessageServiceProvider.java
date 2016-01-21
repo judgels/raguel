@@ -1,7 +1,7 @@
 package org.iatoki.judgels.raguel.activity;
 
-import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
-import org.iatoki.judgels.jophiel.services.impls.UserActivityMessageServiceImpl;
+import org.iatoki.judgels.jophiel.activity.UserActivityMessageService;
+import org.iatoki.judgels.jophiel.activity.UserActivityMessageServiceImpl;
 
 import javax.inject.Provider;
 

@@ -5,9 +5,9 @@ import org.iatoki.judgels.api.JudgelsAPIClientException;
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
 import org.iatoki.judgels.api.jophiel.JophielUser;
-import org.iatoki.judgels.jophiel.forms.ViewpointForm;
-import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
-import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
+import org.iatoki.judgels.jophiel.viewpoint.ViewpointForm;
+import org.iatoki.judgels.jophiel.avatar.BaseAvatarCacheService;
+import org.iatoki.judgels.jophiel.activity.UserActivityMessageService;
 import org.iatoki.judgels.play.jid.BaseJidCacheService;
 import org.iatoki.judgels.raguel.controllers.securities.Authenticated;
 import org.iatoki.judgels.raguel.controllers.securities.HasRole;
@@ -46,7 +46,7 @@ public final class ApplicationController extends AbstractRaguelController {
             return redirect(routes.ApplicationController.authRole(returnUri));
         } else {
             String newReturnUri = routes.ApplicationController.afterLogin(returnUri).absoluteURL(request(), request().secure());
-            return redirect(org.iatoki.judgels.jophiel.controllers.routes.JophielClientController.login(newReturnUri));
+            return redirect(org.iatoki.judgels.jophiel.routes.JophielClientController.login(newReturnUri));
         }
     }
 

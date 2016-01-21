@@ -2,8 +2,8 @@ package org.iatoki.judgels.raguel.forum.thread.post;
 
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
 import org.iatoki.judgels.api.jophiel.JophielPublicAPI;
-import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
-import org.iatoki.judgels.jophiel.services.UserActivityMessageService;
+import org.iatoki.judgels.jophiel.avatar.BaseAvatarCacheService;
+import org.iatoki.judgels.jophiel.activity.UserActivityMessageService;
 import org.iatoki.judgels.play.Page;
 import org.iatoki.judgels.play.jid.BaseJidCacheService;
 import org.iatoki.judgels.play.template.HtmlTemplate;

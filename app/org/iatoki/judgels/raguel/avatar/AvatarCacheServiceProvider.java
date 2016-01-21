@@ -1,6 +1,6 @@
 package org.iatoki.judgels.raguel.avatar;
 
-import org.iatoki.judgels.jophiel.services.BaseAvatarCacheService;
+import org.iatoki.judgels.jophiel.avatar.BaseAvatarCacheService;
 
 import javax.inject.Provider;
 
