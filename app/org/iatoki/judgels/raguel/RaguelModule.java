@@ -14,7 +14,7 @@ import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.play.general.GeneralName;
 import org.iatoki.judgels.play.general.GeneralVersion;
 import org.iatoki.judgels.play.jid.BaseJidCacheService;
-import org.iatoki.judgels.play.migration.BaseDataMigrationService;
+import org.iatoki.judgels.play.migration.JudgelsDataMigrator;
 import org.iatoki.judgels.raguel.activity.UserActivityMessageServiceProvider;
 import org.iatoki.judgels.raguel.avatar.AvatarCacheServiceProvider;
 import org.iatoki.judgels.raguel.jid.JidCacheServiceProvider;
@@ -34,10 +34,9 @@ public class RaguelModule extends AbstractJudgelsPlayModule {
         JudgelsPlayProperties.buildInstance(buildInfo.name(), buildInfo.version(), config);
         RaguelProperties.buildInstance(config);
         bind(RaguelSingletonsBuilder.class).asEagerSingleton();
-        bind(RaguelThreadsScheduler.class).asEagerSingleton();
         // </DEPRECATED>
 
-        bind(BaseDataMigrationService.class).to(RaguelDataMigrationServiceImpl.class);
+        bind(JudgelsDataMigrator.class).to(RaguelDataMigrator.class);
 
         bind(JophielAuthAPI.class).toInstance(jophielAuthAPI());
         bind(JophielClientAPI.class).toInstance(jophielClientAPI());

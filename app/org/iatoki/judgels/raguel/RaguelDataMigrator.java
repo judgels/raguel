@@ -2,31 +2,42 @@ package org.iatoki.judgels.raguel;
 
 import org.hibernate.Session;
 import org.hibernate.internal.SessionImpl;
-import org.iatoki.judgels.play.migration.AbstractBaseDataMigrationServiceImpl;
-import play.db.jpa.JPA;
+import org.iatoki.judgels.play.migration.AbstractJudgelsDataMigrator;
+import org.iatoki.judgels.play.migration.DataMigrationEntityManager;
+import org.iatoki.judgels.play.migration.DataVersionDao;
 
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public final class RaguelDataMigrationServiceImpl extends AbstractBaseDataMigrationServiceImpl {
+public final class RaguelDataMigrator extends AbstractJudgelsDataMigrator {
+
+    private EntityManager entityManager;
+
+    @Inject
+    public RaguelDataMigrator(DataVersionDao dataVersionDao) {
+        super(dataVersionDao);
+        this.entityManager = DataMigrationEntityManager.createEntityManager();
+    }
 
     @Override
-    public long getCodeDataVersion() {
+    public long getLatestDataVersion() {
         return 2;
     }
 
     @Override
-    protected void onUpgrade(long databaseVersion, long codeDatabaseVersion) throws SQLException {
-        if (databaseVersion < 2) {
+    protected void migrate(long currentDataVersion) throws SQLException {
+        if (currentDataVersion < 2) {
             migrateV1toV2();
         }
     }
 
     private void migrateV1toV2() throws SQLException {
-        SessionImpl session = (SessionImpl) JPA.em().unwrap(Session.class);
+        SessionImpl session = (SessionImpl) entityManager.unwrap(Session.class);
         Connection connection = session.getJdbcConnectionAccess().obtainConnection();
 
         String forumTable = "raguel_forum";
