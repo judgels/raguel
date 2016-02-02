@@ -10,6 +10,7 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(UserPostCountModel.class)
 public class UserPostCountModel_ extends AbstractModel_ {
 
+    public static volatile SingularAttribute<UserPostCountModel, Long> id;
     public static volatile SingularAttribute<UserPostCountModel, String> userJid;
     public static volatile SingularAttribute<UserPostCountModel, Long> postCount;
 
