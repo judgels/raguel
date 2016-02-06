@@ -1,5 +1,6 @@
 package org.iatoki.judgels.raguel;
 
+import com.google.inject.AbstractModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.iatoki.judgels.api.jophiel.JophielClientAPI;
@@ -10,7 +11,6 @@ import org.iatoki.judgels.jophiel.avatar.BaseAvatarCacheService;
 import org.iatoki.judgels.jophiel.user.BaseUserService;
 import org.iatoki.judgels.jophiel.activity.UserActivityMessageService;
 import org.iatoki.judgels.play.JudgelsPlayProperties;
-import org.iatoki.judgels.play.config.AbstractJudgelsPlayModule;
 import org.iatoki.judgels.play.general.GeneralName;
 import org.iatoki.judgels.play.general.GeneralVersion;
 import org.iatoki.judgels.play.jid.BaseJidCacheService;
@@ -20,10 +20,10 @@ import org.iatoki.judgels.raguel.avatar.AvatarCacheServiceProvider;
 import org.iatoki.judgels.raguel.jid.JidCacheServiceProvider;
 import org.iatoki.judgels.raguel.user.UserServiceImpl;
 
-public class RaguelModule extends AbstractJudgelsPlayModule {
+public final class RaguelModule extends AbstractModule {
 
     @Override
-    protected void manualBinding() {
+    public void configure() {
         org.iatoki.judgels.raguel.BuildInfo$ buildInfo = org.iatoki.judgels.raguel.BuildInfo$.MODULE$;
 
         bindConstant().annotatedWith(GeneralName.class).to(buildInfo.name());
@@ -46,16 +46,6 @@ public class RaguelModule extends AbstractJudgelsPlayModule {
         bind(BaseJidCacheService.class).toProvider(JidCacheServiceProvider.class);
         bind(BaseAvatarCacheService.class).toProvider(AvatarCacheServiceProvider.class);
         bind(UserActivityMessageService.class).toProvider(UserActivityMessageServiceProvider.class);
-    }
-
-    @Override
-    protected String getDaosImplPackage() {
-        return "org.iatoki.judgels.raguel.models.daos.hibernate";
-    }
-
-    @Override
-    protected String getServicesImplPackage() {
-        return "org.iatoki.judgels.raguel.services.impls";
     }
 
     private RaguelProperties raguelProperties() {
